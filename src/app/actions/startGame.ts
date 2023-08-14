@@ -1,12 +1,16 @@
 "use server";
 import { createRecord, getGame } from "./dynamoDb";
+import { newChime } from "./initiateChime";
+import * as uuid from "uuid";
 
 export async function StartGame() {
-  const gameId = await createRecord("game", "");
-  console.log(gameId);
+  const id = uuid.v4();
+
+  const call = await newChime(id);
+  createRecord(id, "game", JSON.stringify(call));
 }
 
 export async function GetGame() {
-  const gameId = "32e34c4e-264b-40f9-916b-c3fccefacac8";
-  getGame(gameId);
+  const gameId = "652c2625-1aa2-4a4a-a272-d08c1620f473";
+  console.log(await getGame(gameId));
 }
