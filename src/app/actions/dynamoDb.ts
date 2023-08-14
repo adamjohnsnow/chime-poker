@@ -7,11 +7,11 @@ import {
 
 const client = new DynamoDBClient({});
 
-export async function createRecord(id: string, sk: string, content: string) {
+export async function createRecord(id: string, sk: string, state: string) {
   const Item = {
     id: { S: id },
     sk: { S: `${id}:${sk}` },
-    content: { S: content },
+    content: { S: state },
   };
   client.send(
     new PutItemCommand({
@@ -32,5 +32,5 @@ export async function getGame(gameId: string) {
     })
   );
 
-  return item;
+  return item.Item?.content;
 }
