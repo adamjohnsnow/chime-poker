@@ -1,7 +1,5 @@
 "use server";
-import * as uuid from "uuid";
 import {
-  AttributeValue,
   DynamoDBClient,
   GetItemCommand,
   PutItemCommand,
@@ -9,21 +7,18 @@ import {
 
 const client = new DynamoDBClient({});
 
-export async function createRecord(sk: string, content: string) {
-  const id = uuid.v4();
+export async function createRecord(id: string, sk: string, content: string) {
   const Item = {
     id: { S: id },
     sk: { S: `${id}:${sk}` },
     content: { S: content },
   };
-  await client.send(
+  client.send(
     new PutItemCommand({
       TableName: process.env.TABLE_NAME,
       Item,
     })
   );
-
-  return id;
 }
 
 export async function getGame(gameId: string) {
