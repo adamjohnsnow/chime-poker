@@ -1,6 +1,4 @@
-import { couldStartTrivia } from "typescript";
 import { Card } from "./cards";
-import { Stream } from "stream";
 
 export enum Rank {
   HighCard,
@@ -27,30 +25,24 @@ export function handEvaluator(cards: Card[]): Result {
   const straight = hasStraight(sortedCards);
   const flush = hasFlush(sortedCards);
 
-  const sortedResult = [
-    {
-      rank: Rank.HighCard,
-      cards: [sortedCards[0]],
-    },
-    kinds,
-    straight,
-    flush,
-  ].sort((a, b) => b.rank - a.rank);
+  const sortedResult = [kinds, straight, flush].sort((a, b) => b.rank - a.rank);
 
   return sortedResult[0];
 }
 
-export function evaluateKinds(cards: Card[]): Result {
+function evaluateKinds(cards: Card[]): Result {
   const counts = organiseCardValues(cards);
 
-  if (hasKind(counts, 4)) {
+  const fourOfAKindValue = hasKind(counts, 4);
+  if (fourOfAKindValue !== 0) {
     return {
       rank: Rank.FourOfAKind,
-      cards: cards.filter((card) => card.value === hasKind(counts, 4)),
+      cards: cards.filter((card) => card.value === fourOfAKindValue),
     };
   }
 
-  if (hasKind(counts, 3)) {
+  const threeOfAKindValue = hasKind(counts, 3);
+  if (threeOfAKindValue !== 0) {
     const fullHouse = findFullHouse(counts);
     if (fullHouse.length === 5) {
       return {
@@ -60,20 +52,20 @@ export function evaluateKinds(cards: Card[]): Result {
     } else {
       return {
         rank: Rank.ThreeOfAKind,
-        cards: cards.filter((card) => card.value === hasKind(counts, 3)),
+        cards: cards.filter((card) => card.value === threeOfAKindValue),
       };
     }
   }
 
-  if (hasKind(counts, 2)) {
-    const pairCards = findTwoPair(counts);
+  const pairCards = findTwoPair(counts);
+  if (pairCards.length > 0) {
     return {
       rank: pairCards.length === 4 ? Rank.TwoPair : Rank.OnePair,
       cards: pairCards,
     };
   }
 
-  return { rank: 0, cards: [] };
+  return { rank: Rank.HighCard, cards: [cards[0]] };
 }
 
 export function organiseCardValues(cards: Card[]): { [key: string]: Card[] } {
@@ -138,7 +130,7 @@ function hasStraight(cards: Card[]): Result {
     }
   }
 
-  return { rank: 0, cards: [] };
+  return { rank: Rank.HighCard, cards: [] };
 }
 
 function hasFlush(cards: Card[]): Result {
@@ -157,7 +149,7 @@ function hasFlush(cards: Card[]): Result {
       };
     }
   }
-  return { rank: 0, cards: [] };
+  return { rank: Rank.HighCard, cards: [] };
 }
 
 function findFullHouse(tally: { [key: string]: Card[] }): Card[] {
