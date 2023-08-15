@@ -1,5 +1,5 @@
 import { Card } from "../src/app/actions/cards";
-import { Rank, handEvaluator } from "../src/app/actions/hands";
+import { Rank, HandEvaluator } from "../src/app/actions/hands";
 import { describe, expect, test } from "@jest/globals";
 
 describe("hand evaluator", () => {
@@ -10,10 +10,10 @@ describe("hand evaluator", () => {
       new Card(4, "♦️"),
       new Card(1, "♦️"),
     ];
-    const result = handEvaluator(cards);
+    const hand = new HandEvaluator(cards);
 
-    expect(result.rank).toBe(Rank.HighCard);
-    expect(result.cards[0].value).toEqual(8);
+    expect(hand.result.rank).toBe(Rank.HighCard);
+    expect(hand.result.cards[0].value).toEqual(8);
   });
 
   test("returns a pair", () => {
@@ -21,12 +21,12 @@ describe("hand evaluator", () => {
     const card2 = new Card(7, "♦️");
     const cards: Card[] = [card1, card2, new Card(4, "♦️")];
 
-    const result = handEvaluator(cards);
+    const hand = new HandEvaluator(cards);
 
-    expect(result?.rank).toBe(Rank.OnePair);
-    expect(result?.cards.length).toEqual(2);
-    expect(result?.cards.includes(card1)).toBeTruthy;
-    expect(result?.cards.includes(card2)).toBeTruthy;
+    expect(hand.result.rank).toBe(Rank.OnePair);
+    expect(hand.result.cards.length).toEqual(2);
+    expect(hand.result.cards.includes(card1)).toBeTruthy;
+    expect(hand.result.cards.includes(card2)).toBeTruthy;
   });
 
   test("finds two pair", () => {
@@ -36,10 +36,10 @@ describe("hand evaluator", () => {
     const card4 = new Card(8, "♦️");
     const cards: Card[] = [card1, card2, new Card(4, "♦️"), card3, card4];
 
-    const result = handEvaluator(cards);
+    const hand = new HandEvaluator(cards);
 
-    expect(result.rank).toBe(Rank.TwoPair);
-    expect(result.cards.length).toEqual(4);
+    expect(hand.result.rank).toBe(Rank.TwoPair);
+    expect(hand.result.cards.length).toEqual(4);
   });
 
   test("returns three of a kind", () => {
@@ -48,13 +48,13 @@ describe("hand evaluator", () => {
     const card3 = new Card(7, "♣️");
     const cards: Card[] = [card1, card2, new Card(4, "♦️"), card3];
 
-    const result = handEvaluator(cards);
+    const hand = new HandEvaluator(cards);
 
-    expect(result?.rank).toBe(Rank.ThreeOfAKind);
-    expect(result?.cards.length).toEqual(3);
-    expect(result?.cards.includes(card1)).toBeTruthy;
-    expect(result?.cards.includes(card2)).toBeTruthy;
-    expect(result?.cards.includes(card3)).toBeTruthy;
+    expect(hand.result.rank).toBe(Rank.ThreeOfAKind);
+    expect(hand.result.cards.length).toEqual(3);
+    expect(hand.result.cards.includes(card1)).toBeTruthy;
+    expect(hand.result.cards.includes(card2)).toBeTruthy;
+    expect(hand.result.cards.includes(card3)).toBeTruthy;
   });
 
   test("returns straight", () => {
@@ -68,9 +68,9 @@ describe("hand evaluator", () => {
       new Card(6, "♦️"),
     ];
 
-    const result = handEvaluator(cards);
+    const hand = new HandEvaluator(cards);
 
-    expect(result.rank).toBe(Rank.Straight);
+    expect(hand.result.rank).toBe(Rank.Straight);
   });
 
   test("returns not straight", () => {
@@ -84,9 +84,9 @@ describe("hand evaluator", () => {
       new Card(6, "♦️"),
     ];
 
-    const result = handEvaluator(cards);
+    const hand = new HandEvaluator(cards);
 
-    expect(result.rank).not.toBe(Rank.Straight);
+    expect(hand.result.rank).not.toBe(Rank.Straight);
   });
 
   test("returns straight over three of a kind", () => {
@@ -100,9 +100,9 @@ describe("hand evaluator", () => {
       new Card(6, "♦️"),
     ];
 
-    const result = handEvaluator(cards);
+    const hand = new HandEvaluator(cards);
 
-    expect(result.rank).toBe(Rank.Straight);
+    expect(hand.result.rank).toBe(Rank.Straight);
   });
 
   test("returns flush", () => {
@@ -116,8 +116,9 @@ describe("hand evaluator", () => {
       new Card(6, "♣️"),
     ];
 
-    const result = handEvaluator(cards);
-    expect(result.rank).toBe(Rank.Flush);
+    const hand = new HandEvaluator(cards);
+
+    expect(hand.result.rank).toBe(Rank.Flush);
   });
 
   test("finds full house", () => {
@@ -135,10 +136,10 @@ describe("hand evaluator", () => {
       card5,
     ];
 
-    const result = handEvaluator(cards);
+    const hand = new HandEvaluator(cards);
 
-    expect(result.rank).toBe(Rank.FullHouse);
-    expect(result.cards.length).toEqual(5);
+    expect(hand.result.rank).toBe(Rank.FullHouse);
+    expect(hand.result.cards.length).toEqual(5);
   });
 
   test("returns four of a kind", () => {
@@ -148,14 +149,14 @@ describe("hand evaluator", () => {
     const card4 = new Card(7, "♠️");
     const cards: Card[] = [card1, card2, new Card(4, "♦️"), card3, card4];
 
-    const result = handEvaluator(cards);
+    const hand = new HandEvaluator(cards);
 
-    expect(result?.rank).toBe(Rank.FourOfAKind);
-    expect(result?.cards.length).toEqual(4);
-    expect(result?.cards.includes(card1)).toBeTruthy;
-    expect(result?.cards.includes(card2)).toBeTruthy;
-    expect(result?.cards.includes(card3)).toBeTruthy;
-    expect(result?.cards.includes(card4)).toBeTruthy;
+    expect(hand.result.rank).toBe(Rank.FourOfAKind);
+    expect(hand.result.cards.length).toEqual(4);
+    expect(hand.result.cards.includes(card1)).toBeTruthy;
+    expect(hand.result.cards.includes(card2)).toBeTruthy;
+    expect(hand.result.cards.includes(card3)).toBeTruthy;
+    expect(hand.result.cards.includes(card4)).toBeTruthy;
   });
 
   test("returns straight flush", () => {
@@ -169,8 +170,9 @@ describe("hand evaluator", () => {
       new Card(6, "♣️"),
     ];
 
-    const result = handEvaluator(cards);
-    expect(result.rank).toBe(Rank.StraightFlush);
+    const hand = new HandEvaluator(cards);
+
+    expect(hand.result.rank).toBe(Rank.StraightFlush);
   });
 
   test("returns royal flush", () => {
@@ -184,7 +186,8 @@ describe("hand evaluator", () => {
       new Card(11, "♣️"),
     ];
 
-    const result = handEvaluator(cards);
-    expect(result.rank).toBe(Rank.RoyalFlush);
+    const hand = new HandEvaluator(cards);
+
+    expect(hand.result.rank).toBe(Rank.RoyalFlush);
   });
 });
