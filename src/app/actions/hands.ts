@@ -20,6 +20,11 @@ export type Result = {
 
 export function handEvaluator(cards: Card[]): Result {
   const sorted = cards.sort((a, b) => b.value - a.value);
+  const kinds = evaluateKinds(sorted);
+
+  if (kinds) {
+    return kinds;
+  }
 
   const result: Result = {
     rank: Rank.HighCard,
@@ -39,23 +44,32 @@ export function evaluateKinds(cards: Card[]): Result | null {
   }
 
   if (hasKind(counts, 3)) {
-    return {
-      rank: Rank.ThreeOfAKind,
-      cards: cards.filter((card) => card.value === hasKind(counts, 3)),
-    };
+    const fullHouse = findFullHouse(counts);
+    if (fullHouse.length === 5) {
+      return {
+        rank: Rank.FullHouse,
+        cards: fullHouse,
+      };
+    } else {
+      return {
+        rank: Rank.ThreeOfAKind,
+        cards: cards.filter((card) => card.value === hasKind(counts, 3)),
+      };
+    }
   }
 
   if (hasKind(counts, 2)) {
+    const pairCards = findTwoPair(counts);
     return {
-      rank: Rank.OnePair,
-      cards: cards.filter((card) => card.value === hasKind(counts, 2)),
+      rank: pairCards.length === 4 ? Rank.TwoPair : Rank.OnePair,
+      cards: pairCards,
     };
   }
 
   return null;
 }
 
-function organiseCardValues(cards: Card[]): { [key: string]: Card[] } {
+export function organiseCardValues(cards: Card[]): { [key: string]: Card[] } {
   const counts: { [key: string]: Card[] } = {};
   cards.forEach((card) => {
     if (counts[card.value]) {
@@ -68,11 +82,31 @@ function organiseCardValues(cards: Card[]): { [key: string]: Card[] } {
   return counts;
 }
 
-function hasKind(obj: { [key: string]: Card[] }, targetValue: number): number {
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key) && obj[key].length === targetValue) {
+function hasKind(
+  tally: { [key: string]: Card[] },
+  targetValue: number
+): number {
+  for (const key in tally) {
+    if (tally.hasOwnProperty(key) && tally[key].length === targetValue) {
       return parseInt(key);
     }
   }
   return 0;
+}
+
+function findFullHouse(tally: { [key: string]: Card[] }): Card[] {
+  let cards: Card[] = [];
+  for (const key in tally) {
+    if (tally[key].length === 3 || tally[key].length === 2)
+      cards = cards.concat(tally[key]);
+  }
+  return cards;
+}
+
+function findTwoPair(tally: { [key: string]: Card[] }): Card[] {
+  let cards: Card[] = [];
+  for (const key in tally) {
+    if (tally[key].length === 2) cards = cards.concat(tally[key]);
+  }
+  return cards;
 }

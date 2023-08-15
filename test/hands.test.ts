@@ -1,5 +1,5 @@
 import { Card } from "../src/app/actions/cards";
-import { Rank, evaluateKinds, handEvaluator } from "../src/app/actions/hands";
+import { Rank, handEvaluator } from "../src/app/actions/hands";
 import { describe, expect, test } from "@jest/globals";
 
 describe("hand evaluator", () => {
@@ -8,6 +8,7 @@ describe("hand evaluator", () => {
       new Card(7, "♥️"),
       new Card(8, "♥️"),
       new Card(4, "♦️"),
+      new Card(1, "♦️"),
     ];
     const result = handEvaluator(cards);
 
@@ -22,7 +23,7 @@ describe("hand evaluator", () => {
     const card4 = new Card(7, "♠️");
     const cards: Card[] = [card1, card2, new Card(4, "♦️"), card3, card4];
 
-    const result = evaluateKinds(cards);
+    const result = handEvaluator(cards);
 
     expect(result?.rank).toBe(Rank.FourOfAKind);
     expect(result?.cards.length).toEqual(4);
@@ -36,7 +37,9 @@ describe("hand evaluator", () => {
     const card1 = new Card(7, "♥️");
     const card2 = new Card(7, "♦️");
     const cards: Card[] = [card1, card2, new Card(4, "♦️")];
-    const result = evaluateKinds(cards);
+
+    const result = handEvaluator(cards);
+
     expect(result?.rank).toBe(Rank.OnePair);
     expect(result?.cards.length).toEqual(2);
     expect(result?.cards.includes(card1)).toBeTruthy;
@@ -48,11 +51,47 @@ describe("hand evaluator", () => {
     const card2 = new Card(7, "♦️");
     const card3 = new Card(7, "♣️");
     const cards: Card[] = [card1, card2, new Card(4, "♦️"), card3];
-    const result = evaluateKinds(cards);
+
+    const result = handEvaluator(cards);
+
     expect(result?.rank).toBe(Rank.ThreeOfAKind);
     expect(result?.cards.length).toEqual(3);
     expect(result?.cards.includes(card1)).toBeTruthy;
     expect(result?.cards.includes(card2)).toBeTruthy;
     expect(result?.cards.includes(card3)).toBeTruthy;
+  });
+
+  test("finds full house", () => {
+    const card1 = new Card(7, "♥️");
+    const card2 = new Card(7, "♦️");
+    const card3 = new Card(7, "♣️");
+    const card4 = new Card(8, "♥️");
+    const card5 = new Card(8, "♦️");
+    const cards: Card[] = [
+      card1,
+      card2,
+      new Card(4, "♦️"),
+      card3,
+      card4,
+      card5,
+    ];
+
+    const result = handEvaluator(cards);
+
+    expect(result.rank).toBe(Rank.FullHouse);
+    expect(result.cards.length).toEqual(5);
+  });
+
+  test("finds two pair", () => {
+    const card1 = new Card(7, "♥️");
+    const card2 = new Card(7, "♦️");
+    const card3 = new Card(8, "♥️");
+    const card4 = new Card(8, "♦️");
+    const cards: Card[] = [card1, card2, new Card(4, "♦️"), card3, card4];
+
+    const result = handEvaluator(cards);
+
+    expect(result.rank).toBe(Rank.TwoPair);
+    expect(result.cards.length).toEqual(4);
   });
 });
