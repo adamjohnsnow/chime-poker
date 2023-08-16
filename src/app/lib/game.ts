@@ -8,7 +8,7 @@ import { Player } from "./player";
 
 export type gameState = {
   chimeConfig: MediaPlacement;
-  cardDeck: Deck;
+  cardDeck: Card[];
   communityCards: Card[];
   players: Player[];
 };
@@ -25,12 +25,14 @@ export async function startGame() {
 
   const state: gameState = {
     chimeConfig: call,
-    cardDeck: deck,
+    cardDeck: deck.cards,
     communityCards: [],
     players: [],
   };
 
   createRecord(id, "game", JSON.stringify(state));
+
+  return JSON.stringify(state);
 }
 
 export async function GetGame() {

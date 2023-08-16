@@ -1,7 +1,5 @@
 "use server";
-import * as AWS_ChimeSDKMeetings from "@aws-sdk/client-chime-sdk-meetings";
-
-const { ChimeSDKMeetings } = AWS_ChimeSDKMeetings;
+import { ChimeSDKMeetings } from "@aws-sdk/client-chime-sdk-meetings";
 
 export async function newChime(gameId: string) {
   // You must use "us-east-1" as the region for Chime API and set the endpoint.
