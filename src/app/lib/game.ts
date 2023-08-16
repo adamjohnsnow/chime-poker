@@ -2,16 +2,18 @@
 import { MediaPlacement } from "@aws-sdk/client-chime-sdk-meetings";
 import { Deck, Card } from "./cards";
 import { createRecord, getGame } from "./dynamoDb";
-import { newChime } from "./initiateChime";
+import { newChime } from "./chime";
 import * as uuid from "uuid";
+import { Player } from "./player";
 
 export type gameState = {
   chimeConfig: MediaPlacement;
   cardDeck: Deck;
   communityCards: Card[];
+  players: Player[];
 };
 
-export async function StartGame() {
+export async function startGame() {
   const id = uuid.v4();
 
   const call = await newChime(id);
@@ -25,6 +27,7 @@ export async function StartGame() {
     chimeConfig: call,
     cardDeck: deck,
     communityCards: [],
+    players: [],
   };
 
   createRecord(id, "game", JSON.stringify(state));

@@ -1,5 +1,5 @@
-import { Card } from "../src/app/actions/cards";
-import { Rank, HandEvaluator } from "../src/app/actions/hands";
+import { Card } from "../src/app/lib/cards";
+import { Rank, HandEvaluator } from "../src/app/lib/hands";
 import { describe, expect, test } from "@jest/globals";
 
 describe("hand evaluator", () => {

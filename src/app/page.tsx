@@ -1,4 +1,4 @@
-import { StartGame, GetGame }from "./actions/startGame";
+import { startGame, GetGame }from "./lib/game";
 
 export default function Home() {
   return (
@@ -20,7 +20,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div><form action={StartGame}><button>Start new game</button></form></div>
+      <div><form action={startGame}><button>Start new game</button></form></div>
       <div><form action={GetGame}><button>Get game</button></form></div>
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left font-mono">

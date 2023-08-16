@@ -1,4 +1,4 @@
-import { Deck, Card } from "../src/app/actions/cards";
+import { Deck, Card } from "../src/app/lib/cards";
 import { describe, expect, test } from "@jest/globals";
 
 describe("deck class", () => {
