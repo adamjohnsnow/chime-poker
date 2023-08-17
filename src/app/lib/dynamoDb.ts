@@ -27,7 +27,7 @@ export async function getGame(gameId: string) {
       TableName: process.env.TABLE_NAME,
       Key: {
         id: { S: gameId },
-        sk: { S: gameId + ":game" },
+        sk: { S: gameId + "_game" },
       },
     })
   );

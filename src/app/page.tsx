@@ -1,6 +1,28 @@
-import { startGame, GetGame }from "./lib/game";
+"use client"
+
+import { useEffect, useState } from "react";
+import { startGame, GetGame, gameState }from "./lib/game";
+import { SNSClient, SubscribeCommand} from "@aws-sdk/client-sns";
+import { subscribe } from "./lib/notifications";
+
 
 export default function Home() {
+  const [gameId, setGameId] = useState<string>('Start a game')
+  const [gameTopic, setGameTopic] = useState<string>()
+
+  useEffect(() => {
+    if(!gameTopic) {return}
+    console.log(gameTopic)
+    subscribe(gameTopic)
+  }, [gameTopic])
+
+  async function startNewGame() {
+    const game = await startGame()
+    const gameDetails = JSON.parse(game) as gameState
+    setGameId(gameDetails.id)
+    setGameTopic(gameDetails.topicArn)
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
@@ -20,9 +42,9 @@ export default function Home() {
         </div>
       </div>
 
-      <div><form action={startGame}><button>Start new game</button></form></div>
-      <div><form action={GetGame}><button>Get game</button></form></div>
-
+      <div><form action={startNewGame}><button>Start new game</button></form></div>
+      {/* <div><form action={GetGame}><button>Get game</button></form></div> */}
+      <div>{gameId}</div>
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left font-mono">
         A multi-player poker game with video chat. Next,js, React, AWS Chime
       </div>
