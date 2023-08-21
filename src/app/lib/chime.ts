@@ -1,15 +1,5 @@
 "use server";
-import {
-  Attendee,
-  ChimeSDKMeetings,
-  Meeting,
-} from "@aws-sdk/client-chime-sdk-meetings";
-import {
-  DefaultMeetingSession,
-  ConsoleLogger,
-  DefaultDeviceController,
-  MeetingSessionConfiguration,
-} from "amazon-chime-sdk-js";
+import { ChimeSDKMeetings, Meeting } from "@aws-sdk/client-chime-sdk-meetings";
 import { randomUUID } from "crypto";
 
 export type ChimeConfig = Meeting;
@@ -33,25 +23,4 @@ export async function createAttendee(config: Meeting) {
   });
 
   return attendee.Attendee;
-}
-
-export async function setUpCall(
-  config: ChimeConfig,
-  attendee: Attendee
-): Promise<DefaultMeetingSession | undefined> {
-  console.log(attendee);
-  const logger = new ConsoleLogger("MyLogger", 4);
-  const deviceController = new DefaultDeviceController(logger);
-  const configuration = new MeetingSessionConfiguration(
-    { Meeting: config },
-    { Attendee: attendee }
-  );
-
-  const meetingSession = new DefaultMeetingSession(
-    configuration,
-    logger,
-    deviceController
-  );
-
-  return meetingSession;
 }

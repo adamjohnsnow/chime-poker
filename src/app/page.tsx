@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { startGame, GetGame, gameState }from "./lib/game";
-import { ChimeConfig, createAttendee, setUpCall } from "./lib/chime";
+import { ChimeConfig, createAttendee } from "./lib/chime";
 import { Attendee, ConsoleLogger, DefaultDeviceController, DefaultMeetingSession, MeetingSessionConfiguration } from "amazon-chime-sdk-js";
 
 
@@ -21,7 +21,7 @@ export default function Home() {
       return
     }
 
-    const meeting = await setUpCall(gameDetails.chimeConfig, attendee)
+    const meeting = await setUpCall(gameDetails.chimeConfig, attendee as Attendee)
 
     if(meeting) {
       setGameId(gameDetails.id)
@@ -60,4 +60,22 @@ export default function Home() {
       </div>
     </main>
   )
+}
+
+async function setUpCall(config: ChimeConfig, attendee: Attendee): Promise<DefaultMeetingSession | undefined> {
+    console.log(attendee)
+    const logger = new ConsoleLogger('MyLogger', 4);
+    const deviceController = new DefaultDeviceController(logger);
+    const configuration = new MeetingSessionConfiguration(
+      { Meeting: config },
+      { Attendee: attendee }
+    );
+
+    const meetingSession = new DefaultMeetingSession(
+      configuration,
+      logger,
+      deviceController
+    );
+
+    return meetingSession
 }
