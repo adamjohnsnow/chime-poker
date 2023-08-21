@@ -36,7 +36,7 @@ export async function startGame(): Promise<string> {
   return JSON.stringify(state);
 }
 
-export async function GetGame() {
-  const gameId = "5da7a7f3-079e-4301-8c31-477dde15abed";
-  console.log(await getGame(gameId));
+export async function GetGame(gameId: string) {
+  const gameRecord = await getGame(gameId);
+  return gameRecord?.S;
 }
