@@ -1,16 +1,16 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { startGame, GetGame, gameState }from "../lib/game";
+import { startGame, getGame, gameState, nextCards, redealDeck }from "../lib/game";
 import { ChimeConfig, createAttendee } from "../lib/chime";
-import { Attendee, ConsoleLogger, DefaultDeviceController, DefaultMeetingSession, MeetingSessionConfiguration } from "amazon-chime-sdk-js";
 import { ChimeProvider } from "../lib/chimeUtils";
-import { renderIntoDocument } from "react-dom/test-utils";
+import { Card } from "../lib/cards";
 
 export default function Game() {
   const [gameId, setGameId] = useState<string>()
   const [chimeConfig, setChimeConfig] = useState<ChimeConfig>()
   const [meetingSession, setMeetingSession] = useState<ChimeProvider>()
+  const [communityCards, setCommunityCards] = useState<Card[]>([])
 
   useEffect(()=> {
     if(chimeConfig) { console.log('chime config updated') }
@@ -29,7 +29,7 @@ export default function Game() {
     const input = document.getElementById('game-id-input') as HTMLInputElement
     setGameId(input?.value)
 
-    const game = await GetGame(input?.value)
+    const game = await getGame(input?.value)
     if (!game){
       return
     }
@@ -57,8 +57,23 @@ export default function Game() {
     }
   }
 
-  function sendMessage() {
-    meetingSession?.sendMessage('test')
+  async function nextAction() {
+    if(!gameId){return}
+    
+    const cards = await nextCards(gameId)
+    console.log(cards)
+
+    if(cards){
+      setCommunityCards(cards)
+    }
+  }
+
+  async function nextRound() {
+    if(!gameId){return}
+    
+    await redealDeck(gameId)
+
+    setCommunityCards([])
   }
 
   return (
@@ -85,7 +100,9 @@ export default function Game() {
       { gameId ?
         <>
           <div>You are in game: {gameId}</div><div>
-          <form action={sendMessage}><button>Test Message</button></form></div>
+          <form action={nextAction}><button>Next</button></form>
+          <form action={nextRound}><button>Redeal</button></form></div>
+          <ul>{communityCards.map((item, i) => <li key={i}>{item.value}{item.suit}</li>)}</ul>
         </>
         : 
         <>

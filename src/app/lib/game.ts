@@ -1,6 +1,6 @@
 "use server";
 import { Deck, Card } from "./cards";
-import { createRecord, getGame } from "./dynamoDb";
+import { saveGame, loadGame } from "./dynamoDb";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
 import { Player } from "./player";
@@ -31,12 +31,54 @@ export async function startGame(): Promise<string> {
     players: [],
   };
 
-  createRecord(id, "game", JSON.stringify(state));
+  saveGame(id, "game", JSON.stringify(state));
 
   return JSON.stringify(state);
 }
 
-export async function GetGame(gameId: string) {
-  const gameRecord = await getGame(gameId);
+export async function getGame(gameId: string) {
+  const gameRecord = await loadGame(gameId);
   return gameRecord?.S;
+}
+
+export async function nextCards(gameId: string) {
+  const gameRecord = await loadGame(gameId);
+  if (!gameRecord?.S) {
+    return;
+  }
+  const gameState = JSON.parse(gameRecord.S) as gameState;
+
+  switch (gameState.communityCards.length) {
+    case 5: {
+      break;
+    }
+    case 0: {
+      gameState.communityCards = gameState.cardDeck.slice(0, 3);
+      gameState.cardDeck = gameState.cardDeck.slice(3, 52);
+      break;
+    }
+    default: {
+      gameState.communityCards = gameState.communityCards.concat(
+        gameState.cardDeck.slice(0, 1)
+      );
+      gameState.cardDeck = gameState.cardDeck.slice(1);
+      break;
+    }
+  }
+
+  saveGame(gameId, "game", JSON.stringify(gameState));
+
+  return gameState.communityCards;
+}
+
+export async function redealDeck(gameId: string) {
+  const gameRecord = await getGame(gameId);
+  if (!gameRecord) {
+    return;
+  }
+  const gameState = JSON.parse(gameRecord) as gameState;
+  gameState.cardDeck = new Deck().cards;
+  gameState.communityCards = [];
+
+  saveGame(gameId, "game", JSON.stringify(gameState));
 }
