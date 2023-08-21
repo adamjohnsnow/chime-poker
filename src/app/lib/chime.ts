@@ -26,6 +26,5 @@ export async function createAttendee(config: Meeting) {
     MeetingId: config.MeetingId,
     ExternalUserId: randomUUID(),
   });
-  console.log(attendee.Attendee);
   return attendee.Attendee;
 }

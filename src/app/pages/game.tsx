@@ -57,6 +57,10 @@ export default function Game() {
     }
   }
 
+  function sendMessage() {
+    meetingSession?.sendMessage('test')
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <audio id="chime-audio" />
@@ -79,12 +83,17 @@ export default function Game() {
 
 
       { gameId ?
-        <div>You are in game: {gameId}</div> : 
+        <>
+          <div>You are in game: {gameId}</div><div>
+          <form action={sendMessage}><button>Test Message</button></form></div>
+        </>
+        : 
         <>
           <div><form action={startNewGame}><button>Start new game</button></form></div>
           <div>Or</div>
-          <div><form action={joinGame}><input type='text' placeholder="Enter game id" id='game-id-input'></input><br /><button>Join game</button></form></div></>
-         }
+          <div><form action={joinGame}><input type='text' placeholder="Enter game id" id='game-id-input'></input><br /><button>Join game</button></form></div>
+        </>
+      }
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left font-mono">
         A multi-player poker game with video chat. Next,js, React, AWS Chime
       </div>
