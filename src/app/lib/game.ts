@@ -1,14 +1,13 @@
 "use server";
-import { MediaPlacement } from "@aws-sdk/client-chime-sdk-meetings";
 import { Deck, Card } from "./cards";
 import { createRecord, getGame } from "./dynamoDb";
-import { newChime } from "./chime";
+import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
 import { Player } from "./player";
 
 export type gameState = {
   id: string;
-  chimeConfig: MediaPlacement;
+  chimeConfig: ChimeConfig;
   cardDeck: Card[];
   communityCards: Card[];
   players: Player[];
