@@ -10,7 +10,14 @@ import { ChimeConfig, ChimeAttendee } from "./chime";
 
 export class ChimeProvider {
   private meetingSession: DefaultMeetingSession;
+  private meetingId: string;
   constructor(config: ChimeConfig, attendee: ChimeAttendee) {
+    if (!config.MeetingId) {
+      throw "no meeting id";
+    }
+
+    this.meetingId = config.MeetingId;
+
     const logger = new ConsoleLogger("MyLogger", 4);
     const deviceController = new DefaultDeviceController(logger);
     const configuration = new MeetingSessionConfiguration(
@@ -24,7 +31,12 @@ export class ChimeProvider {
       deviceController
     );
 
-    Promise.all([this.setupMic(), this.setupCamera(), this.setupSpeaker()])
+    Promise.all([
+      this.setupMic(),
+      this.setupCamera(),
+      this.setupSpeaker(),
+      this.setUpObservers(),
+    ])
       .then(() => {
         this.meetingSession?.audioVideo.start();
         console.log("meeting started");
@@ -66,5 +78,24 @@ export class ChimeProvider {
     );
     console.log("audio out: ", speakers[0].deviceId);
     return Promise.resolve();
+  }
+
+  private setUpObservers() {
+    this.meetingSession.audioVideo.realtimeSubscribeToReceiveDataMessage(
+      this.meetingId,
+      (message) => {
+        console.log("Message rec", message);
+      }
+    );
+    console.log("obsevers initialised", this.meetingId);
+    return Promise.resolve();
+  }
+
+  public sendMessage(content: string) {
+    console.log("sending", content, "to", this.meetingId);
+    this.meetingSession.audioVideo.realtimeSendDataMessage(
+      this.meetingId,
+      content
+    );
   }
 }
