@@ -2,25 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { startGame, GetGame, gameState }from "./lib/game";
-import { SNSClient, SubscribeCommand} from "@aws-sdk/client-sns";
-import { subscribe } from "./lib/notifications";
 
 
 export default function Home() {
   const [gameId, setGameId] = useState<string>('Start a game')
-  const [gameTopic, setGameTopic] = useState<string>()
-
-  useEffect(() => {
-    if(!gameTopic) {return}
-    console.log(gameTopic)
-    subscribe(gameTopic)
-  }, [gameTopic])
 
   async function startNewGame() {
     const game = await startGame()
     const gameDetails = JSON.parse(game) as gameState
     setGameId(gameDetails.id)
-    setGameTopic(gameDetails.topicArn)
   }
 
   return (

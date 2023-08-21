@@ -5,7 +5,6 @@ import { createRecord, getGame } from "./dynamoDb";
 import { newChime } from "./chime";
 import * as uuid from "uuid";
 import { Player } from "./player";
-import { createTopic } from "./notifications";
 
 export type gameState = {
   id: string;
@@ -13,7 +12,6 @@ export type gameState = {
   cardDeck: Card[];
   communityCards: Card[];
   players: Player[];
-  topicArn: string;
 };
 
 export async function startGame(): Promise<string> {
@@ -21,7 +19,6 @@ export async function startGame(): Promise<string> {
 
   const call = await newChime(id);
   const deck = new Deck();
-  const topic = await createTopic(id + "_game");
 
   if (!call) {
     return "";
@@ -33,7 +30,6 @@ export async function startGame(): Promise<string> {
     cardDeck: deck.cards,
     communityCards: [],
     players: [],
-    topicArn: topic,
   };
 
   createRecord(id, "game", JSON.stringify(state));
