@@ -109,7 +109,7 @@ export async function redealDeck(game: gameState) {
   return game;
 }
 
-export function dealCardToEachPlayer(game: gameState) {
+export async function dealCardToEachPlayer(game: gameState) {
   const deckLength = game.cardDeck.length;
   game.players.forEach((player, i) => {
     player.cards = player.cards?.concat(game.cardDeck[i]);
