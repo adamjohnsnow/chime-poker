@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { startGame, getGame, gameState, nextCards, redealDeck }from "../lib/game";
+import { createNewGame, getGame, gameState, nextCards, resetCards }from "../lib/game";
 import { ChimeConfig, createAttendee } from "../lib/chime";
 import { ChimeProvider } from "../lib/chimeUtils";
 import { Card } from "../lib/cards";
@@ -21,8 +21,9 @@ export default function Game() {
   }, [meetingSession])
 
   async function startNewGame() {
-    const game = await startGame()
-    renderGame(game)
+    const game = await createNewGame()
+    if(!game){return}
+    renderGame(JSON.parse(game) as gameState)
   }
 
   async function joinGame(){
@@ -36,21 +37,20 @@ export default function Game() {
     renderGame(game)
   }
 
-  async function renderGame(game: string){
-    const gameDetails = JSON.parse(game) as gameState
-    console.log('game', gameDetails)
-    const attendee = await createAttendee(gameDetails.chimeConfig)
+  async function renderGame(game: gameState){
+    console.log('game', game)
+    const attendee = await createAttendee(game.chimeConfig)
 
     if(!attendee){
       alert('Unable to create attendee')
       return
     }
 
-    const meeting = new ChimeProvider(gameDetails.chimeConfig, attendee)
+    const meeting = new ChimeProvider(game.chimeConfig, attendee)
 
     if(meeting) {
-      setGameId(gameDetails.id)
-      setChimeConfig(gameDetails.chimeConfig)
+      setGameId(game.id)
+      setChimeConfig(game.chimeConfig)
       setMeetingSession(meeting)
     } else {
       alert('Unable to create call session')
@@ -71,7 +71,7 @@ export default function Game() {
   async function nextRound() {
     if(!gameId){return}
     
-    await redealDeck(gameId)
+    await resetCards(gameId)
 
     setCommunityCards([])
   }

@@ -7,7 +7,7 @@ import {
 
 const client = new DynamoDBClient({});
 
-export async function saveGame(id: string, sk: string, state: string) {
+export async function saveGameToDb(id: string, sk: string, state: string) {
   const Item = {
     id: { S: id },
     sk: { S: `${id}:${sk}` },
