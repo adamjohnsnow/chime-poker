@@ -20,3 +20,9 @@
   margin: 2px;
   border-radius: 7px;
 }
+
+#local {
+  height: 150px;
+  width: 150px;
+  object-fit: cover;
+}
