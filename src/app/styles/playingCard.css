@@ -1,5 +1,4 @@
 .card-back {
-  position: absolute;
   height: 100%;
   width: 100%;
   --s: 20px; /* control the size*/
@@ -7,7 +6,6 @@
   background: var(--_g), var(--_g) calc(var(--s) / 2) calc(var(--s) / 2),
     conic-gradient(#0f9177 25%, #fdebad 0 50%, #d34434 0 75%, #b5d999 0);
   background-size: var(--s) var(--s);
-  backface-visibility: hidden;
   transform: rotateY(180deg);
   border-radius: 7px;
 }
@@ -20,8 +18,8 @@
   transform-style: preserve-3d;
   backface-visibility: hidden;
   position: relative;
-  width: 120px;
-  height: 200px;
+  width: 100px;
+  height: 150px;
   box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
   margin: 2px;
   border-radius: 7px;
@@ -42,11 +40,12 @@
 .card-value {
   margin: 5px 0 0 10px;
   font-size: 24px;
+  line-height: 1;
 }
 
 .card-suit {
-  margin: -5px 0 0 33px;
-  font-size: 84px;
+  margin: -15px 0 0 25px;
+  font-size: 74px;
 }
 
 .card-wrapper:hover {
@@ -58,8 +57,10 @@
 
 @keyframes fly-in {
   0% {
-    transform: rotateY(180deg) rotateX(0) translateZ(0) translateX(700px)
-      translateY(-400px);
+    top: 0;
+    left: 0;
+    transform: rotateY(180deg) rotateX(0) translateZ(0) translateX(calc(100vw))
+      translateY(calc(-80vh));
   }
   40% {
     transform: rotateY(180deg) rotateX(0) translateZ(-30px) translateX(0)

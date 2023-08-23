@@ -40,7 +40,11 @@ export function PlayingCard(card: Card){
     <div className="card-wrapper" style={{ color: getColour()}} onClick={turnCard}>
       <div className="card-back"></div>
       <div className="card-face">
-        <div className="card-value">{getValue()}{card.suit}</div><div className="card-suit">{card.suit}</div></div>
+      <div className="card-value">
+        <div>{getValue()}</div>
+        <div>{card.suit}</div>
+      </div>
+      <div className="card-suit">{card.suit}</div></div>
     </div>
   )
 }

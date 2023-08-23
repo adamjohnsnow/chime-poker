@@ -8,32 +8,27 @@ import { Card } from "../lib/cards";
 import { Player } from "../lib/player";
 import { PlayingCard } from "../components/playingCard";
 
+import { useRouter } from 'next/navigation'
+
 import '../styles/table.css'
 
 export default function Game() {
-  const [gameId, setGameId] = useState<string>()
-  const [chimeConfig, setChimeConfig] = useState<ChimeConfig>()
-  const [meetingSession, setMeetingSession] = useState<ChimeProvider>()
-  const [communityCards, setCommunityCards] = useState<Card[]>([])
-  const [player, setPlayer] = useState()
-
-  useEffect(()=> {
-    if(chimeConfig) { console.log('chime config updated') }
-  }, [chimeConfig])
-
-  useEffect(()=> {
-    if(meetingSession){ console.log('meeting session updated') }
-  }, [meetingSession])
+  const router = useRouter()
 
   async function startNewGame() {
     const game = await createNewGame()
     if(!game){return}
     const gameState = JSON.parse(game) as gameState
     gameState.players = gameState.players.concat(new Player('captain'))
-    //renderGame(gameState)
+    router.push('/game/' + gameState.id)
   }
 
-  function joinGame(){}
+  function joinGame(){
+    const input = document.getElementById('game-id-input') as HTMLInputElement
+    if (!input) {return}
+    router.push('/game/' + input.value)
+  }
+  
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <audio id="chime-audio" />
