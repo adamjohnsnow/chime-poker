@@ -35,6 +35,9 @@
   height: 100%;
   background: #ffffff;
   border-radius: 7px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .card-value {
@@ -44,8 +47,13 @@
 }
 
 .card-suit {
-  margin: -15px 0 0 25px;
+  display: flex;
+  position: absolute;
+  width: 100%;
+  height: 100%;
   font-size: 74px;
+  justify-content: space-around;
+  align-items: center;
 }
 
 .card-wrapper:hover {
@@ -60,10 +68,10 @@
     top: 0;
     left: 0;
     transform: rotateY(180deg) rotateX(0) translateZ(0) translateX(calc(100vw))
-      translateY(calc(-80vh));
+      translateY(calc(-100vh));
   }
   40% {
-    transform: rotateY(180deg) rotateX(0) translateZ(-30px) translateX(0)
+    transform: rotateY(180deg) rotateX(0) translateZ(40px) translateX(0)
       translateY(0);
   }
   100% {

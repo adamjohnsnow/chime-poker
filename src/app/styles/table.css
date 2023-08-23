@@ -1,6 +1,7 @@
 .community-cards {
   display: flex;
   width: 520px;
+  height: 100px;
 }
 
 .community-cards :nth-child(2) {

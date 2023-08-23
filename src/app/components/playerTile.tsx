@@ -4,7 +4,7 @@ export function PlayerTile(player: Player){
   return (
     <>
       <video id={player.id}></video>
-      <div>{player.name}</div>
+      <div hidden>{player.name}</div>
     </>
   )
 }
