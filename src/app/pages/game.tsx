@@ -5,12 +5,17 @@ import { createNewGame, getGame, gameState, nextCards, resetCards }from "../lib/
 import { ChimeConfig, createAttendee } from "../lib/chime";
 import { ChimeProvider } from "../lib/chimeUtils";
 import { Card } from "../lib/cards";
+import { Player } from "../lib/player";
+import { PlayingCard } from "../components/playingCard";
+
+import '../styles/table.css'
 
 export default function Game() {
   const [gameId, setGameId] = useState<string>()
   const [chimeConfig, setChimeConfig] = useState<ChimeConfig>()
   const [meetingSession, setMeetingSession] = useState<ChimeProvider>()
   const [communityCards, setCommunityCards] = useState<Card[]>([])
+  const [player, setPlayer] = useState()
 
   useEffect(()=> {
     if(chimeConfig) { console.log('chime config updated') }
@@ -23,59 +28,12 @@ export default function Game() {
   async function startNewGame() {
     const game = await createNewGame()
     if(!game){return}
-    renderGame(JSON.parse(game) as gameState)
+    const gameState = JSON.parse(game) as gameState
+    gameState.players = gameState.players.concat(new Player('captain'))
+    //renderGame(gameState)
   }
 
-  async function joinGame(){
-    const input = document.getElementById('game-id-input') as HTMLInputElement
-    setGameId(input?.value)
-
-    const game = await getGame(input?.value)
-    if (!game){
-      return
-    }
-    renderGame(game)
-  }
-
-  async function renderGame(game: gameState){
-    console.log('game', game)
-    const attendee = await createAttendee(game.chimeConfig)
-
-    if(!attendee){
-      alert('Unable to create attendee')
-      return
-    }
-
-    const meeting = new ChimeProvider(game.chimeConfig, attendee)
-
-    if(meeting) {
-      setGameId(game.id)
-      setChimeConfig(game.chimeConfig)
-      setMeetingSession(meeting)
-    } else {
-      alert('Unable to create call session')
-    }
-  }
-
-  async function nextAction() {
-    if(!gameId){return}
-    
-    const cards = await nextCards(gameId)
-    console.log(cards)
-
-    if(cards){
-      setCommunityCards(cards)
-    }
-  }
-
-  async function nextRound() {
-    if(!gameId){return}
-    
-    await resetCards(gameId)
-
-    setCommunityCards([])
-  }
-
+  function joinGame(){}
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <audio id="chime-audio" />
@@ -95,24 +53,14 @@ export default function Game() {
           </a>
         </div>
       </div>
-
-
-      { gameId ?
-        <>
-          <div>You are in game: {gameId}</div><div>
-          <form action={nextAction}><button>Next</button></form>
-          <form action={nextRound}><button>Redeal</button></form></div>
-          <ul>{communityCards.map((item, i) => <li key={i}>{item.value}{item.suit}</li>)}</ul>
-        </>
-        : 
         <>
           <div><form action={startNewGame}><button>Start new game</button></form></div>
           <div>Or</div>
           <div><form action={joinGame}><input type='text' placeholder="Enter game id" id='game-id-input'></input><br /><button>Join game</button></form></div>
         </>
-      }
+      
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left font-mono">
-        A multi-player poker game with video chat. Next,js, React, AWS Chime
+        A multi-player, single-page poker game with video chat. Next,js, React, AWS Chime
       </div>
     </main>
   )

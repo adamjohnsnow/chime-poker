@@ -130,7 +130,7 @@ describe("deals to players", () => {
         { suit: "b", value: 3 },
       ],
       communityCards: [],
-      players: [new Player()],
+      players: [new Player("A")],
     };
 
     dealCardToEachPlayer(game);
@@ -151,7 +151,7 @@ describe("deals to players", () => {
         { suit: "d", value: 5 },
       ],
       communityCards: [],
-      players: [new Player(), new Player()],
+      players: [new Player("A"), new Player("B")],
     };
 
     dealCardToEachPlayer(game);
@@ -172,7 +172,7 @@ describe("play a game", () => {
       return;
     }
 
-    game.players = [new Player(), new Player()];
+    game.players = [new Player("A"), new Player("B")];
     redealDeck(game);
 
     expect(game.cardDeck.length).toBe(48);

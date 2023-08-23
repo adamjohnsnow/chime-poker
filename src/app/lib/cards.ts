@@ -29,7 +29,7 @@ export class Deck {
 
   private createSuit(suit: string): sortableCard[] {
     const cards: sortableCard[] = [];
-    for (let i = 1; i < 14; i++) {
+    for (let i = 2; i <= 14; i++) {
       const card = { value: i, suit: suit, sort: Math.random() };
       cards.push(card);
     }
