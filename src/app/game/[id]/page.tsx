@@ -31,8 +31,6 @@ export default function Game({ params }: { params: { id: string } }) {
       if (!game || !player) {
         return;
       }
-      addNewPlayer(game.id, player);
-
       renderGame(game);
     });
 
@@ -53,7 +51,13 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!playerInput) {
       return;
     }
-    const myPlayer = new Player([], uuid.v4(), playerInput.value, 10000);
+    const playerId = await addNewPlayer(gameId, playerInput.value);
+    const myPlayer = new Player(
+      [],
+      playerId as string,
+      playerInput.value,
+      10000
+    );
     setPlayer(myPlayer);
   }
 
@@ -126,14 +130,6 @@ export default function Game({ params }: { params: { id: string } }) {
       }
       case "playerUpdate": {
         console.log("NEW PLAYER JOINED", data.player);
-        getGame(params.id).then((game) => {
-          if (!game || !player) {
-            return;
-          }
-          addNewPlayer(game.id, player);
-
-          renderGame(game);
-        });
         break;
       }
       default: {

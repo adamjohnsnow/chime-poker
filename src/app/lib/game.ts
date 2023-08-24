@@ -118,11 +118,14 @@ export async function dealCardToEachPlayer(game: gameState) {
   game.cardDeck = game.cardDeck.slice(0 - deckLength + game.players.length);
 }
 
-export async function addNewPlayer(gameId: string, newPlayer: Player) {
+export async function addNewPlayer(gameId: string, name: string) {
   const game = await getGame(gameId);
   if (!game) {
     return;
   }
-  game.players = game?.players.concat(newPlayer);
+  const player = new Player([], uuid.v4(), name, 10000);
+  game.players = game?.players.concat(player);
   await saveGame(game);
+
+  return player.id;
 }
