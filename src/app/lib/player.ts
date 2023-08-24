@@ -1,3 +1,5 @@
+"use client";
+
 import { Card } from "./cards";
 import { loadFromDb, saveToDb } from "./dynamoDb";
 import { getGame, saveGame } from "./game";
@@ -13,7 +15,8 @@ export class Player {
 }
 
 export async function loadPlayer(gameId: string, playerId: string) {
-  const player = await loadFromDb(gameId, playerId);
+  const player = await loadFromDb(gameId, ":" + playerId);
+  console.log(player);
   if (!player?.S) {
     return;
   }
@@ -26,7 +29,7 @@ export async function addNewPlayer(gameId: string, name: string) {
     return;
   }
   const player = new Player([], uuid.v4(), name, 10000);
-  game.players = game?.players.concat(player);
+  game.players = game?.players.concat(player.id);
   await saveToDb(gameId, player.id, JSON.stringify(player));
   await saveGame(game);
   return player.id;

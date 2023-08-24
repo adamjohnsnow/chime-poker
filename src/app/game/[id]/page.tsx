@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 // packages
 import { useEffect, useState } from "react";
@@ -7,8 +8,8 @@ import { Card } from "../../lib/cards";
 import { createAttendee } from "../../lib/chime";
 import { ChimeProvider } from "../../lib/chimeUtils";
 import { getGame, gameState, nextCards, resetCards } from "../../lib/game";
-import { Player, addNewPlayer } from "../../lib/player";
-import { savePlayer, loadPlayer } from "../../lib/localCache";
+import { Player, addNewPlayer, loadPlayer } from "../../lib/player";
+import { saveLocalPlayer, loadLocalPlayer } from "../../lib/localCache";
 
 // components
 import { PlayerTile } from "../../components/playerTile";
@@ -19,18 +20,37 @@ import "../../styles/table.css";
 import "../../styles/playingCard.css";
 
 export default function Game({ params }: { params: { id: string } }) {
+  const [loadingPlayer, setLoadingPlayer] = useState<boolean>(true);
   const [gameId, setGameId] = useState<string>(params.id);
   const [communityCards, setCommunityCards] = useState<Card[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
+  const [newPlayerId, setNewPlayerId] = useState<string | null>();
 
   useEffect(() => {
-    const savedPlayer = loadPlayer(params.id);
+    const savedPlayer = loadLocalPlayer(params.id);
     if (savedPlayer) {
       setPlayer(savedPlayer);
     }
+    setLoadingPlayer(false);
   }, [params.id]);
+
+  useEffect(() => {
+    if (
+      newPlayerId &&
+      newPlayerId != player?.id &&
+      !players.some((player) => player.id === newPlayerId)
+    ) {
+      loadPlayer(gameId, newPlayerId).then((newPlayer) => {
+        console.log("NP", newPlayer, players);
+        if (newPlayer) {
+          setPlayers([...players, newPlayer]);
+        }
+        setNewPlayerId(null);
+      });
+    }
+  }, [newPlayerId]);
 
   useEffect(() => {
     getGame(params.id).then((game) => {
@@ -46,10 +66,6 @@ export default function Game({ params }: { params: { id: string } }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player]);
 
-  useEffect(() => {
-    console.log("c", players);
-  }, [players]);
-
   async function playerJoin() {
     const playerInput = document.getElementById(
       "new-player-name"
@@ -64,12 +80,11 @@ export default function Game({ params }: { params: { id: string } }) {
       playerInput.value,
       10000
     );
-    savePlayer(params.id, myPlayer);
+    saveLocalPlayer(params.id, myPlayer);
     setPlayer(myPlayer);
   }
 
   async function renderGame(game: gameState) {
-    console.log("game", game);
     const attendee = await createAttendee(
       game.chimeConfig,
       player?.id as string
@@ -86,7 +101,6 @@ export default function Game({ params }: { params: { id: string } }) {
       setChime(meeting);
       setGameId(game.id);
       setCommunityCards(game.communityCards);
-      setPlayers(game.players);
     } else {
       alert("Unable to create call session");
     }
@@ -138,18 +152,21 @@ export default function Game({ params }: { params: { id: string } }) {
         setCommunityCards([]);
         break;
       }
-      case "playerUpdate": {
-        console.log("NEW PLAYER JOINED", data.player);
+      case "newPlayer": {
+        // const player = load;
+        console.log("NEW PLAYER JOINED", data.playerId);
+        if (data.playerId) {
+          setNewPlayerId(data.playerId);
+        }
         break;
+      }
+      case "playerDropped": {
+        console.log("PLAYER LEFT", data.player);
       }
       default: {
         console.log("UNKNOWN MESSAGE TYPE");
       }
     }
-  }
-
-  function addPlayer(newPlayer: Player) {
-    setPlayers([...players, newPlayer]);
   }
 
   return (
@@ -195,15 +212,19 @@ export default function Game({ params }: { params: { id: string } }) {
         </>
       ) : (
         <>
-          <div>New Player</div>
-          <form action={playerJoin}>
-            <input
-              type="text"
-              id="new-player-name"
-              placeholder="Enter your name"
-            />
-            <button>Take a seat</button>
-          </form>
+          {loadingPlayer ? null : (
+            <>
+              <div>New Player</div>
+              <form action={playerJoin}>
+                <input
+                  type="text"
+                  id="new-player-name"
+                  placeholder="Enter your name"
+                />
+                <button>Take a seat</button>
+              </form>
+            </>
+          )}
         </>
       )}
       <p className="">You are in game: {gameId}</p>

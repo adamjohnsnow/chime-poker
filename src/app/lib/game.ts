@@ -10,7 +10,7 @@ export type gameState = {
   chimeConfig: ChimeConfig;
   cardDeck: Card[];
   communityCards: Card[];
-  players: Player[];
+  players: string[];
 };
 
 export async function startGame(): Promise<gameState | null> {
@@ -101,7 +101,7 @@ export async function redealDeck(game: gameState) {
   game.cardDeck = new Deck().cards;
   game.communityCards = [];
   game.players.forEach((player) => {
-    player.cards = [];
+    // player.cards = [];
   });
 
   dealCardToEachPlayer(game);
@@ -112,7 +112,7 @@ export async function redealDeck(game: gameState) {
 export async function dealCardToEachPlayer(game: gameState) {
   const deckLength = game.cardDeck.length;
   game.players.forEach((player, i) => {
-    player.cards = player.cards?.concat(game.cardDeck[i]);
+    // player.cards = player.cards?.concat(game.cardDeck[i]);
   });
 
   game.cardDeck = game.cardDeck.slice(0 - deckLength + game.players.length);

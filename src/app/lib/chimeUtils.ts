@@ -63,7 +63,7 @@ export class ChimeProvider {
   private async setupMic() {
     const mics = await this.meetingSession?.audioVideo.listAudioInputDevices();
     await this.meetingSession?.audioVideo.startAudioInput(mics[0]);
-    console.log("audio in: ", mics[0].deviceId);
+    // console.log("audio in: ", mics[0].deviceId);
     return Promise.resolve();
   }
 
@@ -71,7 +71,7 @@ export class ChimeProvider {
     const cameras =
       await this.meetingSession?.audioVideo.listVideoInputDevices();
     await this.meetingSession?.audioVideo.startVideoInput(cameras[0]);
-    console.log("camera: ", cameras[0].deviceId);
+    // console.log("camera: ", cameras[0].deviceId);
     return Promise.resolve();
   }
   private async setupSpeaker() {
@@ -87,7 +87,7 @@ export class ChimeProvider {
     await this.meetingSession?.audioVideo.chooseAudioOutput(
       speakers[0].deviceId
     );
-    console.log("audio out: ", speakers[0].deviceId);
+    // console.log("audio out: ", speakers[0].deviceId);
     return Promise.resolve();
   }
 
@@ -128,6 +128,11 @@ export class ChimeProvider {
         if (present && !dropped) {
           this.eventDispatcher({
             message: "newPlayer",
+            playerId: externalUserId,
+          });
+        } else {
+          this.eventDispatcher({
+            message: "playerDropped",
             playerId: externalUserId,
           });
         }

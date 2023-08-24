@@ -2,7 +2,7 @@
 
 import { Player } from "./player";
 
-export function savePlayer(gameId: string, player: Player): boolean {
+export function saveLocalPlayer(gameId: string, player: Player): boolean {
   try {
     localStorage.setItem(gameId, JSON.stringify(player));
     return true;
@@ -11,7 +11,7 @@ export function savePlayer(gameId: string, player: Player): boolean {
   }
 }
 
-export function loadPlayer(gameId: string): Player | null {
+export function loadLocalPlayer(gameId: string): Player | null {
   try {
     const player = localStorage.getItem(gameId);
     if (!player) {
