@@ -12,6 +12,7 @@ import { ChimeConfig, ChimeAttendee } from "./chime";
 export class ChimeProvider {
   private meetingSession: DefaultMeetingSession;
   private meetingId: string;
+  private playerId: string;
   public eventDispatcher: (arg0: any) => void;
 
   constructor(
@@ -20,13 +21,13 @@ export class ChimeProvider {
     callback: (arg0: any) => void
   ) {
     this.eventDispatcher = callback;
-    if (!config.MeetingId) {
-      throw "no meeting id";
+    if (!config.MeetingId || !attendee.ExternalUserId) {
+      throw "no meeting id or player id";
     }
 
     this.meetingId = config.MeetingId;
-
-    const logger = new ConsoleLogger("MyLogger", 4);
+    this.playerId = attendee.ExternalUserId;
+    const logger = new ConsoleLogger("MyLogger", 2);
     const deviceController = new DefaultDeviceController(logger);
     const configuration = new MeetingSessionConfiguration(
       { Meeting: config },
@@ -93,6 +94,7 @@ export class ChimeProvider {
     await this.settUpAttendeeObserver();
     await this.setUpVideoObserver();
 
+    // game messages
     await this.meetingSession.audioVideo.realtimeSubscribeToReceiveDataMessage(
       this.meetingId,
       (message) => {
@@ -102,6 +104,18 @@ export class ChimeProvider {
         this.eventDispatcher(parsedData);
       }
     );
+
+    // player messages
+    await this.meetingSession.audioVideo.realtimeSubscribeToReceiveDataMessage(
+      this.playerId,
+      (message) => {
+        const jsonString = Buffer.from(message.data).toString("utf8");
+        const parsedData = JSON.parse(jsonString);
+
+        this.eventDispatcher(parsedData);
+      }
+    );
+
     console.log("obsevers initialised", this.meetingId);
     return Promise.resolve();
   }
@@ -111,6 +125,10 @@ export class ChimeProvider {
       this.meetingId,
       content
     );
+  }
+
+  public sendPlayerMessage(playerId: string, content: string) {
+    this.meetingSession.audioVideo.realtimeSendDataMessage(playerId, content);
   }
 
   private settUpAttendeeObserver() {
@@ -141,12 +159,11 @@ export class ChimeProvider {
       videoTileDidUpdate: (tileState: VideoTileState): void => {
         if (!tileState.localTile && tileState.boundExternalUserId) {
           setTimeout(() => {
-            console.log(tileState);
             const playerVid = document.getElementById(
               tileState.boundExternalUserId as string
             ) as HTMLVideoElement;
             if (!playerVid) {
-              console.log("vid not found");
+              console.log("vid tile not found");
               return;
             }
             this.meetingSession.audioVideo.bindVideoElement(

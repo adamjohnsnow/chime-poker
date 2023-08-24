@@ -22,6 +22,10 @@ export async function loadPlayer(gameId: string, playerId: string) {
   return JSON.parse(player?.S) as Player;
 }
 
+export async function updatePlayer(gameId: string, player: Player) {
+  saveToDb(gameId, player.id, JSON.stringify(player));
+}
+
 export async function addNewPlayer(gameId: string, name: string) {
   const game = await getGame(gameId);
   if (!game) {

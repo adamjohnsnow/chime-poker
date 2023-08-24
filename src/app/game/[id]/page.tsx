@@ -8,7 +8,12 @@ import { Card } from "../../lib/cards";
 import { createAttendee } from "../../lib/chime";
 import { ChimeProvider } from "../../lib/chimeUtils";
 import { getGame, gameState, nextCards, resetCards } from "../../lib/game";
-import { Player, addNewPlayer, loadPlayer } from "../../lib/player";
+import {
+  Player,
+  addNewPlayer,
+  loadPlayer,
+  updatePlayer,
+} from "../../lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "../../lib/localCache";
 
 // components
@@ -27,11 +32,16 @@ export default function Game({ params }: { params: { id: string } }) {
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
   const [newPlayerId, setNewPlayerId] = useState<string | null>();
+  const [playerCards, setPlayerCards] = useState<Card[]>([]);
 
   useEffect(() => {
     const savedPlayer = loadLocalPlayer(params.id);
     if (savedPlayer) {
-      setPlayer(savedPlayer);
+      loadPlayer(gameId, savedPlayer.id).then((recalledPlayer) => {
+        console.log("REC:", recalledPlayer);
+        setPlayer(recalledPlayer);
+        setPlayerCards(recalledPlayer?.cards || []);
+      });
     }
     setLoadingPlayer(false);
   }, [params.id]);
@@ -64,6 +74,14 @@ export default function Game({ params }: { params: { id: string } }) {
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player]);
+
+  useEffect(() => {
+    if (!player) {
+      return;
+    }
+    player.cards = playerCards;
+    updatePlayer(gameId, player);
+  }, [playerCards]);
 
   async function playerJoin() {
     const playerInput = document.getElementById(
@@ -124,8 +142,18 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!gameId) {
       return;
     }
-
-    await resetCards(gameId);
+    setPlayerCards([]);
+    const newCards = await resetCards(gameId);
+    newCards?.forEach((hand) => {
+      if (hand.playerId === player?.id) {
+        setPlayerCards(hand.cards);
+      } else {
+        chime?.sendPlayerMessage(
+          hand.playerId,
+          JSON.stringify({ message: "newCards", cards: hand.cards })
+        );
+      }
+    });
     chime?.sendMessage(JSON.stringify({ message: "reset" }));
     setCommunityCards([]);
   }
@@ -159,22 +187,40 @@ export default function Game({ params }: { params: { id: string } }) {
       }
       case "playerDropped": {
         console.log("PLAYER LEFT", data.player);
+        break;
+      }
+      case "newCards": {
+        console.log("NEW CARDS", data);
+        setPlayerCards(data.cards);
+        break;
       }
       default: {
-        console.log("UNKNOWN MESSAGE TYPE");
+        console.log("UNKNOWN MESSAGE TYPE", data);
       }
     }
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-10">
+    <main className="flex min-h-screen flex-col items-center justify-between p-10 font-mono">
       {player ? (
         <>
           <audio id="chime-audio" />
-          <div className="z-10 w-full items-start justify-between font-mono text-sm flex">
-            <div>
-              {player.name}: £{player.cash}
+          <div className="z-10 w-full items-start justify-between  text-sm flex">
+            {player.name}: £{player.cash}
+            <div className="flex">
               <video id="local"></video>
+              {playerCards.length != 0 ? (
+                <>
+                  <PlayingCard
+                    value={playerCards[0].value}
+                    suit={playerCards[0].suit}
+                  ></PlayingCard>
+                  <PlayingCard
+                    value={playerCards[1].value}
+                    suit={playerCards[1].suit}
+                  ></PlayingCard>
+                </>
+              ) : null}
             </div>
             <form action={nextAction}>
               <button>Next</button>
@@ -192,7 +238,7 @@ export default function Game({ params }: { params: { id: string } }) {
                 key={i}
                 id={player.id}
                 name={player.name}
-                cards={player.cards}
+                cards={[]}
                 cash={player.cash}
               ></PlayerTile>
             ))}

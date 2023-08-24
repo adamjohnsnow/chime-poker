@@ -11,6 +11,11 @@ export function PlayerTile(player: Player) {
         <div>
           {player.name}: £{player.cash}
         </div>
+        <div className="hand">
+          {player.cards.map((card) => (
+            <div key="">{card.suit}</div>
+          ))}
+        </div>
       </div>
     </>
   );
