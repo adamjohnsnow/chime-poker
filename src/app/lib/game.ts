@@ -1,6 +1,6 @@
 "use server";
 import { Deck, Card } from "./cards";
-import { saveGameToDb, loadGame } from "./dynamoDb";
+import { saveToDb, loadFromDb } from "./dynamoDb";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
 import { Player } from "./player";
@@ -42,11 +42,11 @@ export async function createNewGame(): Promise<string> {
 }
 
 export async function saveGame(game: gameState) {
-  saveGameToDb(game.id, "game", JSON.stringify(game));
+  saveToDb(game.id, "game", JSON.stringify(game));
 }
 
 export async function getGame(gameId: string) {
-  const gameRecord = await loadGame(gameId);
+  const gameRecord = await loadFromDb(gameId, ":game");
   if (!gameRecord?.S) {
     return;
   }
@@ -54,7 +54,7 @@ export async function getGame(gameId: string) {
 }
 
 export async function nextCards(gameId: string) {
-  const gameRecord = await loadGame(gameId);
+  const gameRecord = await loadFromDb(gameId, ":game");
   if (!gameRecord?.S) {
     return;
   }
@@ -116,16 +116,4 @@ export async function dealCardToEachPlayer(game: gameState) {
   });
 
   game.cardDeck = game.cardDeck.slice(0 - deckLength + game.players.length);
-}
-
-export async function addNewPlayer(gameId: string, name: string) {
-  const game = await getGame(gameId);
-  if (!game) {
-    return;
-  }
-  const player = new Player([], uuid.v4(), name, 10000);
-  game.players = game?.players.concat(player);
-  await saveGame(game);
-
-  return player.id;
 }

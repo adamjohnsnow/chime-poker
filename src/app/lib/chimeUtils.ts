@@ -124,7 +124,13 @@ export class ChimeProvider {
         externalUserId?: string,
         dropped?: boolean
       ) => {
-        // console.log(attendeeId, " joined");
+        console.log(attendeeId, " joined");
+        if (present && !dropped) {
+          this.eventDispatcher({
+            message: "newPlayer",
+            playerId: externalUserId,
+          });
+        }
       }
     );
   }

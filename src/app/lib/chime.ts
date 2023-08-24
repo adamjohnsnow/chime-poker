@@ -20,11 +20,11 @@ export async function newChime(gameId: string) {
   return result.Meeting;
 }
 
-export async function createAttendee(config: Meeting) {
+export async function createAttendee(config: Meeting, id: string) {
   const chime = new ChimeSDKMeetings({ region: "us-east-1" });
   const attendee = await chime.createAttendee({
     MeetingId: config.MeetingId,
-    ExternalUserId: randomUUID(),
+    ExternalUserId: id,
   });
   return attendee.Attendee;
 }

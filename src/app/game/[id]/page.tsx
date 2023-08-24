@@ -1,23 +1,22 @@
 "use client";
+// packages
 import { useEffect, useState } from "react";
-import { PlayingCard } from "../../components/playingCard";
+
+// lib
 import { Card } from "../../lib/cards";
 import { createAttendee } from "../../lib/chime";
-import * as uuid from "uuid";
-
 import { ChimeProvider } from "../../lib/chimeUtils";
-import {
-  getGame,
-  gameState,
-  nextCards,
-  resetCards,
-  addNewPlayer,
-} from "../../lib/game";
-import { Player } from "../../lib/player";
+import { getGame, gameState, nextCards, resetCards } from "../../lib/game";
+import { Player, addNewPlayer } from "../../lib/player";
+import { savePlayer, loadPlayer } from "../../lib/localCache";
 
+// components
+import { PlayerTile } from "../../components/playerTile";
+import { PlayingCard } from "../../components/playingCard";
+
+// styles
 import "../../styles/table.css";
 import "../../styles/playingCard.css";
-import { PlayerTile } from "@/app/components/playerTile";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -25,6 +24,13 @@ export default function Game({ params }: { params: { id: string } }) {
   const [players, setPlayers] = useState<Player[]>([]);
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
+
+  useEffect(() => {
+    const savedPlayer = loadPlayer(params.id);
+    if (savedPlayer) {
+      setPlayer(savedPlayer);
+    }
+  }, [params.id]);
 
   useEffect(() => {
     getGame(params.id).then((game) => {
@@ -58,12 +64,16 @@ export default function Game({ params }: { params: { id: string } }) {
       playerInput.value,
       10000
     );
+    savePlayer(params.id, myPlayer);
     setPlayer(myPlayer);
   }
 
   async function renderGame(game: gameState) {
     console.log("game", game);
-    const attendee = await createAttendee(game.chimeConfig);
+    const attendee = await createAttendee(
+      game.chimeConfig,
+      player?.id as string
+    );
 
     if (!attendee) {
       alert("Unable to create attendee");

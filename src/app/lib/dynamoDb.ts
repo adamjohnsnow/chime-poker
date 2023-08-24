@@ -7,7 +7,7 @@ import {
 
 const client = new DynamoDBClient({});
 
-export async function saveGameToDb(id: string, sk: string, state: string) {
+export async function saveToDb(id: string, sk: string, state: string) {
   const Item = {
     id: { S: id },
     sk: { S: `${id}:${sk}` },
@@ -21,13 +21,13 @@ export async function saveGameToDb(id: string, sk: string, state: string) {
   );
 }
 
-export async function loadGame(gameId: string) {
+export async function loadFromDb(gameId: string, sk: string) {
   const item = await client.send(
     new GetItemCommand({
       TableName: process.env.TABLE_NAME,
       Key: {
         id: { S: gameId },
-        sk: { S: gameId + ":game" },
+        sk: { S: gameId + sk },
       },
     })
   );
