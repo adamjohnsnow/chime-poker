@@ -16,7 +16,6 @@ export class Player {
 
 export async function loadPlayer(gameId: string, playerId: string) {
   const player = await loadFromDb(gameId, ":" + playerId);
-  console.log(player);
   if (!player?.S) {
     return;
   }

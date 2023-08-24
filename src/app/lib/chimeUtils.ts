@@ -49,8 +49,6 @@ export class ChimeProvider {
       .then(() => {
         this.meetingSession?.audioVideo.start();
         this.meetingSession.audioVideo.startLocalVideoTile();
-
-        console.log("meeting started");
       })
       .catch((error) => {
         console.error("ERROR", error);
@@ -109,7 +107,6 @@ export class ChimeProvider {
   }
 
   public sendMessage(content: string) {
-    console.log("sending", content, "to", this.meetingId);
     this.meetingSession.audioVideo.realtimeSendDataMessage(
       this.meetingId,
       content
@@ -124,7 +121,6 @@ export class ChimeProvider {
         externalUserId?: string,
         dropped?: boolean
       ) => {
-        console.log(attendeeId, " joined");
         if (present && !dropped) {
           this.eventDispatcher({
             message: "newPlayer",
@@ -143,18 +139,33 @@ export class ChimeProvider {
   private async setUpVideoObserver(): Promise<void> {
     this.meetingSession?.audioVideo.addObserver({
       videoTileDidUpdate: (tileState: VideoTileState): void => {
-        if (!tileState.boundAttendeeId || !tileState.localTile) {
-          return;
+        if (!tileState.localTile && tileState.boundExternalUserId) {
+          setTimeout(() => {
+            console.log(tileState);
+            const playerVid = document.getElementById(
+              tileState.boundExternalUserId as string
+            ) as HTMLVideoElement;
+            if (!playerVid) {
+              console.log("vid not found");
+              return;
+            }
+            this.meetingSession.audioVideo.bindVideoElement(
+              tileState.tileId as number,
+              playerVid
+            );
+          }, 1000);
         }
-        const myVid = document.getElementById("local") as HTMLVideoElement;
-        if (!myVid) {
-          return;
-        }
+        if (tileState.localTile && !tileState.boundVideoElement) {
+          const myVid = document.getElementById("local") as HTMLVideoElement;
+          if (!myVid) {
+            return;
+          }
 
-        this.meetingSession.audioVideo.bindVideoElement(
-          tileState.tileId as number,
-          myVid
-        );
+          this.meetingSession.audioVideo.bindVideoElement(
+            tileState.tileId as number,
+            myVid
+          );
+        }
       },
     });
     return Promise.resolve();

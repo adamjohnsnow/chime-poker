@@ -43,7 +43,6 @@ export default function Game({ params }: { params: { id: string } }) {
       !players.some((player) => player.id === newPlayerId)
     ) {
       loadPlayer(gameId, newPlayerId).then((newPlayer) => {
-        console.log("NP", newPlayer, players);
         if (newPlayer) {
           setPlayers([...players, newPlayer]);
         }
@@ -112,7 +111,6 @@ export default function Game({ params }: { params: { id: string } }) {
     }
 
     const cards = await nextCards(gameId);
-    console.log(cards);
 
     if (cards) {
       chime?.sendMessage(
@@ -137,7 +135,6 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   function eventHandler(data: any): void {
-    console.log("client recieved", data);
     if (!data.message) {
       return;
     }
