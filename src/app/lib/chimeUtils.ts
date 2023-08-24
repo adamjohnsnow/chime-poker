@@ -12,7 +12,14 @@ import { ChimeConfig, ChimeAttendee } from "./chime";
 export class ChimeProvider {
   private meetingSession: DefaultMeetingSession;
   private meetingId: string;
-  constructor(config: ChimeConfig, attendee: ChimeAttendee) {
+  public eventDispatcher: (arg0: any) => void;
+
+  constructor(
+    config: ChimeConfig,
+    attendee: ChimeAttendee,
+    callback: (arg0: any) => void
+  ) {
+    this.eventDispatcher = callback;
     if (!config.MeetingId) {
       throw "no meeting id";
     }
@@ -87,10 +94,14 @@ export class ChimeProvider {
   private async setUpObservers() {
     await this.settUpAttendeeObserver();
     await this.setUpVideoObserver();
+
     await this.meetingSession.audioVideo.realtimeSubscribeToReceiveDataMessage(
       this.meetingId,
       (message) => {
-        console.log("Message rec", message);
+        const jsonString = Buffer.from(message.data).toString("utf8");
+        const parsedData = JSON.parse(jsonString);
+
+        this.eventDispatcher(parsedData);
       }
     );
     console.log("obsevers initialised", this.meetingId);
@@ -106,7 +117,6 @@ export class ChimeProvider {
   }
 
   private settUpAttendeeObserver() {
-    console.log("setting up attendee observer");
     this.meetingSession.audioVideo.realtimeSubscribeToAttendeeIdPresence(
       (
         attendeeId: string,
@@ -114,13 +124,12 @@ export class ChimeProvider {
         externalUserId?: string,
         dropped?: boolean
       ) => {
-        console.log(attendeeId, " joined");
+        // console.log(attendeeId, " joined");
       }
     );
   }
 
   private async setUpVideoObserver(): Promise<void> {
-    console.log("setting up video observer");
     this.meetingSession?.audioVideo.addObserver({
       videoTileDidUpdate: (tileState: VideoTileState): void => {
         if (!tileState.boundAttendeeId || !tileState.localTile) {
@@ -130,7 +139,6 @@ export class ChimeProvider {
         if (!myVid) {
           return;
         }
-        console.log(tileState, myVid);
 
         this.meetingSession.audioVideo.bindVideoElement(
           tileState.tileId as number,

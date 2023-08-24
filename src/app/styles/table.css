@@ -5,12 +5,20 @@
 }
 
 .community-cards :nth-child(2) {
-  animation-delay: 0.5s;
-  -webkit-animation-delay: 0.5s;
+  animation-delay: 0.1s;
+  -webkit-animation-delay: 0.1s;
 }
 .community-cards :nth-child(3) {
-  animation-delay: 1s;
-  -webkit-animation-delay: 1s;
+  animation-delay: 0.2s;
+  -webkit-animation-delay: 0.2s;
+}
+.community-cards :nth-child(3) {
+  animation-delay: 0.3s;
+  -webkit-animation-delay: 0.3s;
+}
+.community-cards :nth-child(4) {
+  animation-delay: 0.4s;
+  -webkit-animation-delay: 0.4s;
 }
 
 .card-deck {
@@ -19,6 +27,11 @@
   box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
   margin: 2px;
   border-radius: 7px;
+}
+
+.players {
+  @apply w-full h-48;
+  display: flex;
 }
 
 #local {

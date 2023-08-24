@@ -67,7 +67,7 @@
   0% {
     top: 0;
     left: 0;
-    transform: rotateY(180deg) rotateX(0) translateZ(0) translateX(calc(100vw))
+    transform: rotateY(180deg) rotateX(0) translateZ(0) translateX(0)
       translateY(calc(-100vh));
   }
   40% {
