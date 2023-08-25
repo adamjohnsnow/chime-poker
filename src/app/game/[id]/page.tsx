@@ -8,12 +8,7 @@ import { Card } from "../../lib/cards";
 import { createAttendee } from "../../lib/chime";
 import { ChimeProvider } from "../../lib/chimeUtils";
 import { getGame, gameState, nextCards, resetCards } from "../../lib/game";
-import {
-  Player,
-  addNewPlayer,
-  loadPlayer,
-  updatePlayer,
-} from "../../lib/player";
+import { Player, addNewPlayer, loadPlayer } from "../../lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "../../lib/localCache";
 
 // components
@@ -23,6 +18,7 @@ import { PlayingCard } from "../../components/playingCard";
 // styles
 import "../../styles/table.css";
 import "../../styles/playingCard.css";
+import { TurnControl } from "@/app/components/turnControl";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [loadingPlayer, setLoadingPlayer] = useState<boolean>(true);
@@ -32,19 +28,34 @@ export default function Game({ params }: { params: { id: string } }) {
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
   const [newPlayerId, setNewPlayerId] = useState<string | null>();
+  const [newBet, setNewBet] = useState<any>();
   const [playerCards, setPlayerCards] = useState<Card[]>([]);
+  const [playerTurn, setPlayerTurn] = useState<string>();
 
   useEffect(() => {
     const savedPlayer = loadLocalPlayer(params.id);
     if (savedPlayer) {
       loadPlayer(gameId, savedPlayer.id).then((recalledPlayer) => {
-        console.log("REC:", recalledPlayer);
         setPlayer(recalledPlayer);
         setPlayerCards(recalledPlayer?.cards || []);
       });
     }
     setLoadingPlayer(false);
   }, [params.id]);
+
+  useEffect(() => {
+    console.log(newBet);
+    if (!newBet || !newBet.playerId) {
+      return;
+    }
+    const updatedPlayers = players.slice();
+    updatedPlayers.forEach((player) => {
+      if (player.id === newBet.playerId) {
+        player.currentBet = newBet.amount;
+      }
+    });
+    setPlayers(updatedPlayers);
+  }, [newBet]);
 
   useEffect(() => {
     if (
@@ -81,8 +92,16 @@ export default function Game({ params }: { params: { id: string } }) {
     }
     player.cards = playerCards;
     player.folded = false;
-    updatePlayer(gameId, player);
   }, [playerCards]);
+
+  useEffect(() => {
+    if (communityCards.length === 0) {
+      players.forEach((player) => {
+        player.currentBet = null;
+        document.getElementById(player.id)?.classList.remove("folded");
+      });
+    }
+  }, [communityCards]);
 
   async function playerJoin() {
     const playerInput = document.getElementById(
@@ -97,6 +116,7 @@ export default function Game({ params }: { params: { id: string } }) {
       playerId as string,
       playerInput.value,
       10000,
+      0,
       false
     );
     saveLocalPlayer(params.id, myPlayer);
@@ -160,16 +180,6 @@ export default function Game({ params }: { params: { id: string } }) {
     setCommunityCards([]);
   }
 
-  async function fold() {
-    if (player) {
-      player.folded = true;
-      updatePlayer(gameId, player);
-      chime?.sendMessage(
-        JSON.stringify({ message: "playerFolded", player: player.id })
-      );
-    }
-  }
-
   function eventHandler(data: any): void {
     if (!data.message) {
       return;
@@ -207,6 +217,10 @@ export default function Game({ params }: { params: { id: string } }) {
         document.getElementById(data.player)?.classList.add("folded");
         break;
       }
+      case "betPlaced": {
+        setNewBet({ playerId: data.playerId, amount: data.amount });
+        break;
+      }
       default: {
         console.log("UNKNOWN MESSAGE TYPE", data);
       }
@@ -241,9 +255,11 @@ export default function Game({ params }: { params: { id: string } }) {
             <form action={nextRound}>
               <button>Redeal</button>
             </form>
-            <form action={fold}>
-              <button>Fold</button>
-            </form>
+            <TurnControl
+              player={player}
+              gameId={gameId}
+              chime={chime as ChimeProvider}
+            ></TurnControl>
           </div>
           <div className="players">
             {players.map((player, i) => (
@@ -254,6 +270,7 @@ export default function Game({ params }: { params: { id: string } }) {
                 cards={[]}
                 cash={player.cash}
                 folded={player.folded}
+                currentBet={player.currentBet}
               ></PlayerTile>
             ))}
           </div>

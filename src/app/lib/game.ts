@@ -3,7 +3,7 @@ import { Deck, Card } from "./cards";
 import { saveToDb, loadFromDb } from "./dynamoDb";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
-import { Player } from "./player";
+import { Player, newCardsForPlayer } from "./player";
 
 export type gameState = {
   id: string;
@@ -113,10 +113,12 @@ export async function redealDeck(game: gameState) {
   const newHands: newHand[] = [];
   const playerCount = game.players.length;
   game.players.forEach((playerId, i) => {
+    const newCards = [game.cardDeck[i], game.cardDeck[i + playerCount]];
     newHands.push({
       playerId: playerId,
-      cards: [game.cardDeck[i], game.cardDeck[i + playerCount]],
+      cards: newCards,
     });
+    newCardsForPlayer(game.id, playerId, newCards);
   });
 
   game.cardDeck = game.cardDeck.slice(0 - deckLength + game.players.length * 2);
