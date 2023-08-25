@@ -5,7 +5,7 @@ export function PlayerTile(player: Player) {
     <>
       <div>
         <video
-          style={{ height: 150, width: 150, objectFit: "cover" }}
+          className={player.folded ? "video-tile folded" : "video-tile"}
           id={player.id}
         ></video>
         <div>

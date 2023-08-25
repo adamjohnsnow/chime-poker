@@ -5,10 +5,10 @@ import { describe, expect, test } from "@jest/globals";
 describe("hand evaluator", () => {
   test("returns high card", () => {
     const cards: Card[] = [
-      new Card(7, "♥️"),
-      new Card(8, "♥️"),
-      new Card(4, "♦️"),
-      new Card(1, "♦️"),
+      { value: 7, suit: "♥️" },
+      { value: 8, suit: "♥️" },
+      { value: 4, suit: "♦️" },
+      { value: 1, suit: "♦️" },
     ];
     const hand = new HandEvaluator(cards);
 
@@ -17,9 +17,9 @@ describe("hand evaluator", () => {
   });
 
   test("returns a pair", () => {
-    const card1 = new Card(7, "♥️");
-    const card2 = new Card(7, "♦️");
-    const cards: Card[] = [card1, card2, new Card(4, "♦️")];
+    const card1 = { value: 7, suit: "♥️" };
+    const card2 = { value: 7, suit: "♦️" };
+    const cards: Card[] = [card1, card2, { value: 4, suit: "♦️" }];
 
     const hand = new HandEvaluator(cards);
 
@@ -30,11 +30,17 @@ describe("hand evaluator", () => {
   });
 
   test("finds two pair", () => {
-    const card1 = new Card(7, "♥️");
-    const card2 = new Card(7, "♦️");
-    const card3 = new Card(8, "♥️");
-    const card4 = new Card(8, "♦️");
-    const cards: Card[] = [card1, card2, new Card(4, "♦️"), card3, card4];
+    const card1 = { value: 7, suit: "♥️" };
+    const card2 = { value: 7, suit: "♦️" };
+    const card3 = { value: 8, suit: "♥️" };
+    const card4 = { value: 8, suit: "♦️" };
+    const cards: Card[] = [
+      card1,
+      card2,
+      { value: 4, suit: "♦️" },
+      card3,
+      card4,
+    ];
 
     const hand = new HandEvaluator(cards);
 
@@ -43,10 +49,10 @@ describe("hand evaluator", () => {
   });
 
   test("returns three of a kind", () => {
-    const card1 = new Card(7, "♥️");
-    const card2 = new Card(7, "♦️");
-    const card3 = new Card(7, "♣️");
-    const cards: Card[] = [card1, card2, new Card(4, "♦️"), card3];
+    const card1 = { value: 7, suit: "♥️" };
+    const card2 = { value: 7, suit: "♦️" };
+    const card3 = { value: 7, suit: "♣️" };
+    const cards: Card[] = [card1, card2, { value: 4, suit: "♦️" }, card3];
 
     const hand = new HandEvaluator(cards);
 
@@ -59,13 +65,13 @@ describe("hand evaluator", () => {
 
   test("returns straight", () => {
     const cards: Card[] = [
-      new Card(13, "♥️"),
-      new Card(1, "♣️"),
-      new Card(7, "♠️"),
-      new Card(8, "♦️"),
-      new Card(9, "♥️"),
-      new Card(10, "♦️"),
-      new Card(6, "♦️"),
+      { value: 13, suit: "♥️" },
+      { value: 1, suit: "♣️" },
+      { value: 7, suit: "♠️" },
+      { value: 8, suit: "♦️" },
+      { value: 9, suit: "♥️" },
+      { value: 10, suit: "♦️" },
+      { value: 6, suit: "♦️" },
     ];
 
     const hand = new HandEvaluator(cards);
@@ -75,13 +81,13 @@ describe("hand evaluator", () => {
 
   test("returns not straight", () => {
     const cards: Card[] = [
-      new Card(11, "♥️"),
-      new Card(1, "♣️"),
-      new Card(7, "♠️"),
-      new Card(8, "♦️"),
-      new Card(2, "♥️"),
-      new Card(10, "♦️"),
-      new Card(6, "♦️"),
+      { value: 11, suit: "♥️" },
+      { value: 1, suit: "♣️" },
+      { value: 7, suit: "♠️" },
+      { value: 8, suit: "♦️" },
+      { value: 2, suit: "♥️" },
+      { value: 10, suit: "♦️" },
+      { value: 6, suit: "♦️" },
     ];
 
     const hand = new HandEvaluator(cards);
@@ -91,13 +97,13 @@ describe("hand evaluator", () => {
 
   test("returns straight over three of a kind", () => {
     const cards: Card[] = [
-      new Card(7, "♥️"),
-      new Card(7, "♣️"),
-      new Card(7, "♠️"),
-      new Card(8, "♦️"),
-      new Card(9, "♥️"),
-      new Card(10, "♦️"),
-      new Card(6, "♦️"),
+      { value: 7, suit: "♥️" },
+      { value: 7, suit: "♣️" },
+      { value: 7, suit: "♠️" },
+      { value: 8, suit: "♦️" },
+      { value: 9, suit: "♥️" },
+      { value: 10, suit: "♦️" },
+      { value: 6, suit: "♦️" },
     ];
 
     const hand = new HandEvaluator(cards);
@@ -107,13 +113,13 @@ describe("hand evaluator", () => {
 
   test("returns flush", () => {
     const cards: Card[] = [
-      new Card(1, "♣️"),
-      new Card(7, "♣️"),
-      new Card(3, "♣️"),
-      new Card(8, "♣️"),
-      new Card(8, "♥️"),
-      new Card(10, "♦️"),
-      new Card(6, "♣️"),
+      { value: 1, suit: "♣️" },
+      { value: 7, suit: "♣️" },
+      { value: 3, suit: "♣️" },
+      { value: 8, suit: "♣️" },
+      { value: 8, suit: "♥️" },
+      { value: 10, suit: "♦️" },
+      { value: 6, suit: "♣️" },
     ];
 
     const hand = new HandEvaluator(cards);
@@ -122,15 +128,15 @@ describe("hand evaluator", () => {
   });
 
   test("finds full house", () => {
-    const card1 = new Card(7, "♥️");
-    const card2 = new Card(7, "♦️");
-    const card3 = new Card(7, "♣️");
-    const card4 = new Card(8, "♥️");
-    const card5 = new Card(8, "♦️");
+    const card1 = { value: 7, suit: "♥️" };
+    const card2 = { value: 7, suit: "♦️" };
+    const card3 = { value: 7, suit: "♣️" };
+    const card4 = { value: 8, suit: "♥️" };
+    const card5 = { value: 8, suit: "♦️" };
     const cards: Card[] = [
       card1,
       card2,
-      new Card(4, "♦️"),
+      { value: 4, suit: "♦️" },
       card3,
       card4,
       card5,
@@ -143,11 +149,17 @@ describe("hand evaluator", () => {
   });
 
   test("returns four of a kind", () => {
-    const card1 = new Card(7, "♥️");
-    const card2 = new Card(7, "♦️");
-    const card3 = new Card(7, "♣️");
-    const card4 = new Card(7, "♠️");
-    const cards: Card[] = [card1, card2, new Card(4, "♦️"), card3, card4];
+    const card1 = { value: 7, suit: "♥️" };
+    const card2 = { value: 7, suit: "♦️" };
+    const card3 = { value: 7, suit: "♣️" };
+    const card4 = { value: 7, suit: "♠️" };
+    const cards: Card[] = [
+      card1,
+      card2,
+      { value: 4, suit: "♦️" },
+      card3,
+      card4,
+    ];
 
     const hand = new HandEvaluator(cards);
 
@@ -161,13 +173,13 @@ describe("hand evaluator", () => {
 
   test("returns straight flush", () => {
     const cards: Card[] = [
-      new Card(5, "♣️"),
-      new Card(2, "♣️"),
-      new Card(3, "♣️"),
-      new Card(4, "♣️"),
-      new Card(8, "♥️"),
-      new Card(10, "♦️"),
-      new Card(6, "♣️"),
+      { value: 5, suit: "♣️" },
+      { value: 2, suit: "♣️" },
+      { value: 3, suit: "♣️" },
+      { value: 4, suit: "♣️" },
+      { value: 8, suit: "♥️" },
+      { value: 10, suit: "♦️" },
+      { value: 6, suit: "♣️" },
     ];
 
     const hand = new HandEvaluator(cards);
@@ -177,13 +189,13 @@ describe("hand evaluator", () => {
 
   test("returns royal flush", () => {
     const cards: Card[] = [
-      new Card(13, "♣️"),
-      new Card(12, "♣️"),
-      new Card(10, "♣️"),
-      new Card(9, "♣️"),
-      new Card(8, "♥️"),
-      new Card(10, "♦️"),
-      new Card(11, "♣️"),
+      { value: 13, suit: "♣️" },
+      { value: 12, suit: "♣️" },
+      { value: 10, suit: "♣️" },
+      { value: 9, suit: "♣️" },
+      { value: 8, suit: "♥️" },
+      { value: 10, suit: "♦️" },
+      { value: 11, suit: "♣️" },
     ];
 
     const hand = new HandEvaluator(cards);

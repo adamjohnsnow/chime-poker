@@ -10,7 +10,8 @@ export class Player {
     public cards: Card[],
     public id: string,
     public name: string,
-    public cash: number
+    public cash: number,
+    public folded: boolean
   ) {}
 }
 
@@ -31,7 +32,7 @@ export async function addNewPlayer(gameId: string, name: string) {
   if (!game) {
     return;
   }
-  const player = new Player([], uuid.v4(), name, 10000);
+  const player = new Player([], uuid.v4(), name, 10000, false);
   game.players = game?.players.concat(player.id);
   await saveToDb(gameId, player.id, JSON.stringify(player));
   await saveGame(game);

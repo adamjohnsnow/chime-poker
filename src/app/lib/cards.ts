@@ -1,6 +1,7 @@
-export class Card {
-  constructor(public value: number, public suit: string) {}
-}
+export type Card = {
+  value: number;
+  suit: string;
+};
 
 export type sortableCard = {
   value: number;
@@ -22,8 +23,8 @@ export class Deck {
     });
     sortableCards.sort((a, b) => a.sort - b.sort);
 
-    sortableCards.forEach((card) => {
-      this.cards.push(new Card(card.value, card.suit));
+    sortableCards.forEach((card: sortableCard) => {
+      this.cards.push({ value: card.value, suit: card.suit });
     });
   }
 

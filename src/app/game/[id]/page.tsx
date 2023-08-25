@@ -80,6 +80,7 @@ export default function Game({ params }: { params: { id: string } }) {
       return;
     }
     player.cards = playerCards;
+    player.folded = false;
     updatePlayer(gameId, player);
   }, [playerCards]);
 
@@ -95,7 +96,8 @@ export default function Game({ params }: { params: { id: string } }) {
       [],
       playerId as string,
       playerInput.value,
-      10000
+      10000,
+      false
     );
     saveLocalPlayer(params.id, myPlayer);
     setPlayer(myPlayer);
@@ -158,8 +160,14 @@ export default function Game({ params }: { params: { id: string } }) {
     setCommunityCards([]);
   }
 
-  async function test() {
-    eventHandler({ message: "playerUpdate", player: [] });
+  async function fold() {
+    if (player) {
+      player.folded = true;
+      updatePlayer(gameId, player);
+      chime?.sendMessage(
+        JSON.stringify({ message: "playerFolded", player: player.id })
+      );
+    }
   }
 
   function eventHandler(data: any): void {
@@ -194,6 +202,11 @@ export default function Game({ params }: { params: { id: string } }) {
         setPlayerCards(data.cards);
         break;
       }
+      case "playerFolded": {
+        console.log("PLAYER FOLDED", data.player);
+        document.getElementById(data.player)?.classList.add("folded");
+        break;
+      }
       default: {
         console.log("UNKNOWN MESSAGE TYPE", data);
       }
@@ -208,7 +221,7 @@ export default function Game({ params }: { params: { id: string } }) {
           <div className="z-10 w-full items-start justify-between  text-sm flex">
             {player.name}: £{player.cash}
             <div className="flex">
-              <video id="local"></video>
+              <video className="video-tile" id="local"></video>
               {playerCards.length != 0 ? (
                 <>
                   <PlayingCard
@@ -228,8 +241,8 @@ export default function Game({ params }: { params: { id: string } }) {
             <form action={nextRound}>
               <button>Redeal</button>
             </form>
-            <form action={test}>
-              <button>Test</button>
+            <form action={fold}>
+              <button>Fold</button>
             </form>
           </div>
           <div className="players">
@@ -240,6 +253,7 @@ export default function Game({ params }: { params: { id: string } }) {
                 name={player.name}
                 cards={[]}
                 cash={player.cash}
+                folded={player.folded}
               ></PlayerTile>
             ))}
           </div>

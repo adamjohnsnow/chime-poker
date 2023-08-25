@@ -35,8 +35,13 @@
   display: flex;
 }
 
-#local {
+.video-tile {
   height: 150px;
   width: 150px;
   object-fit: cover;
+  border-radius: 10px;
+}
+
+.folded {
+  filter: grayscale();
 }

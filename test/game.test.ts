@@ -12,7 +12,6 @@ import {
   gameState,
   redealDeck,
   dealNextCards,
-  dealCardToEachPlayer,
 } from "../src/app/lib/game";
 import { Deck } from "../src/app/lib/cards";
 import { Player } from "../src/app/lib/player";
@@ -121,46 +120,37 @@ describe("deals next community cards", () => {
 });
 
 describe("deals to players", () => {
-  test("deals one card to one player", () => {
+  test("deals one card to one player", async () => {
     const game: gameState = {
       id: "123",
       chimeConfig: {},
-      cardDeck: [
-        { suit: "a", value: 2 },
-        { suit: "b", value: 3 },
-      ],
+      cardDeck: [],
       communityCards: [],
-      players: [new Player("A")],
+      players: ["A"],
     };
 
-    dealCardToEachPlayer(game);
+    const deal = await redealDeck(game);
 
-    expect(game.cardDeck.length).toBe(1);
-    expect(game.players[0].cards?.length).toBe(1);
-    expect(game.cardDeck).not.toContain(game.players[0].cards[0]);
+    expect(game.cardDeck.length).toBe(50);
+    expect(deal.hands.length).toBe(1);
+    expect(game.cardDeck).not.toContain(deal.hands[0].cards[0]);
   });
 
-  test("deals one card to two players", () => {
+  test("deals one card to two players", async () => {
     const game: gameState = {
       id: "123",
       chimeConfig: {},
-      cardDeck: [
-        { suit: "a", value: 2 },
-        { suit: "b", value: 3 },
-        { suit: "c", value: 4 },
-        { suit: "d", value: 5 },
-      ],
+      cardDeck: [],
       communityCards: [],
-      players: [new Player("A"), new Player("B")],
+      players: ["A", "B"],
     };
 
-    dealCardToEachPlayer(game);
+    const deal = await redealDeck(game);
 
-    expect(game.cardDeck.length).toBe(2);
-    expect(game.players[0].cards?.length).toBe(1);
-    expect(game.players[1].cards?.length).toBe(1);
-    expect(game.cardDeck).not.toContain(game.players[0].cards[0]);
-    expect(game.cardDeck).not.toContain(game.players[1].cards[0]);
+    expect(game.cardDeck.length).toBe(48);
+    expect(deal.hands.length).toBe(2);
+    expect(game.cardDeck).not.toContain(deal.hands[0].cards[0]);
+    expect(game.cardDeck).not.toContain(deal.hands[1].cards[0]);
   });
 });
 
@@ -172,13 +162,11 @@ describe("play a game", () => {
       return;
     }
 
-    game.players = [new Player("A"), new Player("B")];
+    game.players = ["A", "B"];
     redealDeck(game);
 
     expect(game.cardDeck.length).toBe(48);
     expect(game.communityCards.length).toBe(0);
-    expect(game.players[0].cards.length).toBe(2);
-    expect(game.players[1].cards.length).toBe(2);
 
     dealNextCards(game);
 
@@ -187,8 +175,6 @@ describe("play a game", () => {
     expect(game.cardDeck).not.toContain(game.communityCards[0]);
     expect(game.cardDeck).not.toContain(game.communityCards[1]);
     expect(game.cardDeck).not.toContain(game.communityCards[2]);
-    expect(game.players[0].cards.length).toBe(2);
-    expect(game.players[1].cards.length).toBe(2);
 
     dealNextCards(game);
 
@@ -198,8 +184,6 @@ describe("play a game", () => {
     expect(game.cardDeck).not.toContain(game.communityCards[1]);
     expect(game.cardDeck).not.toContain(game.communityCards[2]);
     expect(game.cardDeck).not.toContain(game.communityCards[3]);
-    expect(game.players[0].cards.length).toBe(2);
-    expect(game.players[1].cards.length).toBe(2);
 
     dealNextCards(game);
 
@@ -215,7 +199,5 @@ describe("play a game", () => {
 
     expect(game.cardDeck.length).toBe(48);
     expect(game.communityCards.length).toBe(0);
-    expect(game.players[0].cards.length).toBe(2);
-    expect(game.players[1].cards.length).toBe(2);
   });
 });
