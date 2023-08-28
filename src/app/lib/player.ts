@@ -1,5 +1,5 @@
 import { Card } from "./cards";
-import { loadFromDb, saveToDb } from "./dynamoDb";
+import { loadFromDb, queryDb, saveToDb } from "./dynamoDb";
 import { getGame, saveGame } from "./game";
 import * as uuid from "uuid";
 
@@ -20,6 +20,24 @@ export async function loadPlayer(gameId: string, playerId: string) {
     return;
   }
   return JSON.parse(player?.S) as Player;
+}
+
+export async function loadAllPlayers(gameId: string): Promise<Player[]> {
+  const players: Player[] = [];
+
+  const query = await queryDb(gameId);
+
+  if (!query) {
+    return players;
+  }
+
+  query.forEach((record) => {
+    if (record.content.S && record.sk.S?.substring(36) != ":game") {
+      players.push(JSON.parse(record.content.S));
+    }
+  });
+
+  return players;
 }
 
 export async function updatePlayer(gameId: string, player: Player) {
@@ -44,7 +62,6 @@ export async function newCardsForPlayer(
   cards: Card[]
 ) {
   const player = await loadPlayer(gameId, playerId);
-  console.log("XX", player);
 
   if (!player || player.cash <= 0) {
     return;

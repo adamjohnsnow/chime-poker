@@ -14,8 +14,6 @@ import {
   dealNextCards,
 } from "../src/app/lib/game";
 import { Deck } from "../src/app/lib/cards";
-import { Player } from "../src/app/lib/player";
-import exp from "constants";
 
 const ddbMock = mockClient(DynamoDBClient);
 const chimeMock = mockClient(ChimeSDKMeetings);
