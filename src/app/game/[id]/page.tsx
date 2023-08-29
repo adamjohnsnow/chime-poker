@@ -40,6 +40,7 @@ export default function Game({ params }: { params: { id: string } }) {
   const [playerCards, setPlayerCards] = useState<Card[]>([]);
   const [playerTurn, setPlayerTurn] = useState<string>();
   const [results, setResults] = useState<newHand[]>();
+  const [winningHand, setWinningHand] = useState<Card[]>([]);
 
   const router = useRouter();
   useEffect(() => {
@@ -114,8 +115,16 @@ export default function Game({ params }: { params: { id: string } }) {
   }, [communityCards]);
 
   useEffect(() => {
-    alert("WINNER");
+    if (results) {
+      setWinningHand(results[0].cards);
+      console.log(results);
+    }
   }, [results]);
+
+  useEffect(() => {
+    console.log("WH:", winningHand);
+    console.log(playerCards[1], isWinningCard(playerCards[1]));
+  }, [winningHand]);
 
   async function playerJoin() {
     const playerInput = document.getElementById(
@@ -183,6 +192,7 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!gameId) {
       return;
     }
+    setWinningHand([]);
     setPlayerCards([]);
     const newCards = await resetCards(gameId);
     newCards?.forEach((hand) => {
@@ -197,6 +207,22 @@ export default function Game({ params }: { params: { id: string } }) {
     });
     chime?.sendMessage(JSON.stringify({ message: "reset" }));
     setCommunityCards([]);
+  }
+
+  function isWinningCard(card: Card): boolean {
+    if (!card || winningHand.length === 0) {
+      return false;
+    }
+    let found = false;
+    for (let i = 0; !found && i < winningHand.length; i++) {
+      if (
+        card.suit === winningHand[i].suit &&
+        card.value == winningHand[i].value
+      ) {
+        found = true;
+      }
+    }
+    return found;
   }
 
   function eventHandler(data: any): void {
@@ -265,12 +291,12 @@ export default function Game({ params }: { params: { id: string } }) {
                 {playerCards.length != 0 ? (
                   <>
                     <PlayingCard
-                      value={playerCards[0].value}
-                      suit={playerCards[0].suit}
+                      card={playerCards[0]}
+                      highlight={isWinningCard(playerCards[0])}
                     ></PlayingCard>
                     <PlayingCard
-                      value={playerCards[1].value}
-                      suit={playerCards[1].suit}
+                      card={playerCards[1]}
+                      highlight={isWinningCard(playerCards[1])}
                     ></PlayingCard>
                   </>
                 ) : null}
@@ -304,8 +330,8 @@ export default function Game({ params }: { params: { id: string } }) {
               {communityCards.map((item, i) => (
                 <PlayingCard
                   key={i}
-                  value={item.value}
-                  suit={item.suit}
+                  card={item}
+                  highlight={isWinningCard(item)}
                 ></PlayingCard>
               ))}
             </div>
