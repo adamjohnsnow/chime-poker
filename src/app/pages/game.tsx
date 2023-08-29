@@ -1,34 +1,31 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react";
-import { createNewGame, getGame, gameState, nextCards, resetCards }from "../lib/game";
-import { ChimeConfig, createAttendee } from "../lib/chime";
-import { ChimeProvider } from "../lib/chimeUtils";
-import { Card } from "../lib/cards";
-import { Player } from "../lib/player";
-import { PlayingCard } from "../components/playingCard";
+import { createNewGame, gameState } from "../lib/game";
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 
-import '../styles/table.css'
+import "../styles/table.css";
 
 export default function Game() {
-  const router = useRouter()
+  const router = useRouter();
 
   async function startNewGame() {
-    const game = await createNewGame()
-    if(!game){return}
-    const gameState = JSON.parse(game) as gameState
-    gameState.players = gameState.players.concat(new Player('captain'))
-    router.push('/game/' + gameState.id)
+    const game = await createNewGame();
+    if (!game) {
+      return;
+    }
+    const gameState = JSON.parse(game) as gameState;
+    router.push("/game/" + gameState.id);
   }
 
-  function joinGame(){
-    const input = document.getElementById('game-id-input') as HTMLInputElement
-    if (!input) {return}
-    router.push('/game/' + input.value)
+  function joinGame() {
+    const input = document.getElementById("game-id-input") as HTMLInputElement;
+    if (!input) {
+      return;
+    }
+    router.push("/game/" + input.value);
   }
-  
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <audio id="chime-audio" />
@@ -43,21 +40,34 @@ export default function Game() {
             target="_blank"
             rel="noopener noreferrer"
           >
-            By{' '}
-            Adam Snow
+            By Adam Snow
           </a>
         </div>
       </div>
-        <>
-          <div><form action={startNewGame}><button>Start new game</button></form></div>
-          <div>Or</div>
-          <div><form action={joinGame}><input type='text' placeholder="Enter game id" id='game-id-input'></input><br /><button>Join game</button></form></div>
-        </>
-      
+      <>
+        <div>
+          <form action={startNewGame}>
+            <button>Start new game</button>
+          </form>
+        </div>
+        <div>Or</div>
+        <div>
+          <form action={joinGame}>
+            <input
+              type="text"
+              placeholder="Enter game id"
+              id="game-id-input"
+            ></input>
+            <br />
+            <button>Join game</button>
+          </form>
+        </div>
+      </>
+
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left font-mono">
-        A multi-player, single-page poker game with video chat. Next,js, React, AWS Chime
+        A multi-player, single-page poker game with video chat. Next,js, React,
+        AWS Chime
       </div>
     </main>
-  )
+  );
 }
-

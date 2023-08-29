@@ -1,0 +1,11 @@
+.modal-background {
+  @apply h-full w-full flex justify-center items-center bg-gray-600 bg-opacity-50 absolute z-auto;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal {
+  @apply flex flex-col items-center relative w-60 bg-white border-slate-500 rounded-md p-4;
+}

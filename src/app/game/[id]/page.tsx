@@ -19,6 +19,8 @@ import { PlayingCard } from "../../components/playingCard";
 import "../../styles/table.css";
 import "../../styles/playingCard.css";
 import { TurnControl } from "@/app/components/turnControl";
+import { ActivityMonitor } from "@/app/components/activityMonitor";
+import { useRouter } from "next/navigation";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [loadingPlayer, setLoadingPlayer] = useState<boolean>(true);
@@ -32,6 +34,7 @@ export default function Game({ params }: { params: { id: string } }) {
   const [playerCards, setPlayerCards] = useState<Card[]>([]);
   const [playerTurn, setPlayerTurn] = useState<string>();
 
+  const router = useRouter();
   useEffect(() => {
     const savedPlayer = loadLocalPlayer(params.id);
     if (savedPlayer) {
@@ -228,80 +231,84 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-10 font-mono">
-      {player ? (
-        <>
-          <audio id="chime-audio" />
-          <div className="z-10 w-full items-start justify-between  text-sm flex">
-            {player.name}: £{player.cash}
-            <div className="flex">
-              <video className="video-tile" id="local"></video>
-              {playerCards.length != 0 ? (
-                <>
-                  <PlayingCard
-                    value={playerCards[0].value}
-                    suit={playerCards[0].suit}
-                  ></PlayingCard>
-                  <PlayingCard
-                    value={playerCards[1].value}
-                    suit={playerCards[1].suit}
-                  ></PlayingCard>
-                </>
-              ) : null}
-            </div>
-            <form action={nextAction}>
-              <button>Next</button>
-            </form>
-            <form action={nextRound}>
-              <button>Redeal</button>
-            </form>
-            <TurnControl
-              player={player}
-              gameId={gameId}
-              chime={chime as ChimeProvider}
-            ></TurnControl>
-          </div>
-          <div className="players">
-            {players.map((player, i) => (
-              <PlayerTile
-                key={i}
-                id={player.id}
-                name={player.name}
-                cards={[]}
-                cash={player.cash}
-                folded={player.folded}
-                currentBet={player.currentBet}
-              ></PlayerTile>
-            ))}
-          </div>
-          <div className="community-cards">
-            {communityCards.map((item, i) => (
-              <PlayingCard
-                key={i}
-                value={item.value}
-                suit={item.suit}
-              ></PlayingCard>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          {loadingPlayer ? null : (
-            <>
-              <div>New Player</div>
-              <form action={playerJoin}>
-                <input
-                  type="text"
-                  id="new-player-name"
-                  placeholder="Enter your name"
-                />
-                <button>Take a seat</button>
+    <>
+      {chime ? <ActivityMonitor chime={chime} /> : null}
+
+      <main className="flex min-h-screen flex-col items-center justify-between p-10 font-mono">
+        {player ? (
+          <>
+            <audio id="chime-audio" />
+            <div className="z-10 w-full items-start justify-between  text-sm flex">
+              {player.name}: £{player.cash}
+              <div className="flex">
+                <video className="video-tile" id="local"></video>
+                {playerCards.length != 0 ? (
+                  <>
+                    <PlayingCard
+                      value={playerCards[0].value}
+                      suit={playerCards[0].suit}
+                    ></PlayingCard>
+                    <PlayingCard
+                      value={playerCards[1].value}
+                      suit={playerCards[1].suit}
+                    ></PlayingCard>
+                  </>
+                ) : null}
+              </div>
+              <form action={nextAction}>
+                <button>Next</button>
               </form>
-            </>
-          )}
-        </>
-      )}
-      <p className="">You are in game: {gameId}</p>
-    </main>
+              <form action={nextRound}>
+                <button>Redeal</button>
+              </form>
+              <TurnControl
+                player={player}
+                gameId={gameId}
+                chime={chime as ChimeProvider}
+              ></TurnControl>
+            </div>
+            <div className="players">
+              {players.map((player, i) => (
+                <PlayerTile
+                  key={i}
+                  id={player.id}
+                  name={player.name}
+                  cards={[]}
+                  cash={player.cash}
+                  folded={player.folded}
+                  currentBet={player.currentBet}
+                ></PlayerTile>
+              ))}
+            </div>
+            <div className="community-cards">
+              {communityCards.map((item, i) => (
+                <PlayingCard
+                  key={i}
+                  value={item.value}
+                  suit={item.suit}
+                ></PlayingCard>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            {loadingPlayer ? null : (
+              <>
+                <div>New Player</div>
+                <form action={playerJoin}>
+                  <input
+                    type="text"
+                    id="new-player-name"
+                    placeholder="Enter your name"
+                  />
+                  <button>Take a seat</button>
+                </form>
+              </>
+            )}
+          </>
+        )}
+        <p className="">You are in game: {gameId}</p>
+      </main>
+    </>
   );
 }

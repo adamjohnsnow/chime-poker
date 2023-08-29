@@ -27,7 +27,7 @@ export class ChimeProvider {
 
     this.meetingId = config.MeetingId;
     this.playerId = attendee.ExternalUserId;
-    const logger = new ConsoleLogger("MyLogger", 2);
+    const logger = new ConsoleLogger("MyLogger", 3);
     const deviceController = new DefaultDeviceController(logger);
     const configuration = new MeetingSessionConfiguration(
       { Meeting: config },
@@ -129,6 +129,13 @@ export class ChimeProvider {
 
   public sendPlayerMessage(playerId: string, content: string) {
     this.meetingSession.audioVideo.realtimeSendDataMessage(playerId, content);
+  }
+
+  public leaveCall() {
+    console.log("LEAVING CALL", this.meetingSession);
+    this.meetingSession.audioVideo.stopVideoInput();
+    this.meetingSession.audioVideo.stopAudioInput();
+    this.meetingSession.audioVideo.stop();
   }
 
   private settUpAttendeeObserver() {
