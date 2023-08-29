@@ -7,7 +7,13 @@ import { useEffect, useState } from "react";
 import { Card } from "../../lib/cards";
 import { createAttendee } from "../../lib/chime";
 import { ChimeProvider } from "../../lib/chimeUtils";
-import { getGame, gameState, nextCards, resetCards } from "../../lib/game";
+import {
+  getGame,
+  gameState,
+  nextCards,
+  resetCards,
+  newHand,
+} from "../../lib/game";
 import { Player, addNewPlayer, loadPlayer } from "../../lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "../../lib/localCache";
 
@@ -33,6 +39,7 @@ export default function Game({ params }: { params: { id: string } }) {
   const [newBet, setNewBet] = useState<any>();
   const [playerCards, setPlayerCards] = useState<Card[]>([]);
   const [playerTurn, setPlayerTurn] = useState<string>();
+  const [results, setResults] = useState<newHand[]>();
 
   const router = useRouter();
   useEffect(() => {
@@ -106,6 +113,10 @@ export default function Game({ params }: { params: { id: string } }) {
     }
   }, [communityCards]);
 
+  useEffect(() => {
+    alert("WINNER");
+  }, [results]);
+
   async function playerJoin() {
     const playerInput = document.getElementById(
       "new-player-name"
@@ -153,13 +164,18 @@ export default function Game({ params }: { params: { id: string } }) {
       return;
     }
 
-    const cards = await nextCards(gameId);
+    const [cards, results] = await nextCards(gameId);
 
     if (cards) {
       chime?.sendMessage(
         JSON.stringify({ message: "communityCards", cards: cards })
       );
       setCommunityCards(cards);
+    }
+
+    if (results.length > 0) {
+      setResults(results);
+      chime?.sendMessage(JSON.stringify({ message: "results", results }));
     }
   }
 
@@ -222,6 +238,10 @@ export default function Game({ params }: { params: { id: string } }) {
       }
       case "betPlaced": {
         setNewBet({ playerId: data.playerId, amount: data.amount });
+        break;
+      }
+      case "results": {
+        setResults(data.results);
         break;
       }
       default: {

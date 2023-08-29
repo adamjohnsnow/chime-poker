@@ -1,5 +1,9 @@
 import { mockClient } from "aws-sdk-client-mock";
-import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
+import {
+  DynamoDBClient,
+  GetItemCommand,
+  QueryCommand,
+} from "@aws-sdk/client-dynamodb";
 import {
   ChimeSDKMeetings,
   CreateMeetingCommand,
@@ -12,8 +16,11 @@ import {
   gameState,
   redealDeck,
   dealNextCards,
+  findWinner,
 } from "../src/app/lib/game";
 import { Deck } from "../src/app/lib/cards";
+import { query } from "./fixtures/playerQuery";
+import exp from "constants";
 
 const ddbMock = mockClient(DynamoDBClient);
 const chimeMock = mockClient(ChimeSDKMeetings);
@@ -64,6 +71,7 @@ describe("reset card states", () => {
         { suit: "b", value: 3 },
       ],
       players: [],
+      results: [],
     };
 
     redealDeck(game);
@@ -81,6 +89,7 @@ describe("deals next community cards", () => {
       cardDeck: new Deck().cards,
       communityCards: [],
       players: [],
+      results: [],
     };
 
     dealNextCards(game);
@@ -125,6 +134,7 @@ describe("deals to players", () => {
       cardDeck: [],
       communityCards: [],
       players: ["A"],
+      results: [],
     };
 
     const deal = await redealDeck(game);
@@ -141,6 +151,7 @@ describe("deals to players", () => {
       cardDeck: [],
       communityCards: [],
       players: ["A", "B"],
+      results: [],
     };
 
     const deal = await redealDeck(game);
@@ -152,8 +163,38 @@ describe("deals to players", () => {
   });
 });
 
+describe("finding winners", () => {
+  test("find winner", async () => {
+    ddbMock.on(QueryCommand).resolves(query);
+
+    const game: gameState = {
+      id: "123",
+      chimeConfig: {},
+      cardDeck: [],
+      communityCards: [
+        { value: 7, suit: "♣️" },
+        { value: 10, suit: "♣️" },
+        { value: 2, suit: "♣️" },
+        { value: 5, suit: "♦️" },
+        { value: 7, suit: "♥️" },
+      ],
+      players: ["A", "B"],
+      results: [],
+    };
+
+    const results = await findWinner(game);
+
+    expect(results[0].result).toBe("Flush");
+    expect(results[1].result).toBe("OnePair");
+    expect(results[0].cards.length).toBe(5);
+    expect(results[1].cards.length).toBe(2);
+  });
+});
+
 describe("play a game", () => {
   test("run a full round", async () => {
+    ddbMock.on(QueryCommand).resolves(query);
+
     const game = await startGame();
     expect(game).toBeTruthy;
     if (!game) {
@@ -161,12 +202,12 @@ describe("play a game", () => {
     }
 
     game.players = ["A", "B"];
-    redealDeck(game);
+    await redealDeck(game);
 
     expect(game.cardDeck.length).toBe(48);
     expect(game.communityCards.length).toBe(0);
 
-    dealNextCards(game);
+    await dealNextCards(game);
 
     expect(game.communityCards.length).toBe(3);
     expect(game.cardDeck.length).toBe(45);
@@ -174,7 +215,7 @@ describe("play a game", () => {
     expect(game.cardDeck).not.toContain(game.communityCards[1]);
     expect(game.cardDeck).not.toContain(game.communityCards[2]);
 
-    dealNextCards(game);
+    await dealNextCards(game);
 
     expect(game.communityCards.length).toBe(4);
     expect(game.cardDeck.length).toBe(44);
@@ -183,7 +224,7 @@ describe("play a game", () => {
     expect(game.cardDeck).not.toContain(game.communityCards[2]);
     expect(game.cardDeck).not.toContain(game.communityCards[3]);
 
-    dealNextCards(game);
+    await dealNextCards(game);
 
     expect(game.communityCards.length).toBe(5);
     expect(game.cardDeck.length).toBe(43);
@@ -193,8 +234,14 @@ describe("play a game", () => {
     expect(game.cardDeck).not.toContain(game.communityCards[3]);
     expect(game.cardDeck).not.toContain(game.communityCards[4]);
 
-    redealDeck(game);
+    await dealNextCards(game);
 
+    expect(game.results.length).toBe(2);
+    expect(game.results[0].result).not.toBe("");
+
+    await redealDeck(game);
+
+    expect(game.results.length).toBe(0);
     expect(game.cardDeck.length).toBe(48);
     expect(game.communityCards.length).toBe(0);
   });

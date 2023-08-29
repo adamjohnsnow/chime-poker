@@ -3,7 +3,8 @@ import { Deck, Card } from "./cards";
 import { saveToDb, loadFromDb } from "./dynamoDb";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
-import { Player, newCardsForPlayer } from "./player";
+import { Player, loadAllPlayers, newCardsForPlayer } from "./player";
+import { HandEvaluator, Rank, Result } from "./hands";
 
 export type gameState = {
   id: string;
@@ -11,11 +12,14 @@ export type gameState = {
   cardDeck: Card[];
   communityCards: Card[];
   players: string[];
+  results: newHand[];
 };
 
-type newHand = {
+export type newHand = {
   playerId: string;
   cards: Card[];
+  rank: Rank | 0;
+  result?: string;
 };
 
 export async function startGame(): Promise<gameState | null> {
@@ -34,6 +38,7 @@ export async function startGame(): Promise<gameState | null> {
     cardDeck: deck.cards,
     communityCards: [],
     players: [],
+    results: [],
   };
 
   saveGame(state);
@@ -58,18 +63,21 @@ export async function getGame(gameId: string) {
   return JSON.parse(gameRecord.S) as gameState;
 }
 
-export async function nextCards(gameId: string) {
+export async function nextCards(gameId: string): Promise<[Card[], newHand[]]> {
   const gameRecord = await loadFromDb(gameId, ":game");
   if (!gameRecord?.S) {
-    return;
+    return [[], []];
   }
   const gameState = JSON.parse(gameRecord.S) as gameState;
   return dealNextCards(gameState);
 }
 
-export async function dealNextCards(gameState: gameState) {
+export async function dealNextCards(
+  gameState: gameState
+): Promise<[Card[], newHand[]]> {
   switch (gameState.communityCards.length) {
     case 5: {
+      await findWinner(gameState);
       break;
     }
     case 0: {
@@ -90,7 +98,7 @@ export async function dealNextCards(gameState: gameState) {
 
   saveGame(gameState);
 
-  return gameState.communityCards;
+  return [gameState.communityCards, gameState.results];
 }
 
 export async function resetCards(gameId: string) {
@@ -107,6 +115,7 @@ export async function resetCards(gameId: string) {
 export async function redealDeck(game: gameState) {
   game.cardDeck = new Deck().cards;
   game.communityCards = [];
+  game.results = [];
 
   const deckLength = game.cardDeck.length;
 
@@ -117,10 +126,34 @@ export async function redealDeck(game: gameState) {
     newHands.push({
       playerId: playerId,
       cards: newCards,
+      rank: 0,
     });
     newCardsForPlayer(game.id, playerId, newCards);
   });
 
   game.cardDeck = game.cardDeck.slice(0 - deckLength + game.players.length * 2);
   return { game: game, hands: newHands };
+}
+
+export async function findWinner(game: gameState) {
+  const players = await loadAllPlayers(game.id);
+  const results: newHand[] = [];
+
+  if (!players) {
+    return results;
+  }
+
+  await players.forEach((player) => {
+    const cards = [...game.communityCards, ...player.cards];
+    const evaluatedHand = new HandEvaluator(cards).result;
+    results.push({
+      playerId: player.id,
+      cards: evaluatedHand.cards,
+      rank: evaluatedHand.rank,
+      result: Rank[evaluatedHand.rank],
+    });
+  });
+
+  game.results = results.sort((a, b) => b.rank - a.rank);
+  return game.results;
 }

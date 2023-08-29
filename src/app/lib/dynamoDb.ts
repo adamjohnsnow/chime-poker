@@ -50,5 +50,5 @@ export async function queryDb(gameId: string) {
 
   const items = await client.send(new QueryCommand(params));
 
-  return items.Items;
+  return items?.Items;
 }
