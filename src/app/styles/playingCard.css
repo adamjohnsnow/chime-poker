@@ -11,6 +11,7 @@
 }
 
 .card-wrapper {
+  @apply m-1;
   animation-name: fly-in;
   animation-duration: 2s;
   animation-timing-function: ease-in-out;
@@ -21,8 +22,14 @@
   width: 100px;
   height: 150px;
   box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
-  margin: 2px;
   border-radius: 7px;
+}
+
+.opponent-cards .card-wrapper {
+  width: 60px;
+  height: 90px;
+  position: relative;
+  top: -40px;
 }
 
 .card-face {
@@ -33,17 +40,25 @@
   right: 0;
   width: 100%;
   height: 100%;
-  background: #ffffff;
+  background: #fefcf4;
   border-radius: 7px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+}
+.opponent-cards .card-face {
+  @apply justify-center items-center;
 }
 
 .card-value {
   margin: 5px 0 0 10px;
   font-size: 24px;
   line-height: 1;
+}
+
+.opponent-cards .card-value {
+  @apply flex flex-col items-center m-0;
+  font-size: 32px;
 }
 
 .card-suit {
@@ -56,6 +71,10 @@
   align-items: center;
 }
 
+.opponent-cards .card-suit {
+  display: none;
+}
+
 .card-wrapper:hover {
   box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.6);
 }
@@ -65,6 +84,10 @@
 
 .highlighted {
   box-shadow: 0px 0px 7px 0px rgba(245, 189, 46, 1);
+}
+
+.highlighted .card-face {
+  background: #ffffff;
 }
 
 @keyframes fly-in {

@@ -10,19 +10,31 @@ export class Player {
     public name: string,
     public cash: number,
     public currentBet: number | null,
-    public folded: boolean
+    public folded: boolean,
+    public active: boolean
   ) {}
 }
 
-export async function loadPlayer(gameId: string, playerId: string) {
-  const player = await loadFromDb(gameId, ":" + playerId);
-  if (!player?.S) {
+export async function loadPlayer(
+  gameId: string,
+  playerId: string,
+  includeCards?: boolean
+) {
+  const record = await loadFromDb(gameId, ":" + playerId);
+  if (!record?.S) {
     return;
   }
-  return JSON.parse(player?.S) as Player;
+  const player: Player = JSON.parse(record.S);
+  if (!includeCards) {
+    player.cards = [];
+  }
+  return player;
 }
 
-export async function loadAllPlayers(gameId: string): Promise<Player[]> {
+export async function loadAllPlayers(
+  gameId: string,
+  includeCards?: boolean
+): Promise<Player[]> {
   const players: Player[] = [];
 
   const query = await queryDb(gameId);
@@ -33,11 +45,30 @@ export async function loadAllPlayers(gameId: string): Promise<Player[]> {
 
   query.forEach((record) => {
     if (record.content.S && record.sk.S?.substring(36) != ":game") {
-      players.push(JSON.parse(record.content.S));
+      const player = JSON.parse(record.content.S);
+      if (!includeCards) {
+        player.cards = [];
+      }
+      if (!player.folded && player.active) {
+        players.push(player);
+      }
     }
   });
 
   return players;
+}
+
+export async function updatePlayerStatus(
+  gameId: string,
+  playerId: string,
+  active: boolean
+) {
+  const player = await loadPlayer(gameId, playerId, true);
+  if (!player) {
+    return;
+  }
+  player.active = active;
+  updatePlayer(gameId, player);
 }
 
 export async function updatePlayer(gameId: string, player: Player) {
@@ -49,7 +80,7 @@ export async function addNewPlayer(gameId: string, name: string) {
   if (!game) {
     return;
   }
-  const player = new Player([], uuid.v4(), name, 10000, 0, false);
+  const player = new Player([], uuid.v4(), name, 10000, 0, false, true);
   game.players = game?.players.concat(player.id);
   await saveToDb(gameId, player.id, JSON.stringify(player));
   await saveGame(game);

@@ -118,25 +118,29 @@ export async function redealDeck(game: gameState) {
   game.results = [];
 
   const deckLength = game.cardDeck.length;
-
   const newHands: newHand[] = [];
-  const playerCount = game.players.length;
-  game.players.forEach((playerId, i) => {
+
+  const loadedPlayers = await loadAllPlayers(game.id);
+  const activePlayers = loadedPlayers.filter(
+    (player) => player.cash > 0 && player.active
+  );
+  const playerCount = activePlayers.length;
+
+  activePlayers.forEach((player, i) => {
     const newCards = [game.cardDeck[i], game.cardDeck[i + playerCount]];
     newHands.push({
-      playerId: playerId,
+      playerId: player.id,
       cards: newCards,
       rank: 0,
     });
-    newCardsForPlayer(game.id, playerId, newCards);
+    newCardsForPlayer(game.id, player.id, newCards);
   });
-
   game.cardDeck = game.cardDeck.slice(0 - deckLength + game.players.length * 2);
   return { game: game, hands: newHands };
 }
 
 export async function findWinner(game: gameState) {
-  const players = await loadAllPlayers(game.id);
+  const players = await loadAllPlayers(game.id, true);
   const results: newHand[] = [];
 
   if (!players) {

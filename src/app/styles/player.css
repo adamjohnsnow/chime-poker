@@ -1,0 +1,3 @@
+.opponent-cards {
+  @apply flex flex-row justify-center w-40;
+}

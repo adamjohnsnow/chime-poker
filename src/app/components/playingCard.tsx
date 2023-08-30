@@ -1,14 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
 import { Card } from "../lib/cards";
 import "../styles/playingCard.css";
 
-export function PlayingCard({
-  card,
-  highlight,
-}: {
-  card: Card;
-  highlight: boolean;
-}) {
+export function PlayingCard({ card }: { card: Card }) {
   function getColour() {
     if (card.suit === "♦️" || card.suit === "♥️") {
       return "#FF0000";
@@ -39,7 +32,8 @@ export function PlayingCard({
 
   return (
     <div
-      className={highlight ? "highlighted card-wrapper" : "card-wrapper"}
+      id={"card-" + card.value + "-" + card.suit}
+      className={"card-wrapper"}
       style={{ color: getColour() }}
     >
       <div className="card-back"></div>

@@ -1,7 +1,7 @@
 .community-cards {
   display: flex;
-  width: 520px;
-  height: 100px;
+  width: 550px;
+  height: 160px;
   z-index: 1000;
 }
 
@@ -31,7 +31,7 @@
 }
 
 .players {
-  @apply w-full h-48;
+  @apply w-full;
   display: flex;
 }
 
@@ -40,6 +40,7 @@
   width: 150px;
   object-fit: cover;
   border-radius: 10px;
+  background: #9ca3af;
 }
 
 .folded {

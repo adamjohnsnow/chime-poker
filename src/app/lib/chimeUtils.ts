@@ -83,6 +83,9 @@ export class ChimeProvider {
     );
     const speakers =
       await this.meetingSession?.audioVideo.listAudioOutputDevices();
+    if (speakers.length === 0) {
+      return Promise.resolve();
+    }
     await this.meetingSession?.audioVideo.chooseAudioOutput(
       speakers[0].deviceId
     );
@@ -120,10 +123,11 @@ export class ChimeProvider {
     return Promise.resolve();
   }
 
-  public sendMessage(content: string) {
+  public sendMessage(content: Record<string, any>) {
+    const parsedContent = JSON.stringify(content);
     this.meetingSession.audioVideo.realtimeSendDataMessage(
       this.meetingId,
-      content
+      parsedContent
     );
   }
 

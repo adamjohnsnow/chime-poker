@@ -14,9 +14,7 @@ export function TurnControl({
     if (player) {
       player.folded = true;
       updatePlayer(gameId, player);
-      chime?.sendMessage(
-        JSON.stringify({ message: "playerFolded", player: player.id })
-      );
+      chime?.sendMessage({ message: "playerFolded", player: player.id });
     }
   }
 
@@ -25,13 +23,11 @@ export function TurnControl({
     if (!input) {
       return;
     }
-    chime.sendMessage(
-      JSON.stringify({
-        message: "betPlaced",
-        playerId: player.id,
-        amount: input.value,
-      })
-    );
+    chime.sendMessage({
+      message: "betPlaced",
+      playerId: player.id,
+      amount: input.value,
+    });
   }
 
   return (

@@ -14,7 +14,14 @@ import {
   resetCards,
   newHand,
 } from "../../lib/game";
-import { Player, addNewPlayer, loadPlayer } from "../../lib/player";
+import {
+  Player,
+  addNewPlayer,
+  loadAllPlayers,
+  loadPlayer,
+  updatePlayer,
+  updatePlayerStatus,
+} from "../../lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "../../lib/localCache";
 
 // components
@@ -26,10 +33,8 @@ import "../../styles/table.css";
 import "../../styles/playingCard.css";
 import { TurnControl } from "@/app/components/turnControl";
 import { ActivityMonitor } from "@/app/components/activityMonitor";
-import { useRouter } from "next/navigation";
 
 export default function Game({ params }: { params: { id: string } }) {
-  const [loadingPlayer, setLoadingPlayer] = useState<boolean>(true);
   const [gameId, setGameId] = useState<string>(params.id);
   const [communityCards, setCommunityCards] = useState<Card[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -41,21 +46,23 @@ export default function Game({ params }: { params: { id: string } }) {
   const [playerTurn, setPlayerTurn] = useState<string>();
   const [results, setResults] = useState<newHand[]>();
   const [winningHand, setWinningHand] = useState<Card[]>([]);
+  const [newCardsShown, setNewCardsShown] = useState<Record<
+    string,
+    any
+  > | null>();
 
-  const router = useRouter();
   useEffect(() => {
     const savedPlayer = loadLocalPlayer(params.id);
     if (savedPlayer) {
-      loadPlayer(gameId, savedPlayer.id).then((recalledPlayer) => {
-        setPlayer(recalledPlayer);
+      loadPlayer(gameId, savedPlayer.id, true).then((recalledPlayer) => {
+        updatePlayerStatus(params.id, savedPlayer.id, true);
         setPlayerCards(recalledPlayer?.cards || []);
+        setPlayer(recalledPlayer);
       });
     }
-    setLoadingPlayer(false);
   }, [params.id]);
 
   useEffect(() => {
-    console.log(newBet);
     if (!newBet || !newBet.playerId) {
       return;
     }
@@ -90,10 +97,6 @@ export default function Game({ params }: { params: { id: string } }) {
       }
       renderGame(game);
     });
-
-    chime?.sendMessage(
-      JSON.stringify({ message: "playerUpdate", player: player })
-    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player]);
 
@@ -103,6 +106,7 @@ export default function Game({ params }: { params: { id: string } }) {
     }
     player.cards = playerCards;
     player.folded = false;
+    updatePlayer(gameId, player);
   }, [playerCards]);
 
   useEffect(() => {
@@ -116,14 +120,31 @@ export default function Game({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (results) {
+      console.log("RESULTS:", results);
       setWinningHand(results[0].cards);
-      console.log(results);
+      chime?.sendMessage({
+        message: "showCards",
+        cards: playerCards,
+        playerId: player?.id,
+      });
     }
   }, [results]);
 
   useEffect(() => {
-    console.log("WH:", winningHand);
-    console.log(playerCards[1], isWinningCard(playerCards[1]));
+    if (!newCardsShown) {
+      return;
+    }
+    players.forEach((opponent) => {
+      if (opponent.id === newCardsShown?.playerId) {
+        opponent.cards = newCardsShown.cards;
+      }
+    });
+
+    setNewCardsShown(null);
+  }, [newCardsShown]);
+
+  useEffect(() => {
+    setTimeout(() => highlightWinningCard(), 500);
   }, [winningHand]);
 
   async function playerJoin() {
@@ -140,7 +161,8 @@ export default function Game({ params }: { params: { id: string } }) {
       playerInput.value,
       10000,
       0,
-      false
+      false,
+      true
     );
     saveLocalPlayer(params.id, myPlayer);
     setPlayer(myPlayer);
@@ -175,16 +197,15 @@ export default function Game({ params }: { params: { id: string } }) {
 
     const [cards, results] = await nextCards(gameId);
 
-    if (cards) {
-      chime?.sendMessage(
-        JSON.stringify({ message: "communityCards", cards: cards })
-      );
-      setCommunityCards(cards);
-    }
-
     if (results.length > 0) {
       setResults(results);
-      chime?.sendMessage(JSON.stringify({ message: "results", results }));
+      chime?.sendMessage({ message: "results", results });
+      return;
+    }
+
+    if (cards) {
+      chime?.sendMessage({ message: "communityCards", cards: cards });
+      setCommunityCards(cards);
     }
   }
 
@@ -192,8 +213,8 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!gameId) {
       return;
     }
-    setWinningHand([]);
-    setPlayerCards([]);
+    resetTable();
+
     const newCards = await resetCards(gameId);
     newCards?.forEach((hand) => {
       if (hand.playerId === player?.id) {
@@ -205,24 +226,31 @@ export default function Game({ params }: { params: { id: string } }) {
         );
       }
     });
-    chime?.sendMessage(JSON.stringify({ message: "reset" }));
-    setCommunityCards([]);
+    chime?.sendMessage({ message: "reset" });
   }
 
-  function isWinningCard(card: Card): boolean {
-    if (!card || winningHand.length === 0) {
-      return false;
+  function resetTable() {
+    updateActivePlayers();
+    const highlightedCards = document.getElementsByClassName("highlighted");
+    for (let i = 0; i < highlightedCards.length; i++) {
+      highlightedCards[i].classList.remove("highlighted");
     }
-    let found = false;
-    for (let i = 0; !found && i < winningHand.length; i++) {
-      if (
-        card.suit === winningHand[i].suit &&
-        card.value == winningHand[i].value
-      ) {
-        found = true;
+    setCommunityCards([]);
+    setWinningHand([]);
+  }
+  async function updateActivePlayers() {
+    const playerUpdate = await loadAllPlayers(gameId);
+    setPlayers(playerUpdate.filter((opponent) => opponent.id != player?.id));
+  }
+  function highlightWinningCard() {
+    winningHand.forEach((card) => {
+      const cardElement = document.getElementById(
+        "card-" + card.value + "-" + card.suit
+      );
+      if (cardElement) {
+        cardElement.classList.add("highlighted");
       }
-    }
-    return found;
+    });
   }
 
   function eventHandler(data: any): void {
@@ -237,7 +265,8 @@ export default function Game({ params }: { params: { id: string } }) {
         break;
       }
       case "reset": {
-        setCommunityCards([]);
+        console.log("RESET");
+        resetTable();
         break;
       }
       case "newPlayer": {
@@ -249,12 +278,18 @@ export default function Game({ params }: { params: { id: string } }) {
         break;
       }
       case "playerDropped": {
-        console.log("PLAYER LEFT", data.player);
+        updateActivePlayers();
+        console.log("PLAYER LEFT", data.playerId);
         break;
       }
       case "newCards": {
         console.log("NEW CARDS", data);
         setPlayerCards(data.cards);
+        break;
+      }
+      case "showCards": {
+        console.log("CARDS SHOWN", data);
+        setNewCardsShown(data);
         break;
       }
       case "playerFolded": {
@@ -287,17 +322,11 @@ export default function Game({ params }: { params: { id: string } }) {
             <div className="z-10 w-full items-start justify-between  text-sm flex">
               {player.name}: £{player.cash}
               <div className="flex">
-                <video className="video-tile" id="local"></video>
+                <video className="video-tile m-1" id="local"></video>
                 {playerCards.length != 0 ? (
                   <>
-                    <PlayingCard
-                      card={playerCards[0]}
-                      highlight={isWinningCard(playerCards[0])}
-                    ></PlayingCard>
-                    <PlayingCard
-                      card={playerCards[1]}
-                      highlight={isWinningCard(playerCards[1])}
-                    ></PlayingCard>
+                    <PlayingCard card={playerCards[0]}></PlayingCard>
+                    <PlayingCard card={playerCards[1]}></PlayingCard>
                   </>
                 ) : null}
               </div>
@@ -319,38 +348,31 @@ export default function Game({ params }: { params: { id: string } }) {
                   key={i}
                   id={player.id}
                   name={player.name}
-                  cards={[]}
+                  cards={player.cards}
                   cash={player.cash}
                   folded={player.folded}
                   currentBet={player.currentBet}
+                  active={player.active}
                 ></PlayerTile>
               ))}
             </div>
             <div className="community-cards">
               {communityCards.map((item, i) => (
-                <PlayingCard
-                  key={i}
-                  card={item}
-                  highlight={isWinningCard(item)}
-                ></PlayingCard>
+                <PlayingCard key={i} card={item}></PlayingCard>
               ))}
             </div>
           </>
         ) : (
           <>
-            {loadingPlayer ? null : (
-              <>
-                <div>New Player</div>
-                <form action={playerJoin}>
-                  <input
-                    type="text"
-                    id="new-player-name"
-                    placeholder="Enter your name"
-                  />
-                  <button>Take a seat</button>
-                </form>
-              </>
-            )}
+            <div>New Player</div>
+            <form action={playerJoin}>
+              <input
+                type="text"
+                id="new-player-name"
+                placeholder="Enter your name"
+              />
+              <button>Take a seat</button>
+            </form>
           </>
         )}
         <p className="">You are in game: {gameId}</p>

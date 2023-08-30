@@ -2,7 +2,7 @@ export const query = {
   Items: [
     {
       content: {
-        S: `{"cards\":[{"value":7,"suit":"♣️"},{"value":4,"suit":"♣️"}],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false}`,
+        S: `{"cards\":[{"value":7,"suit":"♣️"},{"value":4,"suit":"♣️"}],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false, "active": true}`,
       },
       sk: {
         S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:095b3f67-02eb-41aa-aafb-f5cab1c77ca2",
@@ -11,7 +11,7 @@ export const query = {
     },
     {
       content: {
-        S: '{"cards":[{"value":14,"suit":"♠️"},{"value":6,"suit":"♠️"}],"id":"b3c51b4d-767d-4e65-abaf-9f1b20081fe9","name":"Player 2","cash":10000,"currentBet":0,"folded":true}',
+        S: '{"cards":[{"value":14,"suit":"♠️"},{"value":6,"suit":"♠️"}],"id":"b3c51b4d-767d-4e65-abaf-9f1b20081fe9","name":"Player 2","cash":10000,"currentBet":0,"folded":true, "active": true}',
       },
       sk: {
         S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:b3c51b4d-767d-4e65-abaf-9f1b20081fe9",
@@ -30,7 +30,7 @@ export const query = {
 
 export const player = {
   content: {
-    S: `{"cards\":[{"value":7,"suit":"♣️"},{"value":4,"suit":"♣️"}],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false}`,
+    S: `{"cards\":[{"value":7,"suit":"♣️"},{"value":4,"suit":"♣️"}],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false,  "active": true}`,
   },
   sk: {
     S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:095b3f67-02eb-41aa-aafb-f5cab1c77ca2",
