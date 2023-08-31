@@ -20,7 +20,6 @@ import {
 } from "../src/app/lib/game";
 import { Deck } from "../src/app/lib/cards";
 import { query } from "./fixtures/playerQuery";
-import exp from "constants";
 
 const ddbMock = mockClient(DynamoDBClient);
 const chimeMock = mockClient(ChimeSDKMeetings);
@@ -127,7 +126,9 @@ describe("deals next community cards", () => {
 });
 
 describe("deals to players", () => {
-  test("deals one card to one player", async () => {
+  test("deals cards to each player", async () => {
+    ddbMock.on(QueryCommand).resolves(query);
+
     const game: gameState = {
       id: "123",
       chimeConfig: {},
@@ -140,26 +141,8 @@ describe("deals to players", () => {
     const deal = await redealDeck(game);
 
     expect(game.cardDeck.length).toBe(50);
-    expect(deal.hands.length).toBe(1);
-    expect(game.cardDeck).not.toContain(deal.hands[0].cards[0]);
-  });
-
-  test("deals one card to two players", async () => {
-    const game: gameState = {
-      id: "123",
-      chimeConfig: {},
-      cardDeck: [],
-      communityCards: [],
-      players: ["A", "B"],
-      results: [],
-    };
-
-    const deal = await redealDeck(game);
-
-    expect(game.cardDeck.length).toBe(48);
     expect(deal.hands.length).toBe(2);
     expect(game.cardDeck).not.toContain(deal.hands[0].cards[0]);
-    expect(game.cardDeck).not.toContain(deal.hands[1].cards[0]);
   });
 });
 

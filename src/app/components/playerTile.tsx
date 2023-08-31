@@ -2,7 +2,7 @@ import { Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import "../styles/player.css";
 
-export function PlayerTile(player: Player) {
+export function PlayerTile({ player }: { player: Player }) {
   return (
     <>
       <div className="flex flex-col items-center align-middle w-48 h-60">

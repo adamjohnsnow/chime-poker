@@ -157,16 +157,10 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!playerInput) {
       return;
     }
-    const playerId = await addNewPlayer(gameId, playerInput.value);
-    const myPlayer = new Player(
-      [],
-      playerId as string,
-      playerInput.value,
-      10000,
-      0,
-      false,
-      true
-    );
+    const myPlayer = await addNewPlayer(gameId, playerInput.value);
+    if (!myPlayer) {
+      return;
+    }
     saveLocalPlayer(params.id, myPlayer);
     setPlayer(myPlayer);
   }
@@ -241,10 +235,12 @@ export default function Game({ params }: { params: { id: string } }) {
     setCommunityCards([]);
     setWinningHand([]);
   }
+
   async function updateActivePlayers() {
     const playerUpdate = await loadAllPlayers(gameId);
     setPlayers(playerUpdate.filter((opponent) => opponent.id != player?.id));
   }
+
   function highlightWinningCard() {
     winningHand.forEach((card) => {
       const cardElement = document.getElementById(
@@ -330,16 +326,7 @@ export default function Game({ params }: { params: { id: string } }) {
             ></TurnControl>
             <div className="players">
               {players.map((player, i) => (
-                <PlayerTile
-                  key={i}
-                  id={player.id}
-                  name={player.name}
-                  cards={player.cards}
-                  cash={player.cash}
-                  folded={player.folded}
-                  currentBet={player.currentBet}
-                  active={player.active}
-                ></PlayerTile>
+                <PlayerTile key={i} player={player}></PlayerTile>
               ))}
             </div>
             <CommunityCards

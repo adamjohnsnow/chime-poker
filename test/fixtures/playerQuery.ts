@@ -11,7 +11,7 @@ export const query = {
     },
     {
       content: {
-        S: '{"cards":[{"value":14,"suit":"♠️"},{"value":6,"suit":"♠️"}],"id":"b3c51b4d-767d-4e65-abaf-9f1b20081fe9","name":"Player 2","cash":10000,"currentBet":0,"folded":true, "active": true}',
+        S: '{"cards":[{"value":14,"suit":"♠️"},{"value":6,"suit":"♠️"}],"id":"b3c51b4d-767d-4e65-abaf-9f1b20081fe9","name":"Player 2","cash":10000,"currentBet":0,"folded":false, "active": true}',
       },
       sk: {
         S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:b3c51b4d-767d-4e65-abaf-9f1b20081fe9",
@@ -36,4 +36,36 @@ export const player = {
     S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:095b3f67-02eb-41aa-aafb-f5cab1c77ca2",
   },
   id: { S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf" },
+};
+
+export const turns = {
+  Items: [
+    {
+      content: {
+        S: `{"cards\":[],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false, "active": true, "blindButton": "Big Blind", "isDealer": false}`,
+      },
+      sk: {
+        S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:095b3f67-02eb-41aa-aafb-f5cab1c77ca2",
+      },
+      id: { S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf" },
+    },
+    {
+      content: {
+        S: `{"cards\":[],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false, "active": true,"blindButton": "Little Blind", "isDealer": false}`,
+      },
+      sk: {
+        S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:095b3f67-02eb-41aa-aafb-f5cab1c77ca2",
+      },
+      id: { S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf" },
+    },
+    {
+      content: {
+        S: `{"cards\":[],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false, "active": true, "isDealer": true}`,
+      },
+      sk: {
+        S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:095b3f67-02eb-41aa-aafb-f5cab1c77ca2",
+      },
+      id: { S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf" },
+    },
+  ],
 };

@@ -9,13 +9,14 @@ export function CommunityCards({
   chime,
 }: {
   cards: Card[];
-  chime: ChimeProvider;
+  chime?: ChimeProvider;
 }) {
   const [communityCards, setCommunityCards] = useState<Card[]>([]);
 
   useEffect(() => {
+    setCommunityCards(cards);
+
     if (chime) {
-      setCommunityCards(cards);
       chime.registerCardsEventListener(eventHandler);
     }
   }, [cards, chime]);

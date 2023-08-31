@@ -3,6 +3,11 @@ import { loadFromDb, queryDb, saveToDb } from "./dynamoDb";
 import { getGame, saveGame } from "./game";
 import * as uuid from "uuid";
 
+export enum BlindButtons {
+  "Big Blind",
+  "Little Blind",
+}
+
 export class Player {
   constructor(
     public cards: Card[],
@@ -10,9 +15,14 @@ export class Player {
     public name: string,
     public cash: number,
     public currentBet: number | null,
-    public folded: boolean,
-    public active: boolean
-  ) {}
+    public folded?: boolean,
+    public active?: boolean,
+    public isDealer?: boolean,
+    public blindButton?: BlindButtons
+  ) {
+    this.active = true;
+    this.folded = false;
+  }
 }
 
 export async function loadPlayer(
@@ -38,7 +48,6 @@ export async function loadAllPlayers(
   const players: Player[] = [];
 
   const query = await queryDb(gameId);
-
   if (!query) {
     return players;
   }
@@ -76,15 +85,40 @@ export async function updatePlayer(gameId: string, player: Player) {
 }
 
 export async function addNewPlayer(gameId: string, name: string) {
+  const players = await loadAllPlayers(gameId);
+
+  if (players.length) {
+    return;
+  }
+
   const game = await getGame(gameId);
   if (!game) {
     return;
   }
-  const player = new Player([], uuid.v4(), name, 10000, 0, false, true);
+
+  const player = new Player([], uuid.v4(), name, 10000, 0);
+  switch (players.length) {
+    case 0: {
+      player.isDealer = true;
+      break;
+    }
+    case 1: {
+      player.blindButton = BlindButtons["Big Blind"];
+      break;
+    }
+    case 2: {
+      player.blindButton = BlindButtons["Little Blind"];
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+
   game.players = game?.players.concat(player.id);
   await saveToDb(gameId, player.id, JSON.stringify(player));
   await saveGame(game);
-  return player.id;
+  return player;
 }
 
 export async function newCardsForPlayer(

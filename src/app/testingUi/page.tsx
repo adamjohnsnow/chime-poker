@@ -1,35 +1,37 @@
 "use client";
 
-import { PlayerTile } from "../components/playerTile";
+import { CommunityCards } from "../components/communityCards";
+import { PlayerWrapper } from "../components/player";
 import { Card } from "../lib/cards";
+import { Player } from "../lib/player";
 import "../styles/table.css";
 
 export default function Test() {
-  const cards: Card[] = [
-    { value: 1, suit: "♠️" },
-    { value: 1, suit: "♦️" },
+  const player: Player = {
+    cards: [
+      { value: 1, suit: "♥️" },
+      { value: 3, suit: "♥️" },
+    ],
+    id: "",
+    name: "",
+    cash: 0,
+    currentBet: null,
+    folded: false,
+    active: false,
+  };
+
+  const commCards: Card[] = [
+    { value: 1, suit: "♥️" },
+    { value: 3, suit: "♥️" },
   ];
+
   return (
-    <main className="flex min-h-screen items-center justify-between p-24 font-mono">
-      <div className="players">
-        <PlayerTile
-          cards={cards}
-          id={"abc"}
-          name={"Player Name"}
-          cash={1000}
-          currentBet={null}
-          folded={false}
-          active={true}
-        ></PlayerTile>
-        <PlayerTile
-          cards={cards}
-          id={"abc"}
-          name={"Player TWO"}
-          cash={3418}
-          currentBet={null}
-          folded={false}
-          active={true}
-        ></PlayerTile>
+    <main className="flex flex-col min-h-screen items-center justify-between p-24 font-mono">
+      <div>
+        <PlayerWrapper player={player} playerCards={player.cards} />
+      </div>
+      <div>
+        <CommunityCards cards={commCards} />
       </div>
     </main>
   );
