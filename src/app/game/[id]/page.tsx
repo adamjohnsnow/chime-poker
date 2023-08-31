@@ -4,16 +4,16 @@
 import { useEffect, useState } from "react";
 
 // lib
-import { Card } from "../../lib/cards";
-import { createAttendee } from "../../lib/chime";
-import { ChimeProvider } from "../../lib/chimeUtils";
+import { Card } from "@/app/lib/cards";
+import { createAttendee } from "@/app/lib/chime";
+import { ChimeProvider } from "@/app/lib/chimeUtils";
 import {
   getGame,
   gameState,
   nextCards,
   resetCards,
   newHand,
-} from "../../lib/game";
+} from "@/app/lib/game";
 import {
   Player,
   addNewPlayer,
@@ -21,26 +21,27 @@ import {
   loadPlayer,
   updatePlayer,
   updatePlayerStatus,
-} from "../../lib/player";
-import { saveLocalPlayer, loadLocalPlayer } from "../../lib/localCache";
+} from "@/app/lib/player";
+import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
 
 // components
-import { PlayerTile } from "../../components/playerTile";
-import { PlayingCard } from "../../components/playingCard";
+import { PlayerTile } from "@/app/components/playerTile";
+import { PlayingCard } from "@/app/components/playingCard";
 
 // styles
-import "../../styles/table.css";
-import "../../styles/playingCard.css";
+import "@/app/styles/table.css";
+import "@/app/styles/playingCard.css";
 import { TurnControl } from "@/app/components/turnControl";
 import { ActivityMonitor } from "@/app/components/activityMonitor";
+import { CommunityCards } from "@/app/components/communityCards";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
-  const [communityCards, setCommunityCards] = useState<Card[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
   const [newPlayerId, setNewPlayerId] = useState<string | null>();
+  const [communityCards, setCommunityCards] = useState<Card[]>([]);
   const [newBet, setNewBet] = useState<any>();
   const [playerCards, setPlayerCards] = useState<Card[]>([]);
   const [playerTurn, setPlayerTurn] = useState<string>();
@@ -104,6 +105,7 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!player) {
       return;
     }
+    player.cards = [];
     player.cards = playerCards;
     player.folded = false;
     updatePlayer(gameId, player);
@@ -259,11 +261,6 @@ export default function Game({ params }: { params: { id: string } }) {
     }
 
     switch (data.message) {
-      case "communityCards": {
-        console.log("NEW COMMUNITY CARDS", data.cards);
-        setCommunityCards(data.cards);
-        break;
-      }
       case "reset": {
         console.log("RESET");
         resetTable();
@@ -356,11 +353,10 @@ export default function Game({ params }: { params: { id: string } }) {
                 ></PlayerTile>
               ))}
             </div>
-            <div className="community-cards">
-              {communityCards.map((item, i) => (
-                <PlayingCard key={i} card={item}></PlayingCard>
-              ))}
-            </div>
+            <CommunityCards
+              chime={chime as ChimeProvider}
+              cards={communityCards}
+            />
           </>
         ) : (
           <>

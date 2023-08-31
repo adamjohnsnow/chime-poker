@@ -14,6 +14,7 @@ export class ChimeProvider {
   private meetingId: string;
   private playerId: string;
   public eventDispatcher: (arg0: any) => void;
+  public communityCardsDispatcher!: (arg0: any) => void | undefined;
 
   constructor(
     config: ChimeConfig,
@@ -103,8 +104,11 @@ export class ChimeProvider {
       (message) => {
         const jsonString = Buffer.from(message.data).toString("utf8");
         const parsedData = JSON.parse(jsonString);
-
-        this.eventDispatcher(parsedData);
+        if (parsedData.message === "communityCards") {
+          this.communityCardsDispatcher(parsedData);
+        } else {
+          this.eventDispatcher(parsedData);
+        }
       }
     );
 
@@ -121,6 +125,10 @@ export class ChimeProvider {
 
     console.log("obsevers initialised", this.meetingId);
     return Promise.resolve();
+  }
+
+  public registerCardsEventListener(dispatcher: (arg0: any) => void) {
+    this.communityCardsDispatcher = dispatcher;
   }
 
   public sendMessage(content: Record<string, any>) {
