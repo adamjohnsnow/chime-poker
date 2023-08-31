@@ -34,6 +34,7 @@ import "@/app/styles/playingCard.css";
 import { TurnControl } from "@/app/components/turnControl";
 import { ActivityMonitor } from "@/app/components/activityMonitor";
 import { CommunityCards } from "@/app/components/communityCards";
+import { PlayerWrapper } from "@/app/components/player";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -315,30 +316,18 @@ export default function Game({ params }: { params: { id: string } }) {
       <main className="flex min-h-screen flex-col items-center justify-between p-10 font-mono">
         {player ? (
           <>
-            <audio id="chime-audio" />
-            <div className="z-10 w-full items-start justify-between  text-sm flex">
-              {player.name}: £{player.cash}
-              <div className="flex">
-                <video className="video-tile m-1" id="local"></video>
-                {playerCards.length != 0 ? (
-                  <>
-                    <PlayingCard card={playerCards[0]}></PlayingCard>
-                    <PlayingCard card={playerCards[1]}></PlayingCard>
-                  </>
-                ) : null}
-              </div>
-              <form action={nextAction}>
-                <button>Next</button>
-              </form>
-              <form action={nextRound}>
-                <button>Redeal</button>
-              </form>
-              <TurnControl
-                player={player}
-                gameId={gameId}
-                chime={chime as ChimeProvider}
-              ></TurnControl>
-            </div>
+            <PlayerWrapper player={player} playerCards={playerCards} />
+            <form action={nextAction}>
+              <button>Next</button>
+            </form>
+            <form action={nextRound}>
+              <button>Redeal</button>
+            </form>
+            <TurnControl
+              player={player}
+              gameId={gameId}
+              chime={chime as ChimeProvider}
+            ></TurnControl>
             <div className="players">
               {players.map((player, i) => (
                 <PlayerTile
