@@ -1,16 +1,19 @@
+import { useEffect } from "react";
 import { Card } from "../lib/cards";
-import { ChimeProvider } from "../lib/chimeUtils";
 import { Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import { TurnControl } from "./turnControl";
+import { getPlayerStream } from "../lib/firebase";
 
-export function PlayerWrapper({
-  player,
-  playerCards,
-}: {
-  player: Player;
-  playerCards: Card[];
-}) {
+export function PlayerWrapper({ player }: { player: Player }) {
+  useEffect(() => {
+    getPlayerStream(player.id, playerEventHandler);
+  }, [player]);
+
+  function playerEventHandler(data: any): void {
+    console.log("PLAYER MESSAGE:", data);
+  }
+
   return (
     <div>
       <audio id="chime-audio" />
@@ -18,10 +21,10 @@ export function PlayerWrapper({
         {player.name}: £{player.cash}
         <div className="flex">
           <video className="video-tile m-1" id="local"></video>
-          {playerCards.length != 0 ? (
+          {player.cards && player.cards.length != 0 ? (
             <>
-              <PlayingCard card={playerCards[0]}></PlayingCard>
-              <PlayingCard card={playerCards[1]}></PlayingCard>
+              <PlayingCard card={player.cards[0]}></PlayingCard>
+              <PlayingCard card={player.cards[1]}></PlayingCard>
             </>
           ) : null}
         </div>

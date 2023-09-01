@@ -4,29 +4,19 @@
 import { useEffect, useState } from "react";
 
 // lib
-import { Card } from "@/app/lib/cards";
 import { createAttendee } from "@/app/lib/chime";
 import { ChimeProvider } from "@/app/lib/chimeUtils";
-import {
-  getGame,
-  gameState,
-  nextCards,
-  resetCards,
-  newHand,
-} from "@/app/lib/game";
+import { gameState, nextCards, resetCards, newHand } from "@/app/lib/game";
 import {
   Player,
   addNewPlayer,
-  loadAllPlayers,
   loadPlayer,
-  updatePlayer,
   updatePlayerStatus,
 } from "@/app/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
 
 // components
 import { PlayerTile } from "@/app/components/playerTile";
-import { PlayingCard } from "@/app/components/playingCard";
 
 // styles
 import "@/app/styles/table.css";
@@ -35,120 +25,53 @@ import { TurnControl } from "@/app/components/turnControl";
 import { ActivityMonitor } from "@/app/components/activityMonitor";
 import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
+import { getGame, getGameStream } from "@/app/lib/firebase";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
-  const [players, setPlayers] = useState<Player[]>([]);
+  const [game, setGame] = useState<gameState>();
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
-  const [newPlayerId, setNewPlayerId] = useState<string | null>();
-  const [communityCards, setCommunityCards] = useState<Card[]>([]);
-  const [newBet, setNewBet] = useState<any>();
-  const [playerCards, setPlayerCards] = useState<Card[]>([]);
   const [playerTurn, setPlayerTurn] = useState<string>();
-  const [results, setResults] = useState<newHand[]>();
-  const [winningHand, setWinningHand] = useState<Card[]>([]);
-  const [newCardsShown, setNewCardsShown] = useState<Record<
-    string,
-    any
-  > | null>();
 
   useEffect(() => {
+    setGameId(params.id);
+    getGameStream(params.id, eventHandler);
+
     const savedPlayer = loadLocalPlayer(params.id);
+    console.log(savedPlayer);
     if (savedPlayer) {
-      loadPlayer(gameId, savedPlayer.id, true).then((recalledPlayer) => {
-        updatePlayerStatus(params.id, savedPlayer.id, true);
-        setPlayerCards(recalledPlayer?.cards || []);
-        setPlayer(recalledPlayer);
+      loadPlayer(savedPlayer.id).then((recalledPlayer) => {
+        if (recalledPlayer) {
+          setPlayer(recalledPlayer);
+        }
       });
     }
   }, [params.id]);
 
   useEffect(() => {
-    if (!newBet || !newBet.playerId) {
-      return;
+    console.log("PLAYER UPDATE:", player);
+    if (player) {
+      saveLocalPlayer(gameId, player);
     }
-    const updatedPlayers = players.slice();
-    updatedPlayers.forEach((player) => {
-      if (player.id === newBet.playerId) {
-        player.currentBet = newBet.amount;
-      }
-    });
-    setPlayers(updatedPlayers);
-  }, [newBet]);
-
-  useEffect(() => {
-    if (
-      newPlayerId &&
-      newPlayerId != player?.id &&
-      !players.some((player) => player.id === newPlayerId)
-    ) {
-      loadPlayer(gameId, newPlayerId).then((newPlayer) => {
-        if (newPlayer) {
-          setPlayers([...players, newPlayer]);
-        }
-        setNewPlayerId(null);
-      });
-    }
-  }, [newPlayerId]);
-
-  useEffect(() => {
-    getGame(params.id).then((game) => {
-      if (!game || !player) {
-        return;
-      }
-      renderGame(game);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    renderGame();
   }, [player]);
 
-  useEffect(() => {
-    if (!player) {
+  function eventHandler(data: any): void {
+    console.log("DATA RECIEVED", data);
+    if (!data.game) {
+      console.log("DATA CONTAINED NO GAME");
       return;
     }
-    player.cards = [];
-    player.cards = playerCards;
-    player.folded = false;
-    updatePlayer(gameId, player);
-  }, [playerCards]);
-
-  useEffect(() => {
-    if (communityCards.length === 0) {
-      players.forEach((player) => {
-        player.currentBet = null;
-        document.getElementById(player.id)?.classList.remove("folded");
-      });
+    const gameData = data.game as gameState;
+    if (!gameData.players) {
+      gameData.players = [];
     }
-  }, [communityCards]);
-
-  useEffect(() => {
-    if (results) {
-      console.log("RESULTS:", results);
-      setWinningHand(results[0].cards);
-      chime?.sendMessage({
-        message: "showCards",
-        cards: playerCards,
-        playerId: player?.id,
-      });
+    if (!gameData.communityCards) {
+      gameData.communityCards = [];
     }
-  }, [results]);
-
-  useEffect(() => {
-    if (!newCardsShown) {
-      return;
-    }
-    players.forEach((opponent) => {
-      if (opponent.id === newCardsShown?.playerId) {
-        opponent.cards = newCardsShown.cards;
-      }
-    });
-
-    setNewCardsShown(null);
-  }, [newCardsShown]);
-
-  useEffect(() => {
-    setTimeout(() => highlightWinningCard(), 500);
-  }, [winningHand]);
+    setGame(gameData);
+  }
 
   async function playerJoin() {
     const playerInput = document.getElementById(
@@ -157,15 +80,21 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!playerInput) {
       return;
     }
+
     const myPlayer = await addNewPlayer(gameId, playerInput.value);
+
     if (!myPlayer) {
+      console.log("DEBUG XX");
       return;
     }
     saveLocalPlayer(params.id, myPlayer);
     setPlayer(myPlayer);
   }
 
-  async function renderGame(game: gameState) {
+  async function renderGame() {
+    if (!game || !player) {
+      return;
+    }
     const attendee = await createAttendee(
       game.chimeConfig,
       player?.id as string
@@ -176,12 +105,11 @@ export default function Game({ params }: { params: { id: string } }) {
       return;
     }
 
-    const meeting = new ChimeProvider(game.chimeConfig, attendee, eventHandler);
+    const meeting = new ChimeProvider(game.chimeConfig, attendee);
 
     if (meeting) {
       setChime(meeting);
       setGameId(game.id);
-      setCommunityCards(game.communityCards);
     } else {
       alert("Unable to create call session");
     }
@@ -192,18 +120,7 @@ export default function Game({ params }: { params: { id: string } }) {
       return;
     }
 
-    const [cards, results] = await nextCards(gameId);
-
-    if (results.length > 0) {
-      setResults(results);
-      chime?.sendMessage({ message: "results", results });
-      return;
-    }
-
-    if (cards) {
-      chime?.sendMessage({ message: "communityCards", cards: cards });
-      setCommunityCards(cards);
-    }
+    nextCards(gameId);
   }
 
   async function nextRound() {
@@ -213,17 +130,6 @@ export default function Game({ params }: { params: { id: string } }) {
     resetTable();
 
     const newCards = await resetCards(gameId);
-    newCards?.forEach((hand) => {
-      if (hand.playerId === player?.id) {
-        setPlayerCards(hand.cards);
-      } else {
-        chime?.sendPlayerMessage(
-          hand.playerId,
-          JSON.stringify({ message: "newCards", cards: hand.cards })
-        );
-      }
-    });
-    chime?.sendMessage({ message: "reset" });
   }
 
   function resetTable() {
@@ -232,77 +138,19 @@ export default function Game({ params }: { params: { id: string } }) {
     for (let i = 0; i < highlightedCards.length; i++) {
       highlightedCards[i].classList.remove("highlighted");
     }
-    setCommunityCards([]);
-    setWinningHand([]);
   }
 
-  async function updateActivePlayers() {
-    const playerUpdate = await loadAllPlayers(gameId);
-    setPlayers(playerUpdate.filter((opponent) => opponent.id != player?.id));
-  }
+  async function updateActivePlayers() {}
 
   function highlightWinningCard() {
-    winningHand.forEach((card) => {
-      const cardElement = document.getElementById(
-        "card-" + card.value + "-" + card.suit
-      );
-      if (cardElement) {
-        cardElement.classList.add("highlighted");
-      }
-    });
-  }
-
-  function eventHandler(data: any): void {
-    if (!data.message) {
-      return;
-    }
-
-    switch (data.message) {
-      case "reset": {
-        console.log("RESET");
-        resetTable();
-        break;
-      }
-      case "newPlayer": {
-        // const player = load;
-        console.log("NEW PLAYER JOINED", data.playerId);
-        if (data.playerId) {
-          setNewPlayerId(data.playerId);
-        }
-        break;
-      }
-      case "playerDropped": {
-        updateActivePlayers();
-        console.log("PLAYER LEFT", data.playerId);
-        break;
-      }
-      case "newCards": {
-        console.log("NEW CARDS", data);
-        setPlayerCards(data.cards);
-        break;
-      }
-      case "showCards": {
-        console.log("CARDS SHOWN", data);
-        setNewCardsShown(data);
-        break;
-      }
-      case "playerFolded": {
-        console.log("PLAYER FOLDED", data.player);
-        document.getElementById(data.player)?.classList.add("folded");
-        break;
-      }
-      case "betPlaced": {
-        setNewBet({ playerId: data.playerId, amount: data.amount });
-        break;
-      }
-      case "results": {
-        setResults(data.results);
-        break;
-      }
-      default: {
-        console.log("UNKNOWN MESSAGE TYPE", data);
-      }
-    }
+    // winningHand.forEach((card) => {
+    //   const cardElement = document.getElementById(
+    //     "card-" + card.value + "-" + card.suit
+    //   );
+    //   if (cardElement) {
+    //     cardElement.classList.add("highlighted");
+    //   }
+    // });
   }
 
   return (
@@ -312,7 +160,7 @@ export default function Game({ params }: { params: { id: string } }) {
       <main className="flex min-h-screen flex-col items-center justify-between p-10 font-mono">
         {player ? (
           <>
-            <PlayerWrapper player={player} playerCards={playerCards} />
+            <PlayerWrapper player={player} />
             <form action={nextAction}>
               <button>Next</button>
             </form>
@@ -325,13 +173,13 @@ export default function Game({ params }: { params: { id: string } }) {
               chime={chime as ChimeProvider}
             ></TurnControl>
             <div className="players">
-              {players.map((player, i) => (
-                <PlayerTile key={i} player={player}></PlayerTile>
+              {game?.players?.map((player, i) => (
+                <PlayerTile key={i} playerId={player}></PlayerTile>
               ))}
             </div>
             <CommunityCards
               chime={chime as ChimeProvider}
-              cards={communityCards}
+              cards={game ? game.communityCards : []}
             />
           </>
         ) : (

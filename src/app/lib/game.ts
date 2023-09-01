@@ -1,10 +1,9 @@
-"use server";
 import { Deck, Card } from "./cards";
-import { saveToDb, loadFromDb } from "./dynamoDb";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
 import { Player, loadAllPlayers, newCardsForPlayer } from "./player";
 import { HandEvaluator, Rank, Result } from "./hands";
+import { getGame, getGameStream, writeGameData } from "./firebase";
 
 export type gameState = {
   id: string;
@@ -41,41 +40,26 @@ export async function startGame(): Promise<gameState | null> {
     results: [],
   };
 
-  saveGame(state);
+  writeGameData(state);
 
   return state;
 }
 
-export async function createNewGame(): Promise<string> {
-  const newGame = await startGame();
-  return JSON.stringify(newGame);
-}
-
-export async function saveGame(game: gameState) {
-  saveToDb(game.id, "game", JSON.stringify(game));
-}
-
-export async function getGame(gameId: string) {
-  const gameRecord = await loadFromDb(gameId, ":game");
-  if (!gameRecord?.S) {
-    return;
-  }
-  return JSON.parse(gameRecord.S) as gameState;
-}
-
 export async function nextCards(gameId: string): Promise<[Card[], newHand[]]> {
-  const gameRecord = await loadFromDb(gameId, ":game");
-  if (!gameRecord?.S) {
+  const game = await getGame(gameId);
+  if (!game) {
     return [[], []];
   }
-  const gameState = JSON.parse(gameRecord.S) as gameState;
-  return dealNextCards(gameState);
+  if (!game.communityCards) {
+    game.communityCards = [];
+  }
+  return dealNextCards(game);
 }
 
 export async function dealNextCards(
   gameState: gameState
 ): Promise<[Card[], newHand[]]> {
-  switch (gameState.communityCards.length) {
+  switch (gameState?.communityCards?.length) {
     case 5: {
       await findWinner(gameState);
       break;
@@ -96,7 +80,7 @@ export async function dealNextCards(
     }
   }
 
-  saveGame(gameState);
+  writeGameData(gameState);
 
   return [gameState.communityCards, gameState.results];
 }
@@ -107,7 +91,7 @@ export async function resetCards(gameId: string) {
     return;
   }
   const redeal = await redealDeck(gameRecord);
-  saveGame(redeal.game);
+  writeGameData(redeal.game);
 
   return redeal.hands;
 }
@@ -135,12 +119,13 @@ export async function redealDeck(game: gameState) {
     });
     newCardsForPlayer(game.id, player.id, newCards);
   });
+
   game.cardDeck = game.cardDeck.slice(0 - deckLength + game.players.length * 2);
   return { game: game, hands: newHands };
 }
 
 export async function findWinner(game: gameState) {
-  const players = await loadAllPlayers(game.id, true);
+  const players = await loadAllPlayers(game.id);
   const results: newHand[] = [];
 
   if (!players) {

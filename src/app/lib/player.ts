@@ -1,6 +1,6 @@
 import { Card } from "./cards";
-import { loadFromDb, queryDb, saveToDb } from "./dynamoDb";
-import { getGame, saveGame } from "./game";
+import { getPlayer, writePlayerData } from "./firebase";
+import { getGame, writeGameData } from "./firebase";
 import * as uuid from "uuid";
 
 export enum BlindButtons {
@@ -9,58 +9,44 @@ export enum BlindButtons {
 }
 
 export class Player {
-  constructor(
-    public cards: Card[],
-    public id: string,
-    public name: string,
-    public cash: number,
-    public currentBet: number | null,
-    public folded?: boolean,
-    public active?: boolean,
-    public isDealer?: boolean,
-    public blindButton?: BlindButtons
-  ) {
+  public cards: Card[];
+  public id: string;
+  public name: string;
+  public cash: number;
+  public currentBet: number | null;
+  public cardsShown: boolean;
+  public folded?: boolean;
+  public active?: boolean;
+  public isDealer?: boolean;
+  public blindButton?: BlindButtons;
+  constructor(name: string) {
+    this.id = uuid.v4();
+    this.name = name;
+    this.cards = [];
+    this.cash = 10000;
+    this.currentBet = 0;
+    this.cardsShown = false;
     this.active = true;
     this.folded = false;
   }
 }
 
-export async function loadPlayer(
-  gameId: string,
-  playerId: string,
-  includeCards?: boolean
-) {
-  const record = await loadFromDb(gameId, ":" + playerId);
-  if (!record?.S) {
-    return;
-  }
-  const player: Player = JSON.parse(record.S);
-  if (!includeCards) {
-    player.cards = [];
-  }
+export async function loadPlayer(playerId: string) {
+  console.log("loading player");
+  const player = getPlayer(playerId);
   return player;
 }
 
-export async function loadAllPlayers(
-  gameId: string,
-  includeCards?: boolean
-): Promise<Player[]> {
+export async function loadAllPlayers(gameId: string): Promise<Player[]> {
   const players: Player[] = [];
-
-  const query = await queryDb(gameId);
-  if (!query) {
+  const game = await getGame(gameId);
+  if (!game || !game.players) {
     return players;
   }
-
-  query.forEach((record) => {
-    if (record.content.S && record.sk.S?.substring(36) != ":game") {
-      const player = JSON.parse(record.content.S);
-      if (!includeCards) {
-        player.cards = [];
-      }
-      if (!player.folded && player.active) {
-        players.push(player);
-      }
+  game.players.forEach(async (playerId: string) => {
+    const newPlayer = await getPlayer(playerId);
+    if (newPlayer) {
+      players.push(newPlayer);
     }
   });
 
@@ -72,7 +58,7 @@ export async function updatePlayerStatus(
   playerId: string,
   active: boolean
 ) {
-  const player = await loadPlayer(gameId, playerId, true);
+  const player = await loadPlayer(playerId);
   if (!player) {
     return;
   }
@@ -81,43 +67,51 @@ export async function updatePlayerStatus(
 }
 
 export async function updatePlayer(gameId: string, player: Player) {
-  saveToDb(gameId, player.id, JSON.stringify(player));
+  writePlayerData(player);
 }
 
 export async function addNewPlayer(gameId: string, name: string) {
-  const players = await loadAllPlayers(gameId);
+  // const players = await loadAllPlayers(gameId);
 
-  if (players.length) {
-    return;
-  }
+  // if (players.length > 5) {
+  //   return;
+  // }
 
   const game = await getGame(gameId);
+  console.log("DEBUG 2", game);
+
   if (!game) {
+    console.log("DEBUG 2X");
+
     return;
   }
+  console.log("DEBUG 3");
 
-  const player = new Player([], uuid.v4(), name, 10000, 0);
-  switch (players.length) {
-    case 0: {
-      player.isDealer = true;
-      break;
-    }
-    case 1: {
-      player.blindButton = BlindButtons["Big Blind"];
-      break;
-    }
-    case 2: {
-      player.blindButton = BlindButtons["Little Blind"];
-      break;
-    }
-    default: {
-      break;
-    }
+  const player = new Player(name);
+  // switch (players.length) {
+  //   case 0: {
+  //     player.isDealer = true;
+  //     break;
+  //   }
+  //   case 1: {
+  //     player.blindButton = BlindButtons["Big Blind"];
+  //     break;
+  //   }
+  //   case 2: {
+  //     player.blindButton = BlindButtons["Little Blind"];
+  //     break;
+  //   }
+  //   default: {
+  //     break;
+  //   }
+  // }
+  writePlayerData(player);
+  if (game.players) {
+    game.players = game?.players.concat(player.id);
+  } else {
+    game.players = [player.id];
   }
-
-  game.players = game?.players.concat(player.id);
-  await saveToDb(gameId, player.id, JSON.stringify(player));
-  await saveGame(game);
+  writeGameData(game);
   return player;
 }
 
@@ -126,7 +120,7 @@ export async function newCardsForPlayer(
   playerId: string,
   cards: Card[]
 ) {
-  const player = await loadPlayer(gameId, playerId);
+  const player = await loadPlayer(playerId);
 
   if (!player || player.cash <= 0) {
     return;
