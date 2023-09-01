@@ -21,9 +21,10 @@ export default function Test() {
     currentBet: null,
     folded: false,
     active: false,
+    gameId: "123",
   });
 
-  getPlayerStream("123", (data: any) => console.log(data));
+  getPlayerStream("123", "123", (data: any) => console.log(data));
   const commCards: Card[] = [
     { value: 1, suit: "♥️" },
     { value: 3, suit: "♥️" },
@@ -32,7 +33,7 @@ export default function Test() {
   return (
     <main className="flex flex-col min-h-screen items-center justify-between p-24 font-mono">
       <div>
-        <PlayerWrapper player={player} />
+        <PlayerWrapper playerId={player.id} gameId={player.gameId} />
       </div>
       <div>
         <CommunityCards cards={commCards} />

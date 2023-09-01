@@ -4,7 +4,6 @@ import { Player, updatePlayer } from "../lib/player";
 export function TurnControl({
   gameId,
   player,
-  chime,
 }: {
   gameId: string;
   player: Player;
@@ -14,7 +13,6 @@ export function TurnControl({
     if (player) {
       player.folded = true;
       updatePlayer(gameId, player);
-      chime?.sendMessage({ message: "playerFolded", player: player.id });
     }
   }
 
@@ -23,11 +21,6 @@ export function TurnControl({
     if (!input) {
       return;
     }
-    chime.sendMessage({
-      message: "betPlaced",
-      playerId: player.id,
-      amount: input.value,
-    });
   }
 
   return (

@@ -1,5 +1,5 @@
 import { Card } from "./cards";
-import { getPlayer, writePlayerData } from "./firebase";
+import { getAllPlayers, getPlayer, writePlayerData } from "./firebase";
 import { getGame, writeGameData } from "./firebase";
 import * as uuid from "uuid";
 
@@ -9,6 +9,7 @@ export enum BlindButtons {
 }
 
 export class Player {
+  public gameId: string;
   public cards: Card[];
   public id: string;
   public name: string;
@@ -19,8 +20,9 @@ export class Player {
   public active?: boolean;
   public isDealer?: boolean;
   public blindButton?: BlindButtons;
-  constructor(name: string) {
+  constructor(gameId: string, name: string) {
     this.id = uuid.v4();
+    this.gameId = gameId;
     this.name = name;
     this.cards = [];
     this.cash = 10000;
@@ -31,25 +33,16 @@ export class Player {
   }
 }
 
-export async function loadPlayer(playerId: string) {
-  console.log("loading player");
-  const player = getPlayer(playerId);
+export async function loadPlayer(gameId: string, playerId: string) {
+  const player = getPlayer(gameId, playerId);
   return player;
 }
 
 export async function loadAllPlayers(gameId: string): Promise<Player[]> {
-  const players: Player[] = [];
-  const game = await getGame(gameId);
-  if (!game || !game.players) {
-    return players;
+  const players = await getAllPlayers(gameId);
+  if (!players) {
+    return [];
   }
-  game.players.forEach(async (playerId: string) => {
-    const newPlayer = await getPlayer(playerId);
-    if (newPlayer) {
-      players.push(newPlayer);
-    }
-  });
-
   return players;
 }
 
@@ -58,60 +51,27 @@ export async function updatePlayerStatus(
   playerId: string,
   active: boolean
 ) {
-  const player = await loadPlayer(playerId);
+  const player = await loadPlayer(gameId, playerId);
   if (!player) {
     return;
   }
   player.active = active;
-  updatePlayer(gameId, player);
+  updatePlayer(player);
 }
 
-export async function updatePlayer(gameId: string, player: Player) {
+export async function updatePlayer(player: Player) {
   writePlayerData(player);
 }
 
 export async function addNewPlayer(gameId: string, name: string) {
-  // const players = await loadAllPlayers(gameId);
-
-  // if (players.length > 5) {
-  //   return;
-  // }
-
-  const game = await getGame(gameId);
-  console.log("DEBUG 2", game);
-
-  if (!game) {
-    console.log("DEBUG 2X");
-
+  const players = await getAllPlayers(gameId);
+  if (!players || players.length > 5) {
     return;
   }
-  console.log("DEBUG 3");
 
-  const player = new Player(name);
-  // switch (players.length) {
-  //   case 0: {
-  //     player.isDealer = true;
-  //     break;
-  //   }
-  //   case 1: {
-  //     player.blindButton = BlindButtons["Big Blind"];
-  //     break;
-  //   }
-  //   case 2: {
-  //     player.blindButton = BlindButtons["Little Blind"];
-  //     break;
-  //   }
-  //   default: {
-  //     break;
-  //   }
-  // }
+  const player = new Player(gameId, name);
+
   writePlayerData(player);
-  if (game.players) {
-    game.players = game?.players.concat(player.id);
-  } else {
-    game.players = [player.id];
-  }
-  writeGameData(game);
   return player;
 }
 
@@ -120,7 +80,7 @@ export async function newCardsForPlayer(
   playerId: string,
   cards: Card[]
 ) {
-  const player = await loadPlayer(playerId);
+  const player = await loadPlayer(gameId, playerId);
 
   if (!player || player.cash <= 0) {
     return;
@@ -128,5 +88,5 @@ export async function newCardsForPlayer(
   player.folded = false;
   player.cards = cards;
 
-  updatePlayer(gameId, player);
+  updatePlayer(player);
 }

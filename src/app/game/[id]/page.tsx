@@ -1,18 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 // packages
-import { useEffect, useState } from "react";
+import { Key, useEffect, useState } from "react";
 
 // lib
 import { createAttendee } from "@/app/lib/chime";
 import { ChimeProvider } from "@/app/lib/chimeUtils";
-import { gameState, nextCards, resetCards, newHand } from "@/app/lib/game";
-import {
-  Player,
-  addNewPlayer,
-  loadPlayer,
-  updatePlayerStatus,
-} from "@/app/lib/player";
+import { gameState, nextCommunityCards, resetCards } from "@/app/lib/game";
+import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
 
 // components
@@ -25,54 +20,55 @@ import { TurnControl } from "@/app/components/turnControl";
 import { ActivityMonitor } from "@/app/components/activityMonitor";
 import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
-import { getGame, getGameStream } from "@/app/lib/firebase";
+import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
   const [game, setGame] = useState<gameState>();
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
+  const [players, setPlayers] = useState<Player[]>([]);
   const [playerTurn, setPlayerTurn] = useState<string>();
+  const [showNameInput, setShowNameInput] = useState<boolean>(false);
 
   useEffect(() => {
     setGameId(params.id);
-    getGameStream(params.id, eventHandler);
+    getGameStream(params.id, gameEventHandler);
+    getAllPlayersStream(params.id, playersEventHandler);
 
     const savedPlayer = loadLocalPlayer(params.id);
-    console.log(savedPlayer);
     if (savedPlayer) {
-      loadPlayer(savedPlayer.id).then((recalledPlayer) => {
+      loadPlayer(params.id, savedPlayer.id).then((recalledPlayer) => {
         if (recalledPlayer) {
           setPlayer(recalledPlayer);
         }
       });
+    } else {
+      setShowNameInput(true);
     }
   }, [params.id]);
 
   useEffect(() => {
-    console.log("PLAYER UPDATE:", player);
+    console.log("PLAYER UPDATED:", player);
     if (player) {
       saveLocalPlayer(gameId, player);
     }
     renderGame();
   }, [player]);
 
-  function eventHandler(data: any): void {
-    console.log("DATA RECIEVED", data);
-    if (!data.game) {
-      console.log("DATA CONTAINED NO GAME");
-      return;
-    }
-    const gameData = data.game as gameState;
-    if (!gameData.players) {
-      gameData.players = [];
-    }
+  function gameEventHandler(gameData: gameState): void {
     if (!gameData.communityCards) {
       gameData.communityCards = [];
     }
+    console.log("GAMEDATA UPDATE:", gameData);
+
     setGame(gameData);
   }
 
+  function playersEventHandler(playersData: Player[]) {
+    console.log("PLAYERS UPDATE:", playersData);
+    setPlayers(playersData);
+  }
   async function playerJoin() {
     const playerInput = document.getElementById(
       "new-player-name"
@@ -84,7 +80,6 @@ export default function Game({ params }: { params: { id: string } }) {
     const myPlayer = await addNewPlayer(gameId, playerInput.value);
 
     if (!myPlayer) {
-      console.log("DEBUG XX");
       return;
     }
     saveLocalPlayer(params.id, myPlayer);
@@ -119,8 +114,7 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!gameId) {
       return;
     }
-
-    nextCards(gameId);
+    nextCommunityCards(gameId);
   }
 
   async function nextRound() {
@@ -160,7 +154,7 @@ export default function Game({ params }: { params: { id: string } }) {
       <main className="flex min-h-screen flex-col items-center justify-between p-10 font-mono">
         {player ? (
           <>
-            <PlayerWrapper player={player} />
+            <PlayerWrapper playerId={player.id} gameId={gameId} />
             <form action={nextAction}>
               <button>Next</button>
             </form>
@@ -173,9 +167,16 @@ export default function Game({ params }: { params: { id: string } }) {
               chime={chime as ChimeProvider}
             ></TurnControl>
             <div className="players">
-              {game?.players?.map((player, i) => (
-                <PlayerTile key={i} playerId={player}></PlayerTile>
-              ))}
+              {players ? (
+                <>
+                  {players.map(
+                    (playerTile: Player, i: Key | null | undefined) =>
+                      playerTile.active && playerTile.id != player?.id ? (
+                        <PlayerTile key={i} player={playerTile}></PlayerTile>
+                      ) : null
+                  )}
+                </>
+              ) : null}
             </div>
             <CommunityCards
               chime={chime as ChimeProvider}
@@ -184,15 +185,21 @@ export default function Game({ params }: { params: { id: string } }) {
           </>
         ) : (
           <>
-            <div>New Player</div>
-            <form action={playerJoin}>
-              <input
-                type="text"
-                id="new-player-name"
-                placeholder="Enter your name"
-              />
-              <button>Take a seat</button>
-            </form>
+            {showNameInput ? (
+              <>
+                <div>New Player</div>
+                <form action={playerJoin}>
+                  <input
+                    type="text"
+                    id="new-player-name"
+                    placeholder="Enter your name"
+                  />
+                  <button>Take a seat</button>
+                </form>
+              </>
+            ) : (
+              <div>LOADING</div>
+            )}
           </>
         )}
         <p className="">You are in game: {gameId}</p>

@@ -4,11 +4,11 @@ import "../styles/player.css";
 import { useEffect, useState } from "react";
 import { getPlayerStream } from "../lib/firebase";
 
-export function PlayerTile({ playerId }: { playerId: string }) {
-  const [player, setPlayer] = useState<Player>();
+export function PlayerTile({ player }: { player: Player }) {
+  // const [player, setPlayer] = useState<Player>();
   useEffect(() => {
-    getPlayerStream(playerId, playerEventHandler);
-  }, [playerId]);
+    getPlayerStream(player.gameId, player.id, playerEventHandler);
+  }, [player]);
 
   function playerEventHandler(data: any): void {
     console.log("PLAYER MESSAGE:", data);
@@ -28,7 +28,7 @@ export function PlayerTile({ playerId }: { playerId: string }) {
             ></video>
           </div>
           <div>
-            {player.cards.length === 2 ? (
+            {player.cards?.length === 2 && player.cardsShown ? (
               <div className="opponent-cards">
                 <PlayingCard card={player.cards[0]}></PlayingCard>
                 <PlayingCard card={player.cards[1]}></PlayingCard>

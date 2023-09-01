@@ -1,20 +1,30 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "../lib/cards";
 import { Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
-import { TurnControl } from "./turnControl";
 import { getPlayerStream } from "../lib/firebase";
 
-export function PlayerWrapper({ player }: { player: Player }) {
+export function PlayerWrapper({
+  gameId,
+  playerId,
+}: {
+  gameId: string;
+  playerId: string;
+}) {
+  const [player, setPlayer] = useState<Player>();
   useEffect(() => {
-    getPlayerStream(player.id, playerEventHandler);
-  }, [player]);
+    getPlayerStream(gameId, playerId, playerEventHandler);
+  }, [gameId, playerId]);
 
   function playerEventHandler(data: any): void {
-    console.log("PLAYER MESSAGE:", data);
+    console.log("THIS PLAYER MESSAGE:", data);
+    if (!data) {
+      return;
+    }
+    setPlayer(data);
   }
 
-  return (
+  return player ? (
     <div>
       <audio id="chime-audio" />
       <div className="z-10 w-full items-start justify-between  text-sm flex">
@@ -30,5 +40,5 @@ export function PlayerWrapper({ player }: { player: Player }) {
         </div>
       </div>
     </div>
-  );
+  ) : null;
 }

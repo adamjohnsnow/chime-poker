@@ -3,14 +3,18 @@ import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
 import { Player, loadAllPlayers, newCardsForPlayer } from "./player";
 import { HandEvaluator, Rank, Result } from "./hands";
-import { getGame, getGameStream, writeGameData } from "./firebase";
+import {
+  getGame,
+  getGameStream,
+  writeGameData,
+  writePlayerData,
+} from "./firebase";
 
 export type gameState = {
   id: string;
   chimeConfig: ChimeConfig;
   cardDeck: Card[];
   communityCards: Card[];
-  players: string[];
   results: newHand[];
 };
 
@@ -36,7 +40,6 @@ export async function startGame(): Promise<gameState | null> {
     chimeConfig: call,
     cardDeck: deck.cards,
     communityCards: [],
-    players: [],
     results: [],
   };
 
@@ -45,7 +48,9 @@ export async function startGame(): Promise<gameState | null> {
   return state;
 }
 
-export async function nextCards(gameId: string): Promise<[Card[], newHand[]]> {
+export async function nextCommunityCards(
+  gameId: string
+): Promise<[Card[], newHand[]]> {
   const game = await getGame(gameId);
   if (!game) {
     return [[], []];
@@ -53,10 +58,10 @@ export async function nextCards(gameId: string): Promise<[Card[], newHand[]]> {
   if (!game.communityCards) {
     game.communityCards = [];
   }
-  return dealNextCards(game);
+  return dealNextCommunityCards(game);
 }
 
-export async function dealNextCards(
+export async function dealNextCommunityCards(
   gameState: gameState
 ): Promise<[Card[], newHand[]]> {
   switch (gameState?.communityCards?.length) {
@@ -91,9 +96,9 @@ export async function resetCards(gameId: string) {
     return;
   }
   const redeal = await redealDeck(gameRecord);
-  writeGameData(redeal.game);
+  writeGameData(redeal);
 
-  return redeal.hands;
+  return redeal;
 }
 
 export async function redealDeck(game: gameState) {
@@ -105,6 +110,7 @@ export async function redealDeck(game: gameState) {
   const newHands: newHand[] = [];
 
   const loadedPlayers = await loadAllPlayers(game.id);
+  console.log("LLP:", loadedPlayers);
   const activePlayers = loadedPlayers.filter(
     (player) => player.cash > 0 && player.active
   );
@@ -120,8 +126,10 @@ export async function redealDeck(game: gameState) {
     newCardsForPlayer(game.id, player.id, newCards);
   });
 
-  game.cardDeck = game.cardDeck.slice(0 - deckLength + game.players.length * 2);
-  return { game: game, hands: newHands };
+  game.cardDeck = game.cardDeck.slice(
+    0 - deckLength + activePlayers.length * 2
+  );
+  return game;
 }
 
 export async function findWinner(game: gameState) {
@@ -132,7 +140,7 @@ export async function findWinner(game: gameState) {
     return results;
   }
 
-  await players.forEach((player) => {
+  await players.forEach((player: { cards: any; id: any }) => {
     const cards = [...game.communityCards, ...player.cards];
     const evaluatedHand = new HandEvaluator(cards).result;
     results.push({
