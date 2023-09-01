@@ -17,6 +17,7 @@ describe("turns", () => {
         folded: false,
         isDealer: false,
         blindButton: BlindButtons["Big Blind"],
+        gameId: "123",
       },
       {
         id: "2",
@@ -29,6 +30,7 @@ describe("turns", () => {
         folded: false,
         isDealer: false,
         blindButton: BlindButtons["Little Blind"],
+        gameId: "123",
       },
       {
         id: "3",
@@ -40,6 +42,7 @@ describe("turns", () => {
         active: true,
         folded: false,
         isDealer: true,
+        gameId: "123",
       },
     ];
 
