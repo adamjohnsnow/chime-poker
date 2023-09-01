@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Card } from "../lib/cards";
 import { Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import { getPlayerStream } from "../lib/firebase";

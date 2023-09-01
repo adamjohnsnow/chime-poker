@@ -1,18 +1,21 @@
 import { Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import "../styles/player.css";
-import { useEffect, useState } from "react";
-import { getPlayerStream } from "../lib/firebase";
+import { useEffect } from "react";
 
 export function PlayerTile({ player }: { player: Player }) {
   // const [player, setPlayer] = useState<Player>();
   useEffect(() => {
-    getPlayerStream(player.gameId, player.id, playerEventHandler);
+    // getPlayerStream(player.gameId, player.id, playerEventHandler);
   }, [player]);
 
-  function playerEventHandler(data: any): void {
-    console.log("PLAYER MESSAGE:", data);
-  }
+  // function playerEventHandler(data: any): void {
+  //   console.log("PLAYER MESSAGE:", data);
+  //   if(data.cards == player.cards){
+  //   player.cards = []
+  //   }
+  // }
+
   return (
     <>
       {player ? (

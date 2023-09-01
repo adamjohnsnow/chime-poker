@@ -1,18 +1,11 @@
 import { ChimeProvider } from "../lib/chimeUtils";
 import { Player, updatePlayer } from "../lib/player";
 
-export function TurnControl({
-  gameId,
-  player,
-}: {
-  gameId: string;
-  player: Player;
-  chime: ChimeProvider;
-}) {
+export function TurnControl({ player }: { player: Player }) {
   async function fold() {
     if (player) {
       player.folded = true;
-      updatePlayer(gameId, player);
+      updatePlayer(player);
     }
   }
 

@@ -140,7 +140,7 @@ export async function findWinner(game: gameState) {
     return results;
   }
 
-  await players.forEach((player: { cards: any; id: any }) => {
+  await players.forEach((player) => {
     const cards = [...game.communityCards, ...player.cards];
     const evaluatedHand = new HandEvaluator(cards).result;
     results.push({
@@ -149,6 +149,8 @@ export async function findWinner(game: gameState) {
       rank: evaluatedHand.rank,
       result: Rank[evaluatedHand.rank],
     });
+    player.cardsShown = true;
+    writePlayerData(player);
   });
 
   game.results = results.sort((a, b) => b.rank - a.rank);

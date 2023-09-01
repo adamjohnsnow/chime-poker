@@ -202,4 +202,37 @@ describe("hand evaluator", () => {
 
     expect(hand.result.rank).toBe(Rank.RoyalFlush);
   });
+
+  test("doesnt return 3 pairs...", () => {
+    const cards: Card[] = [
+      {
+        suit: "♦️",
+        value: 10,
+      },
+      {
+        suit: "♠️",
+        value: 7,
+      },
+      {
+        suit: "♠️",
+        value: 8,
+      },
+      {
+        suit: "♣️",
+        value: 8,
+      },
+      {
+        suit: "♣️",
+        value: 10,
+      },
+      {
+        suit: "♠️",
+        value: 7,
+      },
+    ];
+    const hand = new HandEvaluator(cards);
+    expect(hand.result.rank).toBe(Rank.TwoPair);
+    expect(hand.result.cards.length).toBe(4);
+    expect(hand.result.cards[0].value).not.toBe(7);
+  });
 });

@@ -63,6 +63,7 @@ export class HandEvaluator {
     }
 
     const pairCards = this.findTwoPair(counts);
+
     if (pairCards.length > 0) {
       return {
         rank: pairCards.length === 4 ? Rank.TwoPair : Rank.OnePair,
@@ -174,6 +175,6 @@ export class HandEvaluator {
     for (const key in tally) {
       if (tally[key].length === 2) cards = cards.concat(tally[key]);
     }
-    return cards;
+    return cards.slice(-4);
   }
 }

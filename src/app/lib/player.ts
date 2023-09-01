@@ -85,6 +85,7 @@ export async function newCardsForPlayer(
   if (!player || player.cash <= 0) {
     return;
   }
+  player.cardsShown = false;
   player.folded = false;
   player.cards = cards;
 

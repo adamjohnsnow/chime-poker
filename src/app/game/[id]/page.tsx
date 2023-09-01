@@ -20,7 +20,11 @@ import { TurnControl } from "@/app/components/turnControl";
 import { ActivityMonitor } from "@/app/components/activityMonitor";
 import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
-import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
+import {
+  getAllPlayersStream,
+  getGameStream,
+  writePlayerData,
+} from "@/app/lib/firebase";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -53,8 +57,18 @@ export default function Game({ params }: { params: { id: string } }) {
     if (player) {
       saveLocalPlayer(gameId, player);
     }
-    renderGame();
+    initialiseGame();
   }, [player]);
+
+  useEffect(() => {
+    if (game && game.results) {
+      console.log("RESULTS IN!", game.results);
+      highlightWinningCards();
+    }
+    if (!game?.results || game.results.length === 0) {
+      resetHighlights();
+    }
+  }, [game]);
 
   function gameEventHandler(gameData: gameState): void {
     if (!gameData.communityCards) {
@@ -69,6 +83,7 @@ export default function Game({ params }: { params: { id: string } }) {
     console.log("PLAYERS UPDATE:", playersData);
     setPlayers(playersData);
   }
+
   async function playerJoin() {
     const playerInput = document.getElementById(
       "new-player-name"
@@ -86,7 +101,7 @@ export default function Game({ params }: { params: { id: string } }) {
     setPlayer(myPlayer);
   }
 
-  async function renderGame() {
+  async function initialiseGame() {
     if (!game || !player) {
       return;
     }
@@ -121,13 +136,11 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!gameId) {
       return;
     }
-    resetTable();
 
-    const newCards = await resetCards(gameId);
+    await resetCards(gameId);
   }
 
-  function resetTable() {
-    updateActivePlayers();
+  function resetHighlights() {
     const highlightedCards = document.getElementsByClassName("highlighted");
     for (let i = 0; i < highlightedCards.length; i++) {
       highlightedCards[i].classList.remove("highlighted");
@@ -136,15 +149,17 @@ export default function Game({ params }: { params: { id: string } }) {
 
   async function updateActivePlayers() {}
 
-  function highlightWinningCard() {
-    // winningHand.forEach((card) => {
-    //   const cardElement = document.getElementById(
-    //     "card-" + card.value + "-" + card.suit
-    //   );
-    //   if (cardElement) {
-    //     cardElement.classList.add("highlighted");
-    //   }
-    // });
+  function highlightWinningCards() {
+    const winningHand = game?.results[0].cards;
+
+    winningHand?.forEach((card) => {
+      const cardElement = document.getElementById(
+        "card-" + card.value + "-" + card.suit
+      );
+      if (cardElement) {
+        cardElement.classList.add("highlighted");
+      }
+    });
   }
 
   return (
@@ -161,11 +176,7 @@ export default function Game({ params }: { params: { id: string } }) {
             <form action={nextRound}>
               <button>Redeal</button>
             </form>
-            <TurnControl
-              player={player}
-              gameId={gameId}
-              chime={chime as ChimeProvider}
-            ></TurnControl>
+            {/* <TurnControl player={player}></TurnControl> */}
             <div className="players">
               {players ? (
                 <>
