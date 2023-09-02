@@ -18,10 +18,12 @@ export default function Test() {
     name: "",
     cash: 0,
     cardsShown: false,
-    currentBet: null,
+    currentBet: 0,
     folded: false,
     active: false,
     gameId: "123",
+    sortIndex: 0,
+    blindButton: null,
   });
 
   getPlayerStream("123", "123", (data: any) => console.log(data));

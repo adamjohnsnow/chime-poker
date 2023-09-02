@@ -5,10 +5,11 @@ import {
 } from "@aws-sdk/client-chime-sdk-meetings";
 
 import { describe, expect, test, beforeEach, jest } from "@jest/globals";
-import { startGame, gameState, redealDeck } from "../src/app/lib/game";
+import { startGame, gameState, GamePhase } from "../src/app/lib/game";
 import { Deck } from "../src/app/lib/cards";
 import { query } from "./fixtures/playerQuery";
 import { MockedComponentClass } from "react-dom/test-utils";
+import { Player } from "@/app/lib/player";
 
 const chimeMock = mockClient(ChimeSDKMeetings);
 
@@ -43,6 +44,9 @@ describe("reset card states", () => {
         { suit: "b", value: 3 },
       ],
       results: [],
+      prizePot: 0,
+      phase: GamePhase.START,
+      blind: 0,
     };
 
     // redealDeck(game);
@@ -54,33 +58,27 @@ describe("reset card states", () => {
 
 describe("deals next community cards", () => {
   test("deals the cards", async () => {
-    const game: gameState = {
-      id: "123",
-      chimeConfig: {},
-      cardDeck: new Deck().cards,
-      communityCards: [],
-      results: [],
-    };
-
+    // const game: gameState = {
+    //   id: "123",
+    //   chimeConfig: {},
+    //   cardDeck: new Deck().cards,
+    //   communityCards: [],
+    //   results: [],
+    // };
     // redealDeck(game);
-
     // expect(game.communityCards.length).toBe(3);
     // expect(game.cardDeck.length).toBe(49);
     // expect(game.cardDeck).not.toContain(game.communityCards[0]);
     // expect(game.cardDeck).not.toContain(game.communityCards[1]);
     // expect(game.cardDeck).not.toContain(game.communityCards[2]);
-
     // redealDeck(game);
-
     // expect(game.communityCards.length).toBe(4);
     // expect(game.cardDeck.length).toBe(48);
     // expect(game.cardDeck).not.toContain(game.communityCards[0]);
     // expect(game.cardDeck).not.toContain(game.communityCards[1]);
     // expect(game.cardDeck).not.toContain(game.communityCards[2]);
     // expect(game.cardDeck).not.toContain(game.communityCards[3]);
-
     // redealDeck(game);
-
     // expect(game.communityCards.length).toBe(5);
     // expect(game.cardDeck.length).toBe(47);
     // expect(game.cardDeck).not.toContain(game.communityCards[0]);
@@ -88,9 +86,7 @@ describe("deals next community cards", () => {
     // expect(game.cardDeck).not.toContain(game.communityCards[2]);
     // expect(game.cardDeck).not.toContain(game.communityCards[3]);
     // expect(game.cardDeck).not.toContain(game.communityCards[4]);
-
     // redealDeck(game);
-
     // expect(game.communityCards.length).toBe(5);
     // expect(game.cardDeck.length).toBe(47);
   });
@@ -103,7 +99,7 @@ describe("deals to players", () => {
     //   chimeConfig: {},
     //   cardDeck: [],
     //   communityCards: [],
-    //   players: ["A"],
+    //   players: [new Player("123", "Ad")],
     //   results: [],
     // };
     // const deal = await redealDeck(game);

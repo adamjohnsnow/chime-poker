@@ -108,7 +108,6 @@ describe("turns", () => {
     ];
 
     nextRoundTurn(players);
-    console.log(players);
     expect(players[0].isDealer).toBeTruthy;
     expect(players[1].isDealer).toBeFalsy;
     expect(players[2].isDealer).toBeFalsy;
@@ -235,7 +234,6 @@ describe("turns", () => {
     ];
 
     nextRoundTurn(players);
-    console.log(players);
     expect(players[0].isDealer).toBeFalsy;
     expect(players[1].isDealer).toBeFalsy;
     expect(players[2].isDealer).toBeTruthy;
@@ -307,7 +305,6 @@ describe("turns", () => {
     ];
 
     nextRoundTurn(players);
-    console.log(players);
     expect(players[0].isDealer).toBeFalsy;
     expect(players[1].isDealer).toBeTruthy;
     expect(players[2].isDealer).toBeFalsy;

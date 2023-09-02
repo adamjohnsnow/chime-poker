@@ -1,7 +1,12 @@
 import { Deck, Card } from "./cards";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
-import { Player, loadAllPlayers, newCardsForPlayer } from "./player";
+import {
+  BlindButtons,
+  Player,
+  loadAllPlayers,
+  newCardsForPlayer,
+} from "./player";
 import { HandEvaluator, Rank } from "./hands";
 import { getGame, writeGameData, writePlayerData } from "./firebase";
 import { nextRoundTurn } from "./turns";
@@ -14,6 +19,7 @@ export type gameState = {
   results: newHand[];
   prizePot: number;
   phase: GamePhase;
+  blind: number;
 };
 
 export type newHand = {
@@ -23,7 +29,7 @@ export type newHand = {
   result?: string;
 };
 
-enum GamePhase {
+export enum GamePhase {
   START,
   DEAL,
   TURN,
@@ -50,6 +56,7 @@ export async function startGame(): Promise<gameState | null> {
     results: [],
     prizePot: 0,
     phase: GamePhase.START,
+    blind: 20,
   };
 
   writeGameData(state);
@@ -59,8 +66,8 @@ export async function startGame(): Promise<gameState | null> {
 
 export async function nextCommunityCards(gameId: string) {
   const game = await getGame(gameId);
-  if (!game) {
-    return [[], []];
+  if (!game || game.phase === GamePhase.RESULTS) {
+    return;
   }
   if (!game.communityCards) {
     game.communityCards = [];
@@ -73,10 +80,10 @@ export async function nextCommunityCards(gameId: string) {
       writePlayerData(player);
     }
   });
-  await dealNextCommunityCards(game);
+  await dealNextCards(game);
 }
 
-export async function dealNextCommunityCards(gameState: gameState) {
+export async function dealNextCards(gameState: gameState) {
   switch (gameState.phase) {
     case GamePhase.START: {
       await dealDeck(gameState);
@@ -115,8 +122,6 @@ export async function dealNextCommunityCards(gameState: gameState) {
     }
 
     default: {
-      dealDeck(gameState);
-      gameState.phase = GamePhase.DEAL;
       break;
     }
   }
@@ -124,8 +129,8 @@ export async function dealNextCommunityCards(gameState: gameState) {
 }
 
 export async function resetCards(gameId: string) {
-  const gameRecord = await getGame(gameId);
-  if (!gameRecord) {
+  const game = await getGame(gameId);
+  if (!game) {
     return;
   }
 
@@ -138,12 +143,13 @@ export async function resetCards(gameId: string) {
     writePlayerData(player);
   });
 
-  gameRecord.cardDeck = new Deck().cards;
-  gameRecord.communityCards = [];
-  gameRecord.results = [];
-  gameRecord.phase = GamePhase.START;
+  game.cardDeck = new Deck().cards;
+  game.communityCards = [];
+  game.results = [];
+  game.phase = GamePhase.START;
+  game.prizePot = 0;
 
-  writeGameData(gameRecord);
+  writeGameData(game);
 }
 
 export async function dealDeck(game: gameState) {
@@ -164,6 +170,15 @@ export async function dealDeck(game: gameState) {
   const playerCount = activePlayers.length;
 
   activePlayers.forEach((player, i) => {
+    if (player.blindButton === BlindButtons.BIGBLIND) {
+      player.cash = player.cash - game.blind;
+      player.currentBet = game.blind;
+    }
+    if (player.blindButton === BlindButtons.LITTLEBLIND) {
+      player.cash = player.cash - game.blind / 2;
+      player.currentBet = game.blind / 2;
+    }
+
     newCardsForPlayer(player, [
       game.cardDeck[i],
       game.cardDeck[i + playerCount],

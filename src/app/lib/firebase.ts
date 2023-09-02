@@ -16,6 +16,7 @@ export function writePlayerData(player: Player) {
 }
 
 export function writeGameData(game: gameState) {
+  console.log("writing game");
   set(ref(db, "games/" + game.id + "/game"), game);
 }
 
