@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Player } from "../lib/player";
+import { BlindButtons, Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import { getPlayerStream } from "../lib/firebase";
 
@@ -29,6 +29,14 @@ export function PlayerWrapper({
       <div className="z-10 w-full items-start justify-between  text-sm flex">
         {player.name}: £{player.cash}
         <div className="flex">
+          {" "}
+          {player.isDealer ? <div>D</div> : null}
+          {player.blindButton === BlindButtons["Big Blind"] ? (
+            <div>BIG</div>
+          ) : null}
+          {player.blindButton === BlindButtons["Little Blind"] ? (
+            <div>LITTLE</div>
+          ) : null}
           <video className="video-tile m-1" id="local"></video>
           {player.cards && player.cards.length != 0 ? (
             <>

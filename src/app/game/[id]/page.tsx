@@ -57,7 +57,7 @@ export default function Game({ params }: { params: { id: string } }) {
     if (player) {
       saveLocalPlayer(gameId, player);
     }
-    initialiseGame();
+    // initialiseGame();
   }, [player]);
 
   useEffect(() => {
@@ -140,15 +140,6 @@ export default function Game({ params }: { params: { id: string } }) {
     await resetCards(gameId);
   }
 
-  function resetHighlights() {
-    const highlightedCards = document.getElementsByClassName("highlighted");
-    for (let i = 0; i < highlightedCards.length; i++) {
-      highlightedCards[i].classList.remove("highlighted");
-    }
-  }
-
-  async function updateActivePlayers() {}
-
   function highlightWinningCards() {
     const winningHand = game?.results[0].cards;
 
@@ -160,6 +151,15 @@ export default function Game({ params }: { params: { id: string } }) {
         cardElement.classList.add("highlighted");
       }
     });
+  }
+
+  function resetHighlights() {
+    const highlightedCards = document.getElementsByClassName("highlighted");
+    console.log("HIGH", highlightedCards);
+    for (let i = 0; i < highlightedCards.length; i++) {
+      console.log("H", i, highlightedCards[i]);
+      highlightedCards[i].classList.remove("highlighted");
+    }
   }
 
   return (

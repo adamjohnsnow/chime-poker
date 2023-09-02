@@ -1,4 +1,4 @@
-import { Player } from "../lib/player";
+import { BlindButtons, Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import "../styles/player.css";
 import { useEffect } from "react";
@@ -38,6 +38,13 @@ export function PlayerTile({ player }: { player: Player }) {
               </div>
             ) : null}
           </div>
+          {player.isDealer ? <div>D</div> : null}
+          {player.blindButton === BlindButtons["Big Blind"] ? (
+            <div>BIG</div>
+          ) : null}
+          {player.blindButton === BlindButtons["Little Blind"] ? (
+            <div>LITTLE</div>
+          ) : null}
         </div>
       ) : null}
     </>

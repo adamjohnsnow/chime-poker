@@ -67,7 +67,7 @@ export async function getPlayer(
   }
 }
 
-export async function getAllPlayers(gameId: string): Promise<Player[] | null> {
+export async function getAllPlayers(gameId: string): Promise<Player[]> {
   const dbRef = ref(getDatabase());
   console.log("getting players from ", gameId);
   const snapshot = await get(child(dbRef, "games/" + gameId + "/players"));
@@ -106,5 +106,5 @@ function convertPlayers(playersObject: Object): Player[] {
   split.forEach((entry) => {
     players.push(entry[1] as Player);
   });
-  return players;
+  return players.sort((a, b) => a.sortIndex - b.sortIndex);
 }

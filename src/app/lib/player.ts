@@ -19,7 +19,8 @@ export class Player {
   public folded?: boolean;
   public active?: boolean;
   public isDealer?: boolean;
-  public blindButton?: BlindButtons;
+  public blindButton: BlindButtons | null;
+  public sortIndex: number;
   constructor(gameId: string, name: string) {
     this.id = uuid.v4();
     this.gameId = gameId;
@@ -30,6 +31,8 @@ export class Player {
     this.cardsShown = false;
     this.active = true;
     this.folded = false;
+    this.blindButton = null;
+    this.sortIndex = 0;
   }
 }
 
@@ -70,18 +73,12 @@ export async function addNewPlayer(gameId: string, name: string) {
   }
 
   const player = new Player(gameId, name);
-
+  player.sortIndex = players.length;
   writePlayerData(player);
   return player;
 }
 
-export async function newCardsForPlayer(
-  gameId: string,
-  playerId: string,
-  cards: Card[]
-) {
-  const player = await loadPlayer(gameId, playerId);
-
+export async function newCardsForPlayer(player: Player, cards: Card[]) {
   if (!player || player.cash <= 0) {
     return;
   }

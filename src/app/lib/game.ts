@@ -2,13 +2,9 @@ import { Deck, Card } from "./cards";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
 import { Player, loadAllPlayers, newCardsForPlayer } from "./player";
-import { HandEvaluator, Rank, Result } from "./hands";
-import {
-  getGame,
-  getGameStream,
-  writeGameData,
-  writePlayerData,
-} from "./firebase";
+import { HandEvaluator, Rank } from "./hands";
+import { getGame, writeGameData, writePlayerData } from "./firebase";
+import { nextRoundTurn } from "./turns";
 
 export type gameState = {
   id: string;
@@ -95,25 +91,39 @@ export async function resetCards(gameId: string) {
   if (!gameRecord) {
     return;
   }
-  const redeal = await redealDeck(gameRecord);
-  writeGameData(redeal);
+  gameRecord.cardDeck = new Deck().cards;
+  gameRecord.communityCards = [];
+  gameRecord.results = [];
 
-  return redeal;
+  writeGameData(gameRecord);
+
+  const players = await loadAllPlayers(gameId);
+
+  await nextRoundTurn(players);
+
+  players.forEach((player) => {
+    player.cards = [];
+    writePlayerData(player);
+  });
 }
 
 export async function redealDeck(game: gameState) {
-  game.cardDeck = new Deck().cards;
-  game.communityCards = [];
-  game.results = [];
-
   const deckLength = game.cardDeck.length;
   const newHands: newHand[] = [];
 
   const loadedPlayers = await loadAllPlayers(game.id);
-  console.log("LLP:", loadedPlayers);
-  const activePlayers = loadedPlayers.filter(
-    (player) => player.cash > 0 && player.active
-  );
+
+  const activePlayers: Player[] = [];
+  loadedPlayers.forEach((player) => {
+    if (player.cash > 0 && player.active) {
+      activePlayers.push(player);
+    }
+    if (player.cash <= 0) {
+      player.blindButton = null;
+      player.isDealer = false;
+      writePlayerData(player);
+    }
+  });
   const playerCount = activePlayers.length;
 
   activePlayers.forEach((player, i) => {
@@ -123,7 +133,7 @@ export async function redealDeck(game: gameState) {
       cards: newCards,
       rank: 0,
     });
-    newCardsForPlayer(game.id, player.id, newCards);
+    newCardsForPlayer(player, newCards);
   });
 
   game.cardDeck = game.cardDeck.slice(
