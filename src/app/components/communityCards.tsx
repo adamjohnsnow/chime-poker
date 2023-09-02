@@ -11,7 +11,7 @@ export function CommunityCards({
   cards: Card[];
   chime?: ChimeProvider;
 }) {
-  const [communityCards, setCommunityCards] = useState<Card[]>([]);
+  const [communityCards, setCommunityCards] = useState<Card[]>(cards);
 
   useEffect(() => {
     setCommunityCards(cards);
@@ -31,7 +31,7 @@ export function CommunityCards({
 
   return (
     <div className="community-cards">
-      {communityCards.map((item, i) => (
+      {communityCards?.map((item, i) => (
         <PlayingCard key={i} card={item}></PlayingCard>
       ))}
     </div>

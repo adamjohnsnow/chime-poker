@@ -42,7 +42,7 @@ export const turns = {
   Items: [
     {
       content: {
-        S: `{"cards\":[],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false, "active": true, "blindButton": "Big Blind", "isDealer": false}`,
+        S: `{"cards\":[],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false, "active": true, "blindButton": BIGBLIND, "isDealer": false}`,
       },
       sk: {
         S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:095b3f67-02eb-41aa-aafb-f5cab1c77ca2",
@@ -51,7 +51,7 @@ export const turns = {
     },
     {
       content: {
-        S: `{"cards\":[],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false, "active": true,"blindButton": "Little Blind", "isDealer": false}`,
+        S: `{"cards\":[],"id":"095b3f67-02eb-41aa-aafb-f5cab1c77ca2","name":"Player 1","cash":10000,"currentBet":0,"folded":false, "active": true,"blindButton": LITTLEBLIND, "isDealer": false}`,
       },
       sk: {
         S: "736bbf1b-8b1c-4d9b-ace6-92a59145c8cf:095b3f67-02eb-41aa-aafb-f5cab1c77ca2",

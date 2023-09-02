@@ -1,20 +1,11 @@
 import { ChimeProvider } from "../lib/chimeUtils";
 import { Player, updatePlayer } from "../lib/player";
 
-export function TurnControl({
-  gameId,
-  player,
-  chime,
-}: {
-  gameId: string;
-  player: Player;
-  chime: ChimeProvider;
-}) {
+export function TurnControl({ player }: { player: Player }) {
   async function fold() {
     if (player) {
       player.folded = true;
-      updatePlayer(gameId, player);
-      chime?.sendMessage({ message: "playerFolded", player: player.id });
+      updatePlayer(player);
     }
   }
 
@@ -23,11 +14,6 @@ export function TurnControl({
     if (!input) {
       return;
     }
-    chime.sendMessage({
-      message: "betPlaced",
-      playerId: player.id,
-      amount: input.value,
-    });
   }
 
   return (

@@ -12,22 +12,14 @@ import { ChimeConfig, ChimeAttendee } from "./chime";
 export class ChimeProvider {
   private meetingSession: DefaultMeetingSession;
   private meetingId: string;
-  private playerId: string;
-  public eventDispatcher: (arg0: any) => void;
   public communityCardsDispatcher!: (arg0: any) => void | undefined;
 
-  constructor(
-    config: ChimeConfig,
-    attendee: ChimeAttendee,
-    callback: (arg0: any) => void
-  ) {
-    this.eventDispatcher = callback;
+  constructor(config: ChimeConfig, attendee: ChimeAttendee) {
     if (!config.MeetingId || !attendee.ExternalUserId) {
       throw "no meeting id or player id";
     }
 
     this.meetingId = config.MeetingId;
-    this.playerId = attendee.ExternalUserId;
     const logger = new ConsoleLogger("MyLogger", 3);
     const deviceController = new DefaultDeviceController(logger);
     const configuration = new MeetingSessionConfiguration(
@@ -90,7 +82,6 @@ export class ChimeProvider {
     await this.meetingSession?.audioVideo.chooseAudioOutput(
       speakers[0].deviceId
     );
-    // console.log("audio out: ", speakers[0].deviceId);
     return Promise.resolve();
   }
 
@@ -98,49 +89,12 @@ export class ChimeProvider {
     await this.settUpAttendeeObserver();
     await this.setUpVideoObserver();
 
-    // game messages
-    await this.meetingSession.audioVideo.realtimeSubscribeToReceiveDataMessage(
-      this.meetingId,
-      (message) => {
-        const jsonString = Buffer.from(message.data).toString("utf8");
-        const parsedData = JSON.parse(jsonString);
-        if (parsedData.message === "communityCards") {
-          this.communityCardsDispatcher(parsedData);
-        } else {
-          this.eventDispatcher(parsedData);
-        }
-      }
-    );
-
-    // player messages
-    await this.meetingSession.audioVideo.realtimeSubscribeToReceiveDataMessage(
-      this.playerId,
-      (message) => {
-        const jsonString = Buffer.from(message.data).toString("utf8");
-        const parsedData = JSON.parse(jsonString);
-
-        this.eventDispatcher(parsedData);
-      }
-    );
-
     console.log("obsevers initialised", this.meetingId);
     return Promise.resolve();
   }
 
   public registerCardsEventListener(dispatcher: (arg0: any) => void) {
     this.communityCardsDispatcher = dispatcher;
-  }
-
-  public sendMessage(content: Record<string, any>) {
-    const parsedContent = JSON.stringify(content);
-    this.meetingSession.audioVideo.realtimeSendDataMessage(
-      this.meetingId,
-      parsedContent
-    );
-  }
-
-  public sendPlayerMessage(playerId: string, content: string) {
-    this.meetingSession.audioVideo.realtimeSendDataMessage(playerId, content);
   }
 
   public leaveCall() {
@@ -159,15 +113,9 @@ export class ChimeProvider {
         dropped?: boolean
       ) => {
         if (present && !dropped) {
-          this.eventDispatcher({
-            message: "newPlayer",
-            playerId: externalUserId,
-          });
+          // todo
         } else {
-          this.eventDispatcher({
-            message: "playerDropped",
-            playerId: externalUserId,
-          });
+          // todo
         }
       }
     );

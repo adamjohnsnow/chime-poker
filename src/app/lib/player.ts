@@ -1,69 +1,51 @@
 import { Card } from "./cards";
-import { loadFromDb, queryDb, saveToDb } from "./dynamoDb";
-import { getGame, saveGame } from "./game";
+import { getAllPlayers, getPlayer, writePlayerData } from "./firebase";
+import { getGame, writeGameData } from "./firebase";
 import * as uuid from "uuid";
 
 export enum BlindButtons {
-  "Big Blind",
-  "Little Blind",
+  BIGBLIND,
+  LITTLEBLIND,
 }
 
 export class Player {
-  constructor(
-    public cards: Card[],
-    public id: string,
-    public name: string,
-    public cash: number,
-    public currentBet: number | null,
-    public folded?: boolean,
-    public active?: boolean,
-    public isDealer?: boolean,
-    public blindButton?: BlindButtons
-  ) {
+  public gameId: string;
+  public cards: Card[];
+  public id: string;
+  public name: string;
+  public cash: number;
+  public currentBet: number;
+  public cardsShown: boolean;
+  public folded?: boolean;
+  public active?: boolean;
+  public isDealer?: boolean;
+  public blindButton: BlindButtons | null;
+  public sortIndex: number;
+  constructor(gameId: string, name: string) {
+    this.id = uuid.v4();
+    this.gameId = gameId;
+    this.name = name;
+    this.cards = [];
+    this.cash = 10000;
+    this.currentBet = 0;
+    this.cardsShown = false;
     this.active = true;
     this.folded = false;
+    this.blindButton = null;
+    this.sortIndex = 0;
   }
 }
 
-export async function loadPlayer(
-  gameId: string,
-  playerId: string,
-  includeCards?: boolean
-) {
-  const record = await loadFromDb(gameId, ":" + playerId);
-  if (!record?.S) {
-    return;
-  }
-  const player: Player = JSON.parse(record.S);
-  if (!includeCards) {
-    player.cards = [];
-  }
+export async function loadPlayer(gameId: string, playerId: string) {
+  const player = getPlayer(gameId, playerId);
   return player;
 }
 
-export async function loadAllPlayers(
-  gameId: string,
-  includeCards?: boolean
-): Promise<Player[]> {
-  const players: Player[] = [];
-
-  const query = await queryDb(gameId);
-  if (!query) {
-    return players;
+export async function loadAllPlayers(gameId: string): Promise<Player[]> {
+  const players = await getAllPlayers(gameId);
+  if (!players) {
+    return [];
   }
-
-  query.forEach((record) => {
-    if (record.content.S && record.sk.S?.substring(36) != ":game") {
-      const player = JSON.parse(record.content.S);
-      if (!includeCards) {
-        player.cards = [];
-      }
-      if (!player.folded && player.active) {
-        players.push(player);
-      }
-    }
-  });
-
   return players;
 }
 
@@ -72,67 +54,37 @@ export async function updatePlayerStatus(
   playerId: string,
   active: boolean
 ) {
-  const player = await loadPlayer(gameId, playerId, true);
+  const player = await loadPlayer(gameId, playerId);
   if (!player) {
     return;
   }
   player.active = active;
-  updatePlayer(gameId, player);
+  updatePlayer(player);
 }
 
-export async function updatePlayer(gameId: string, player: Player) {
-  saveToDb(gameId, player.id, JSON.stringify(player));
+export async function updatePlayer(player: Player) {
+  writePlayerData(player);
 }
 
 export async function addNewPlayer(gameId: string, name: string) {
-  const players = await loadAllPlayers(gameId);
-
-  if (players.length) {
+  const players = await getAllPlayers(gameId);
+  if (!players || players.length > 5) {
     return;
   }
 
-  const game = await getGame(gameId);
-  if (!game) {
-    return;
-  }
-
-  const player = new Player([], uuid.v4(), name, 10000, 0);
-  switch (players.length) {
-    case 0: {
-      player.isDealer = true;
-      break;
-    }
-    case 1: {
-      player.blindButton = BlindButtons["Big Blind"];
-      break;
-    }
-    case 2: {
-      player.blindButton = BlindButtons["Little Blind"];
-      break;
-    }
-    default: {
-      break;
-    }
-  }
-
-  game.players = game?.players.concat(player.id);
-  await saveToDb(gameId, player.id, JSON.stringify(player));
-  await saveGame(game);
+  const player = new Player(gameId, name);
+  player.sortIndex = players.length;
+  writePlayerData(player);
   return player;
 }
 
-export async function newCardsForPlayer(
-  gameId: string,
-  playerId: string,
-  cards: Card[]
-) {
-  const player = await loadPlayer(gameId, playerId);
-
+export async function newCardsForPlayer(player: Player, cards: Card[]) {
   if (!player || player.cash <= 0) {
     return;
   }
+  player.cardsShown = false;
   player.folded = false;
   player.cards = cards;
 
-  updatePlayer(gameId, player);
+  updatePlayer(player);
 }

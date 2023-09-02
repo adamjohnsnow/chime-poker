@@ -1,18 +1,25 @@
-"use server";
 import { Deck, Card } from "./cards";
-import { saveToDb, loadFromDb } from "./dynamoDb";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
-import { Player, loadAllPlayers, newCardsForPlayer } from "./player";
-import { HandEvaluator, Rank, Result } from "./hands";
+import {
+  BlindButtons,
+  Player,
+  loadAllPlayers,
+  newCardsForPlayer,
+} from "./player";
+import { HandEvaluator, Rank } from "./hands";
+import { getGame, writeGameData, writePlayerData } from "./firebase";
+import { nextRoundTurn } from "./turns";
 
 export type gameState = {
   id: string;
   chimeConfig: ChimeConfig;
   cardDeck: Card[];
   communityCards: Card[];
-  players: string[];
   results: newHand[];
+  prizePot: number;
+  phase: GamePhase;
+  blind: number;
 };
 
 export type newHand = {
@@ -21,6 +28,15 @@ export type newHand = {
   rank: Rank | 0;
   result?: string;
 };
+
+export enum GamePhase {
+  START,
+  DEAL,
+  TURN,
+  FLOP,
+  RIVER,
+  RESULTS,
+}
 
 export async function startGame(): Promise<gameState | null> {
   const id = uuid.v4();
@@ -37,110 +53,145 @@ export async function startGame(): Promise<gameState | null> {
     chimeConfig: call,
     cardDeck: deck.cards,
     communityCards: [],
-    players: [],
     results: [],
+    prizePot: 0,
+    phase: GamePhase.START,
+    blind: 20,
   };
 
-  saveGame(state);
+  writeGameData(state);
 
   return state;
 }
 
-export async function createNewGame(): Promise<string> {
-  const newGame = await startGame();
-  return JSON.stringify(newGame);
-}
-
-export async function saveGame(game: gameState) {
-  saveToDb(game.id, "game", JSON.stringify(game));
-}
-
-export async function getGame(gameId: string) {
-  const gameRecord = await loadFromDb(gameId, ":game");
-  if (!gameRecord?.S) {
+export async function nextCommunityCards(gameId: string) {
+  const game = await getGame(gameId);
+  if (!game || game.phase === GamePhase.RESULTS) {
     return;
   }
-  return JSON.parse(gameRecord.S) as gameState;
-}
-
-export async function nextCards(gameId: string): Promise<[Card[], newHand[]]> {
-  const gameRecord = await loadFromDb(gameId, ":game");
-  if (!gameRecord?.S) {
-    return [[], []];
+  if (!game.communityCards) {
+    game.communityCards = [];
   }
-  const gameState = JSON.parse(gameRecord.S) as gameState;
-  return dealNextCards(gameState);
+  const players = await loadAllPlayers(gameId);
+  players.forEach((player) => {
+    if (player.currentBet > 0) {
+      game.prizePot = game.prizePot + player.currentBet;
+      player.currentBet = 0;
+      writePlayerData(player);
+    }
+  });
+  await dealNextCards(game);
 }
 
-export async function dealNextCards(
-  gameState: gameState
-): Promise<[Card[], newHand[]]> {
-  switch (gameState.communityCards.length) {
-    case 5: {
-      await findWinner(gameState);
+export async function dealNextCards(gameState: gameState) {
+  switch (gameState.phase) {
+    case GamePhase.START: {
+      await dealDeck(gameState);
+      gameState.phase = GamePhase.DEAL;
       break;
     }
-    case 0: {
+    case GamePhase.DEAL: {
       gameState.communityCards = gameState.cardDeck.slice(0, 3);
       gameState.cardDeck = gameState.cardDeck.slice(
         0 - gameState.cardDeck.length + 3
       );
+
+      gameState.phase = GamePhase.TURN;
       break;
     }
-    default: {
+    case GamePhase.TURN: {
       gameState.communityCards = gameState.communityCards.concat(
         gameState.cardDeck.slice(0, 1)
       );
       gameState.cardDeck = gameState.cardDeck.slice(1);
+      gameState.phase = GamePhase.FLOP;
+      break;
+    }
+    case GamePhase.FLOP: {
+      gameState.communityCards = gameState.communityCards.concat(
+        gameState.cardDeck.slice(0, 1)
+      );
+      gameState.cardDeck = gameState.cardDeck.slice(1);
+      gameState.phase = GamePhase.RIVER;
+      break;
+    }
+    case GamePhase.RIVER: {
+      await findWinner(gameState);
+      gameState.phase = GamePhase.RESULTS;
+      break;
+    }
+
+    default: {
       break;
     }
   }
-
-  saveGame(gameState);
-
-  return [gameState.communityCards, gameState.results];
+  writeGameData(gameState);
 }
 
 export async function resetCards(gameId: string) {
-  const gameRecord = await getGame(gameId);
-  if (!gameRecord) {
+  const game = await getGame(gameId);
+  if (!game) {
     return;
   }
-  const redeal = await redealDeck(gameRecord);
-  saveGame(redeal.game);
 
-  return redeal.hands;
-}
+  const players = await loadAllPlayers(gameId);
 
-export async function redealDeck(game: gameState) {
+  await nextRoundTurn(players);
+
+  players.forEach((player) => {
+    player.cards = [];
+    writePlayerData(player);
+  });
+
   game.cardDeck = new Deck().cards;
   game.communityCards = [];
   game.results = [];
+  game.phase = GamePhase.START;
+  game.prizePot = 0;
 
+  writeGameData(game);
+}
+
+export async function dealDeck(game: gameState) {
   const deckLength = game.cardDeck.length;
-  const newHands: newHand[] = [];
-
   const loadedPlayers = await loadAllPlayers(game.id);
-  const activePlayers = loadedPlayers.filter(
-    (player) => player.cash > 0 && player.active
-  );
+
+  const activePlayers: Player[] = [];
+  loadedPlayers.forEach((player) => {
+    if (player.cash > 0 && player.active) {
+      activePlayers.push(player);
+    }
+    if (player.cash <= 0) {
+      player.blindButton = null;
+      player.isDealer = false;
+      writePlayerData(player);
+    }
+  });
   const playerCount = activePlayers.length;
 
   activePlayers.forEach((player, i) => {
-    const newCards = [game.cardDeck[i], game.cardDeck[i + playerCount]];
-    newHands.push({
-      playerId: player.id,
-      cards: newCards,
-      rank: 0,
-    });
-    newCardsForPlayer(game.id, player.id, newCards);
+    if (player.blindButton === BlindButtons.BIGBLIND) {
+      player.cash = player.cash - game.blind;
+      player.currentBet = game.blind;
+    }
+    if (player.blindButton === BlindButtons.LITTLEBLIND) {
+      player.cash = player.cash - game.blind / 2;
+      player.currentBet = game.blind / 2;
+    }
+
+    newCardsForPlayer(player, [
+      game.cardDeck[i],
+      game.cardDeck[i + playerCount],
+    ]);
   });
-  game.cardDeck = game.cardDeck.slice(0 - deckLength + game.players.length * 2);
-  return { game: game, hands: newHands };
+  game.cardDeck = game.cardDeck.slice(
+    0 - deckLength + activePlayers.length * 2
+  );
+  return game;
 }
 
 export async function findWinner(game: gameState) {
-  const players = await loadAllPlayers(game.id, true);
+  const players = await loadAllPlayers(game.id);
   const results: newHand[] = [];
 
   if (!players) {
@@ -156,6 +207,8 @@ export async function findWinner(game: gameState) {
       rank: evaluatedHand.rank,
       result: Rank[evaluatedHand.rank],
     });
+    player.cardsShown = true;
+    writePlayerData(player);
   });
 
   game.results = results.sort((a, b) => b.rank - a.rank);
