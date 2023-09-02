@@ -6,7 +6,12 @@ import { Key, useEffect, useState } from "react";
 // lib
 import { createAttendee } from "@/app/lib/chime";
 import { ChimeProvider } from "@/app/lib/chimeUtils";
-import { gameState, nextCommunityCards, resetCards } from "@/app/lib/game";
+import {
+  dealDeck,
+  gameState,
+  nextCommunityCards,
+  resetCards,
+} from "@/app/lib/game";
 import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
 
@@ -20,11 +25,7 @@ import { TurnControl } from "@/app/components/turnControl";
 import { ActivityMonitor } from "@/app/components/activityMonitor";
 import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
-import {
-  getAllPlayersStream,
-  getGameStream,
-  writePlayerData,
-} from "@/app/lib/firebase";
+import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -80,7 +81,7 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   function playersEventHandler(playersData: Player[]) {
-    console.log("PLAYERS UPDATE:", playersData);
+    // console.log("PLAYERS UPDATE:", playersData);
     setPlayers(playersData);
   }
 
@@ -126,10 +127,18 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   async function nextAction() {
-    if (!gameId) {
+    if (!game) {
       return;
     }
-    nextCommunityCards(gameId);
+    if (
+      players.filter((player) => {
+        player.cards;
+      }).length != 0
+    ) {
+      dealDeck(game);
+    } else {
+      nextCommunityCards(gameId);
+    }
   }
 
   async function nextRound() {
@@ -155,9 +164,7 @@ export default function Game({ params }: { params: { id: string } }) {
 
   function resetHighlights() {
     const highlightedCards = document.getElementsByClassName("highlighted");
-    console.log("HIGH", highlightedCards);
     for (let i = 0; i < highlightedCards.length; i++) {
-      console.log("H", i, highlightedCards[i]);
       highlightedCards[i].classList.remove("highlighted");
     }
   }
@@ -171,10 +178,10 @@ export default function Game({ params }: { params: { id: string } }) {
           <>
             <PlayerWrapper playerId={player.id} gameId={gameId} />
             <form action={nextAction}>
-              <button>Next</button>
+              <button>Deal</button>
             </form>
             <form action={nextRound}>
-              <button>Redeal</button>
+              <button>Reset</button>
             </form>
             {/* <TurnControl player={player}></TurnControl> */}
             <div className="players">
@@ -189,6 +196,7 @@ export default function Game({ params }: { params: { id: string } }) {
                 </>
               ) : null}
             </div>
+            <div>{game?.prizePot}</div>
             <CommunityCards
               chime={chime as ChimeProvider}
               cards={game ? game.communityCards : []}

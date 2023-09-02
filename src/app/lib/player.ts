@@ -4,8 +4,8 @@ import { getGame, writeGameData } from "./firebase";
 import * as uuid from "uuid";
 
 export enum BlindButtons {
-  "Big Blind",
-  "Little Blind",
+  BIGBLIND,
+  LITTLEBLIND,
 }
 
 export class Player {
@@ -14,7 +14,7 @@ export class Player {
   public id: string;
   public name: string;
   public cash: number;
-  public currentBet: number | null;
+  public currentBet: number;
   public cardsShown: boolean;
   public folded?: boolean;
   public active?: boolean;

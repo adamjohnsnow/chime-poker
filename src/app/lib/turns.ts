@@ -21,19 +21,19 @@ export async function nextRoundTurn(players: Player[]) {
 
   if (players.filter((player) => player.isDealer).length === 0) {
     players[0].isDealer = true;
-    players[1].blindButton = BlindButtons["Big Blind"];
-    players[nextPlayerIndex(1)].blindButton = BlindButtons["Little Blind"];
+    players[1].blindButton = BlindButtons.BIGBLIND;
+    players[nextPlayerIndex(1)].blindButton = BlindButtons.LITTLEBLIND;
     return;
   }
   let dealerMoved = false;
   let buttonsMoved = false;
 
   for (let i = 0; i < players.length; i++) {
-    if (!buttonsMoved && players[i].blindButton === BlindButtons["Big Blind"]) {
+    if (!buttonsMoved && players[i].blindButton === BlindButtons.BIGBLIND) {
       players[i].blindButton = null;
-      players[nextPlayerIndex(i)].blindButton = BlindButtons["Big Blind"];
+      players[nextPlayerIndex(i)].blindButton = BlindButtons.BIGBLIND;
       players[nextPlayerIndex(nextPlayerIndex(i))].blindButton =
-        BlindButtons["Little Blind"];
+        BlindButtons.LITTLEBLIND;
       buttonsMoved = true;
     }
     if (!dealerMoved && players[i].isDealer) {

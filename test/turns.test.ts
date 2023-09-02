@@ -57,8 +57,8 @@ describe("turns", () => {
     expect(players[2].isDealer).toBeFalsy;
 
     expect(players[0].blindButton).toBeNull;
-    expect(players[1].blindButton).toBe(BlindButtons["Big Blind"]);
-    expect(players[2].blindButton).toBe(BlindButtons["Little Blind"]);
+    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
+    expect(players[2].blindButton).toBe(BlindButtons.LITTLEBLIND);
   });
 
   test("round turn", async () => {
@@ -73,7 +73,7 @@ describe("turns", () => {
         active: true,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons["Big Blind"],
+        blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
       },
@@ -87,7 +87,7 @@ describe("turns", () => {
         cardsShown: false,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons["Little Blind"],
+        blindButton: BlindButtons.LITTLEBLIND,
         gameId: "123",
         sortIndex: 0,
       },
@@ -114,8 +114,8 @@ describe("turns", () => {
     expect(players[2].isDealer).toBeFalsy;
 
     expect(players[0].blindButton).toBeNull;
-    expect(players[1].blindButton).toBe(BlindButtons["Big Blind"]);
-    expect(players[2].blindButton).toBe(BlindButtons["Little Blind"]);
+    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
+    expect(players[2].blindButton).toBe(BlindButtons.LITTLEBLIND);
 
     nextRoundTurn(players);
     expect(players[1].isDealer).toBeTruthy;
@@ -123,8 +123,8 @@ describe("turns", () => {
     expect(players[2].isDealer).toBeFalsy;
 
     expect(players[1].blindButton).toBeNull;
-    expect(players[2].blindButton).toBe(BlindButtons["Big Blind"]);
-    expect(players[0].blindButton).toBe(BlindButtons["Little Blind"]);
+    expect(players[2].blindButton).toBe(BlindButtons.BIGBLIND);
+    expect(players[0].blindButton).toBe(BlindButtons.LITTLEBLIND);
   });
   test("2 players round turn", async () => {
     const players: Player[] = [
@@ -138,7 +138,7 @@ describe("turns", () => {
         active: true,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons["Big Blind"],
+        blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
       },
@@ -152,7 +152,7 @@ describe("turns", () => {
         cardsShown: false,
         folded: false,
         isDealer: true,
-        blindButton: BlindButtons["Little Blind"],
+        blindButton: BlindButtons.LITTLEBLIND,
         gameId: "123",
         sortIndex: 0,
       },
@@ -163,15 +163,15 @@ describe("turns", () => {
     expect(players[0].isDealer).toBeTruthy;
     expect(players[1].isDealer).toBeFalsy;
 
-    expect(players[1].blindButton).toBe(BlindButtons["Big Blind"]);
-    expect(players[0].blindButton).toBe(BlindButtons["Little Blind"]);
+    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
+    expect(players[0].blindButton).toBe(BlindButtons.LITTLEBLIND);
 
     nextRoundTurn(players);
     expect(players[1].isDealer).toBeTruthy;
     expect(players[0].isDealer).toBeFalsy;
 
-    expect(players[0].blindButton).toBe(BlindButtons["Big Blind"]);
-    expect(players[1].blindButton).toBe(BlindButtons["Little Blind"]);
+    expect(players[0].blindButton).toBe(BlindButtons.BIGBLIND);
+    expect(players[1].blindButton).toBe(BlindButtons.LITTLEBLIND);
   });
 
   test("dont give to busted or inactive", async () => {
@@ -186,7 +186,7 @@ describe("turns", () => {
         active: true,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons["Big Blind"],
+        blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
       },
@@ -200,7 +200,7 @@ describe("turns", () => {
         cardsShown: false,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons["Little Blind"],
+        blindButton: BlindButtons.LITTLEBLIND,
         gameId: "123",
         sortIndex: 0,
       },
@@ -243,8 +243,8 @@ describe("turns", () => {
 
     expect(players[0].blindButton).toBeNull;
     expect(players[1].blindButton).toBeNull;
-    expect(players[2].blindButton).toBe(BlindButtons["Big Blind"]);
-    expect(players[3].blindButton).toBe(BlindButtons["Little Blind"]);
+    expect(players[2].blindButton).toBe(BlindButtons.BIGBLIND);
+    expect(players[3].blindButton).toBe(BlindButtons.LITTLEBLIND);
   });
   test("dont give to busted or inactive 2", async () => {
     const players: Player[] = [
@@ -258,7 +258,7 @@ describe("turns", () => {
         active: true,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons["Big Blind"],
+        blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
       },
@@ -272,7 +272,7 @@ describe("turns", () => {
         cardsShown: false,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons["Little Blind"],
+        blindButton: BlindButtons.LITTLEBLIND,
         gameId: "123",
         sortIndex: 0,
       },
@@ -315,7 +315,7 @@ describe("turns", () => {
 
     expect(players[0].blindButton).toBeNull;
     expect(players[3].blindButton).toBeNull;
-    expect(players[1].blindButton).toBe(BlindButtons["Big Blind"]);
-    expect(players[2].blindButton).toBe(BlindButtons["Little Blind"]);
+    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
+    expect(players[2].blindButton).toBe(BlindButtons.LITTLEBLIND);
   });
 });

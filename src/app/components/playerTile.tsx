@@ -39,10 +39,8 @@ export function PlayerTile({ player }: { player: Player }) {
             ) : null}
           </div>
           {player.isDealer ? <div>D</div> : null}
-          {player.blindButton === BlindButtons["Big Blind"] ? (
-            <div>BIG</div>
-          ) : null}
-          {player.blindButton === BlindButtons["Little Blind"] ? (
+          {player.blindButton === BlindButtons.BIGBLIND ? <div>BIG</div> : null}
+          {player.blindButton === BlindButtons.LITTLEBLIND ? (
             <div>LITTLE</div>
           ) : null}
         </div>

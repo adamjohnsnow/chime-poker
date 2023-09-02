@@ -31,10 +31,8 @@ export function PlayerWrapper({
         <div className="flex">
           {" "}
           {player.isDealer ? <div>D</div> : null}
-          {player.blindButton === BlindButtons["Big Blind"] ? (
-            <div>BIG</div>
-          ) : null}
-          {player.blindButton === BlindButtons["Little Blind"] ? (
+          {player.blindButton === BlindButtons.BIGBLIND ? <div>BIG</div> : null}
+          {player.blindButton === BlindButtons.LITTLEBLIND ? (
             <div>LITTLE</div>
           ) : null}
           <video className="video-tile m-1" id="local"></video>

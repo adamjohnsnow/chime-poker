@@ -69,7 +69,6 @@ export async function getPlayer(
 
 export async function getAllPlayers(gameId: string): Promise<Player[]> {
   const dbRef = ref(getDatabase());
-  console.log("getting players from ", gameId);
   const snapshot = await get(child(dbRef, "games/" + gameId + "/players"));
   console.log(snapshot.exists());
   if (snapshot.exists()) {
