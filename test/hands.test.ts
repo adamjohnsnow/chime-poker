@@ -2,6 +2,7 @@ import { Card } from "../src/app/lib/cards";
 import { Rank, HandEvaluator } from "../src/app/lib/hands";
 import { describe, expect, test } from "@jest/globals";
 
+const evaluator = new HandEvaluator();
 describe("hand evaluator", () => {
   test("returns high card", () => {
     const cards: Card[] = [
@@ -13,11 +14,13 @@ describe("hand evaluator", () => {
       { value: 6, suit: "♥️" },
       { value: 14, suit: "♦️" },
     ];
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.HighCard);
-    expect(hand.result.cards[0].value).toEqual(14);
-    expect(hand.result.kickers.length).toBe(4);
+    expect(hand.rank).toBe(Rank.HighCard);
+    expect(hand.cards[0].value).toEqual(14);
+    expect(hand.cardsScore).toEqual(14);
+    expect(hand.kickers.length).toBe(4);
+    expect(hand.kickersScore).toEqual(8070604);
   });
 
   test("returns a pair", () => {
@@ -31,12 +34,14 @@ describe("hand evaluator", () => {
       { value: 14, suit: "♦️" },
     ];
 
-    const hand = new HandEvaluator(cards);
-    expect(hand.result.rank).toBe(Rank.OnePair);
-    expect(hand.result.cards.length).toEqual(2);
-    expect(hand.result.cards[0].value).toEqual(7);
-    expect(hand.result.cards[1].value).toEqual(7);
-    expect(hand.result.kickers.length).toBe(3);
+    const hand = evaluator.evaluate(cards);
+    expect(hand.rank).toBe(Rank.OnePair);
+    expect(hand.cards.length).toEqual(2);
+    expect(hand.cardsScore).toEqual(707);
+    expect(hand.cards[0].value).toEqual(7);
+    expect(hand.cards[1].value).toEqual(7);
+    expect(hand.kickers.length).toBe(3);
+    expect(hand.kickersScore).toEqual(140806);
   });
 
   test("finds two pair", () => {
@@ -50,12 +55,15 @@ describe("hand evaluator", () => {
       { value: 14, suit: "♦️" },
     ];
 
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.TwoPair);
-    expect(hand.result.cards.length).toEqual(4);
-    expect(hand.result.kickers.length).toBe(1);
-    expect(hand.result.kickers[0].value).toBe(14);
+    expect(hand.rank).toBe(Rank.TwoPair);
+    expect(hand.cards.length).toEqual(4);
+    expect(hand.cards[0].value).toBe(7);
+    expect(hand.kickers.length).toBe(1);
+    expect(hand.kickers[0].value).toBe(14);
+    expect(hand.cardsScore).toEqual(7070202);
+    expect(hand.kickersScore).toEqual(14);
   });
 
   test("returns three of a kind", () => {
@@ -68,16 +76,18 @@ describe("hand evaluator", () => {
       { value: 6, suit: "♥️" },
       { value: 14, suit: "♦️" },
     ];
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.ThreeOfAKind);
-    expect(hand.result.cards.length).toEqual(3);
-    expect(hand.result.kickers.length).toBe(2);
-    expect(hand.result.cards[0].value).toEqual(7);
-    expect(hand.result.cards[1].value).toEqual(7);
-    expect(hand.result.cards[2].value).toEqual(7);
-    expect(hand.result.kickers[0].value).toBe(14);
-    expect(hand.result.kickers[1].value).toBe(8);
+    expect(hand.rank).toBe(Rank.ThreeOfAKind);
+    expect(hand.cards.length).toEqual(3);
+    expect(hand.kickers.length).toBe(2);
+    expect(hand.cards[0].value).toEqual(7);
+    expect(hand.cards[1].value).toEqual(7);
+    expect(hand.cards[2].value).toEqual(7);
+    expect(hand.kickers[0].value).toBe(14);
+    expect(hand.kickers[1].value).toBe(8);
+    expect(hand.cardsScore).toEqual(70707);
+    expect(hand.kickersScore).toEqual(1408);
   });
 
   test("returns straight", () => {
@@ -91,12 +101,12 @@ describe("hand evaluator", () => {
       { value: 6, suit: "♦️" },
     ];
 
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.Straight);
-    expect(hand.result.cards[0].value).toEqual(10);
+    expect(hand.rank).toBe(Rank.Straight);
+    expect(hand.cards[0].value).toEqual(10);
 
-    expect(hand.result.kickers.length).toBe(0);
+    expect(hand.kickers.length).toBe(0);
   });
 
   test("returns not straight", () => {
@@ -110,9 +120,9 @@ describe("hand evaluator", () => {
       { value: 6, suit: "♦️" },
     ];
 
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).not.toBe(Rank.Straight);
+    expect(hand.rank).not.toBe(Rank.Straight);
   });
 
   test("returns straight over three of a kind", () => {
@@ -126,10 +136,10 @@ describe("hand evaluator", () => {
       { value: 6, suit: "♦️" },
     ];
 
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.Straight);
-    expect(hand.result.kickers.length).toBe(0);
+    expect(hand.rank).toBe(Rank.Straight);
+    expect(hand.kickers.length).toBe(0);
   });
 
   test("returns flush", () => {
@@ -143,10 +153,11 @@ describe("hand evaluator", () => {
       { value: 6, suit: "♣️" },
     ];
 
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.Flush);
-    expect(hand.result.kickers.length).toBe(0);
+    expect(hand.rank).toBe(Rank.Flush);
+    expect(hand.cards[0].value).toBe(8);
+    expect(hand.kickers.length).toBe(0);
   });
 
   test("finds full house", () => {
@@ -164,11 +175,11 @@ describe("hand evaluator", () => {
       card5,
     ];
 
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.FullHouse);
-    expect(hand.result.cards.length).toEqual(5);
-    expect(hand.result.kickers.length).toBe(0);
+    expect(hand.rank).toBe(Rank.FullHouse);
+    expect(hand.cards.length).toEqual(5);
+    expect(hand.kickers.length).toBe(0);
   });
 
   test("returns four of a kind", () => {
@@ -184,13 +195,13 @@ describe("hand evaluator", () => {
       card4,
     ];
 
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.FourOfAKind);
-    expect(hand.result.cards.length).toEqual(4);
-    expect(hand.result.cards[0].value).toBe(7);
-    expect(hand.result.kickers.length).toBe(1);
-    expect(hand.result.kickers[0].value).toBe(4);
+    expect(hand.rank).toBe(Rank.FourOfAKind);
+    expect(hand.cards.length).toEqual(4);
+    expect(hand.cards[0].value).toBe(7);
+    expect(hand.kickers.length).toBe(1);
+    expect(hand.kickers[0].value).toBe(4);
   });
 
   test("returns straight flush", () => {
@@ -204,10 +215,10 @@ describe("hand evaluator", () => {
       { value: 6, suit: "♣️" },
     ];
 
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.StraightFlush);
-    expect(hand.result.kickers.length).toBe(0);
+    expect(hand.rank).toBe(Rank.StraightFlush);
+    expect(hand.kickers.length).toBe(0);
   });
 
   test("returns royal flush", () => {
@@ -221,10 +232,10 @@ describe("hand evaluator", () => {
       { value: 11, suit: "♣️" },
     ];
 
-    const hand = new HandEvaluator(cards);
+    const hand = evaluator.evaluate(cards);
 
-    expect(hand.result.rank).toBe(Rank.RoyalFlush);
-    expect(hand.result.kickers.length).toBe(0);
+    expect(hand.rank).toBe(Rank.RoyalFlush);
+    expect(hand.kickers.length).toBe(0);
   });
 
   test("doesnt return 3 pairs...", () => {
@@ -236,9 +247,9 @@ describe("hand evaluator", () => {
       { suit: "♣️", value: 10 },
       { suit: "♠️", value: 7 },
     ];
-    const hand = new HandEvaluator(cards);
-    expect(hand.result.rank).toBe(Rank.TwoPair);
-    expect(hand.result.cards.length).toBe(4);
-    expect(hand.result.cards[0].value).not.toBe(7);
+    const hand = evaluator.evaluate(cards);
+    expect(hand.rank).toBe(Rank.TwoPair);
+    expect(hand.cards.length).toBe(4);
+    expect(hand.cards[0].value).not.toBe(7);
   });
 });

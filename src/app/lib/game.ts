@@ -1,33 +1,20 @@
 import { Deck, Card } from "./cards";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
-import {
-  BlindButtons,
-  Player,
-  loadAllPlayers,
-  newCardsForPlayer,
-} from "./player";
-import { HandEvaluator, Rank } from "./hands";
+import { BlindButtons, Player, loadAllPlayers } from "./player";
 import { getGame, writeGameData, writePlayerData } from "./firebase";
 import { nextRoundTurn } from "./turns";
-import { findWinner } from "./findWinner";
+import { findWinner, handResult } from "./findWinner";
 
 export type gameState = {
   id: string;
   chimeConfig: ChimeConfig;
   cardDeck: Card[];
   communityCards: Card[];
-  results: newHand[];
+  results: handResult[];
   prizePot: number;
   phase: GamePhase;
   blind: number;
-};
-
-export type newHand = {
-  playerId: string;
-  cards: Card[];
-  rank: Rank | 0;
-  result?: string;
 };
 
 export enum GamePhase {
