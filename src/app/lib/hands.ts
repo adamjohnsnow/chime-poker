@@ -16,6 +16,7 @@ export enum Rank {
 export interface Result {
   rank: Rank;
   cards: Card[];
+  kickers: Card[];
 }
 
 export class HandEvaluator {
@@ -43,6 +44,7 @@ export class HandEvaluator {
       return {
         rank: Rank.FourOfAKind,
         cards: cards.filter((card) => card.value === fourOfAKindValue),
+        kickers: [cards.filter((card) => card.value != fourOfAKindValue)[0]],
       };
     }
 
@@ -53,11 +55,15 @@ export class HandEvaluator {
         return {
           rank: Rank.FullHouse,
           cards: fullHouse,
+          kickers: [],
         };
       } else {
         return {
           rank: Rank.ThreeOfAKind,
           cards: cards.filter((card) => card.value === threeOfAKindValue),
+          kickers: cards
+            .filter((card) => card.value != threeOfAKindValue)
+            .slice(2),
         };
       }
     }
@@ -65,13 +71,34 @@ export class HandEvaluator {
     const pairCards = this.findTwoPair(counts);
 
     if (pairCards.length > 0) {
-      return {
-        rank: pairCards.length === 4 ? Rank.TwoPair : Rank.OnePair,
-        cards: pairCards,
-      };
+      if (pairCards.length === 4) {
+        return {
+          rank: Rank.TwoPair,
+          cards: pairCards,
+          kickers: cards
+            .filter(
+              (card) =>
+                card.value != pairCards[0].value &&
+                card.value != pairCards[3].value
+            )
+            .slice(1),
+        };
+      } else {
+        return {
+          rank: Rank.OnePair,
+          cards: pairCards,
+          kickers: cards
+            .filter((card) => card.value != pairCards[0].value)
+            .slice(3),
+        };
+      }
     }
 
-    return { rank: Rank.HighCard, cards: [cards[0]] };
+    return {
+      rank: Rank.HighCard,
+      cards: [cards[0]],
+      kickers: cards.slice(1, 5),
+    };
   }
 
   private organiseCardValues(cards: Card[]): { [key: string]: Card[] } {
@@ -124,11 +151,13 @@ export class HandEvaluator {
             return {
               rank: Rank.RoyalFlush,
               cards: newCards,
+              kickers: [],
             };
           }
           return {
             rank: Rank.Straight,
             cards: newCards,
+            kickers: [],
           };
         }
       } else {
@@ -136,7 +165,11 @@ export class HandEvaluator {
       }
     }
 
-    return { rank: Rank.HighCard, cards: [] };
+    return {
+      rank: Rank.HighCard,
+      cards: [cards[0]],
+      kickers: cards.slice(1, 5),
+    };
   }
 
   private hasFlush(cards: Card[]): Result {
@@ -149,16 +182,22 @@ export class HandEvaluator {
         return {
           cards: suitTally[key],
           rank: Rank.StraightFlush,
+          kickers: [],
         };
       }
       if (suitTally[key].length > 4) {
         return {
           cards: suitTally[key],
           rank: Rank.Flush,
+          kickers: [],
         };
       }
     }
-    return { rank: Rank.HighCard, cards: [] };
+    return {
+      rank: Rank.HighCard,
+      cards: [cards[0]],
+      kickers: cards.slice(1, 5),
+    };
   }
 
   private findFullHouse(tally: { [key: string]: Card[] }): Card[] {

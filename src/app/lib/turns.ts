@@ -1,6 +1,9 @@
 import { BlindButtons, Player } from "./player";
 
 export async function nextRoundTurn(players: Player[]) {
+  if (players.length < 2) {
+    return;
+  }
   function nextPlayerIndex(startNumber: number): number {
     let n: number;
     startNumber === players.length - 1 ? (n = 0) : (n = startNumber + 1);

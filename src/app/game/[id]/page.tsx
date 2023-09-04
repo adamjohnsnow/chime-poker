@@ -6,12 +6,7 @@ import { Key, useEffect, useState } from "react";
 // lib
 import { createAttendee } from "@/app/lib/chime";
 import { ChimeProvider } from "@/app/lib/chimeUtils";
-import {
-  dealDeck,
-  gameState,
-  nextCommunityCards,
-  resetCards,
-} from "@/app/lib/game";
+import { dealDeck, gameState, nextPhase, resetCards } from "@/app/lib/game";
 import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
 
@@ -130,15 +125,7 @@ export default function Game({ params }: { params: { id: string } }) {
     if (!game) {
       return;
     }
-    if (
-      players.filter((player) => {
-        player.cards;
-      }).length != 0
-    ) {
-      dealDeck(game);
-    } else {
-      nextCommunityCards(gameId);
-    }
+    nextPhase(gameId);
   }
 
   async function nextRound() {
