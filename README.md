@@ -3,9 +3,10 @@ This is a work-in-progress personal project that I will use to try out new techn
 This is intended to be a multi-player poker game with video calling. Tech used:
 
 - AWS Chime for video calls
-- NextJS for framework
+- NextJS for framework, using React/Typescript
 - Firebase Realtime Database for data persistence and websockets
 - Vercel for hosting and deployment
+- Jest for TDD testing
 
 Can be previewed at [Poker Face Game](https://poker-face-game.vercel.app/)
 

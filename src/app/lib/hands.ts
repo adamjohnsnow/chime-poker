@@ -63,7 +63,7 @@ export class HandEvaluator {
           cards: cards.filter((card) => card.value === threeOfAKindValue),
           kickers: cards
             .filter((card) => card.value != threeOfAKindValue)
-            .slice(2),
+            .slice(0, 2),
         };
       }
     }
@@ -75,13 +75,13 @@ export class HandEvaluator {
         return {
           rank: Rank.TwoPair,
           cards: pairCards,
-          kickers: cards
-            .filter(
+          kickers: [
+            cards.filter(
               (card) =>
                 card.value != pairCards[0].value &&
                 card.value != pairCards[3].value
-            )
-            .slice(1),
+            )[0],
+          ],
         };
       } else {
         return {
@@ -89,7 +89,7 @@ export class HandEvaluator {
           cards: pairCards,
           kickers: cards
             .filter((card) => card.value != pairCards[0].value)
-            .slice(3),
+            .slice(0, 3),
         };
       }
     }
