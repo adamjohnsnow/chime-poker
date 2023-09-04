@@ -1,5 +1,12 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a work-in-progress personal project that I will use to try out new technologies, approaches or just to practice.
 
-I am not sure of the purpose of it yet - I am going to just add new things as I want to work on them, testing with Jest, refactoring classes, websockets, some tailwind CSS. Seeing where this might take me.
+This is intended to be a multi-player poker game with video calling. Tech used:
+
+- AWS Chime for video calls
+- NextJS for framework
+- Firebase Realtime Database for data persistence and websockets
+- Vercel for hosting and deployment
+
+Can be previewed at [Poker Face Game](poker-face-game.vercel.app)
 
 Maybe one day this will be a fully featured poker game with video chat...
