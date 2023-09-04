@@ -6,7 +6,7 @@ import { Key, useEffect, useState } from "react";
 // lib
 import { createAttendee } from "@/app/lib/chime";
 import { ChimeProvider } from "@/app/lib/chimeUtils";
-import { dealDeck, gameState, nextPhase, resetCards } from "@/app/lib/game";
+import { gameState, nextPhase, resetCards } from "@/app/lib/game";
 import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
 
@@ -53,7 +53,7 @@ export default function Game({ params }: { params: { id: string } }) {
     if (player) {
       saveLocalPlayer(gameId, player);
     }
-    // initialiseGame();
+    initialiseGame();
   }, [player]);
 
   useEffect(() => {
