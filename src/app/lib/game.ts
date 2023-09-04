@@ -160,6 +160,7 @@ export async function dealDeck(game: gameState, players: Player[]) {
   const playerCount = countActivePlayers(players);
   let i = 0;
   players.forEach((player) => {
+    player.cardsShown = false;
     if (player.cash > 0 && player.active) {
       player.cards = [game.cardDeck[i], game.cardDeck[i + playerCount]];
       if (player.blindButton === BlindButtons.BIGBLIND) {

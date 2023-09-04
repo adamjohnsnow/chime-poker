@@ -136,15 +136,24 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   function highlightWinningCards() {
-    // const winningHand = game?.results[0].cards;
-    // winningHand?.forEach((card) => {
-    //   const cardElement = document.getElementById(
-    //     "card-" + card.value + "-" + card.suit
-    //   );
-    //   if (cardElement) {
-    //     cardElement.classList.add("highlighted");
-    //   }
-    // });
+    const winningHand = game?.results[0].result.cards;
+    winningHand?.forEach((card) => {
+      const cardElement = document.getElementById(
+        "card-" + card.value + "-" + card.suit
+      );
+      if (cardElement) {
+        cardElement.classList.add("highlighted");
+      }
+    });
+    const kickers = game?.results[0].result.kickers;
+    kickers?.forEach((card) => {
+      const cardElement = document.getElementById(
+        "card-" + card.value + "-" + card.suit
+      );
+      if (cardElement) {
+        cardElement.classList.add("lowlighted");
+      }
+    });
   }
 
   function resetHighlights() {

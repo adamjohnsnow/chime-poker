@@ -90,6 +90,10 @@
   background: #ffffff;
 }
 
+.lowlighted .card-face {
+  background: #ffffff;
+}
+
 @keyframes fly-in {
   0% {
     top: 0;
