@@ -245,6 +245,9 @@ export class HandEvaluator {
   }
 
   private scoreCards(cards: Card[]): number {
+    if (cards.length === 0) {
+      return 0;
+    }
     cards.sort((a, b) => b.value - a.value);
     const values: string[] = [];
     let valueString: string;

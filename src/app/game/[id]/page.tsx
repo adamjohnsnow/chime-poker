@@ -53,7 +53,7 @@ export default function Game({ params }: { params: { id: string } }) {
     if (player) {
       saveLocalPlayer(gameId, player);
     }
-    initialiseGame();
+    // initialiseGame();
   }, [player]);
 
   useEffect(() => {
@@ -76,7 +76,6 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   function playersEventHandler(playersData: Player[]) {
-    // console.log("PLAYERS UPDATE:", playersData);
     setPlayers(playersData);
   }
 
@@ -137,16 +136,15 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   function highlightWinningCards() {
-    const winningHand = game?.results[0].cards;
-
-    winningHand?.forEach((card) => {
-      const cardElement = document.getElementById(
-        "card-" + card.value + "-" + card.suit
-      );
-      if (cardElement) {
-        cardElement.classList.add("highlighted");
-      }
-    });
+    // const winningHand = game?.results[0].cards;
+    // winningHand?.forEach((card) => {
+    //   const cardElement = document.getElementById(
+    //     "card-" + card.value + "-" + card.suit
+    //   );
+    //   if (cardElement) {
+    //     cardElement.classList.add("highlighted");
+    //   }
+    // });
   }
 
   function resetHighlights() {

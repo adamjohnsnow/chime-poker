@@ -219,6 +219,7 @@ describe("hand evaluator", () => {
 
     expect(hand.rank).toBe(Rank.StraightFlush);
     expect(hand.kickers.length).toBe(0);
+    expect(hand.kickersScore).toBe(0);
   });
 
   test("returns royal flush", () => {
