@@ -7,6 +7,6 @@ This is intended to be a multi-player poker game with video calling. Tech used:
 - Firebase Realtime Database for data persistence and websockets
 - Vercel for hosting and deployment
 
-Can be previewed at [Poker Face Game](poker-face-game.vercel.app)
+Can be previewed at [Poker Face Game](https://poker-face-game.vercel.app/)
 
 Maybe one day this will be a fully featured poker game with video chat...
