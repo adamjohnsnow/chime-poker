@@ -20,6 +20,7 @@ export type gameState = {
   prizePot: number;
   phase: GamePhase;
   blind: number;
+  currentMinimimBet: number;
 };
 
 export enum GamePhase {
@@ -59,6 +60,7 @@ export async function getNewGame(
     prizePot: 0,
     phase: GamePhase.START,
     blind: 20,
+    currentMinimimBet: 0,
   };
 
   return state;

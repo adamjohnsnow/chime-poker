@@ -45,3 +45,67 @@ export async function nextRoundTurn(players: Player[]) {
     }
   }
 }
+
+export async function nextBettingTurn(players: Player[]): Promise<number> {
+  const betLevel = players
+    .slice()
+    .sort((a, b) => b.currentBet - a.currentBet)[0].currentBet;
+
+  const inTurnPlayer = players.filter((player) => player.isBettingTurn)[0];
+
+  if (!inTurnPlayer) {
+    players[1].isBettingTurn = true;
+    return betLevel;
+  }
+  inTurnPlayer.isBettingTurn = false;
+
+  if (betLevel === 0) {
+    if (inTurnPlayer.isDealer) {
+      return betLevel;
+    }
+  } else {
+    const activePlayers = players.filter(
+      (player) => player.active && !player.folded && player.cash > 0
+    );
+    const paidUpPlayers = activePlayers.filter(
+      (player) => player.currentBet === betLevel
+    );
+
+    if (activePlayers.length === paidUpPlayers.length) {
+      return betLevel;
+    }
+  }
+
+  const i = players.indexOf(inTurnPlayer);
+  players[nextPlayerIndex(i)].isBettingTurn = true;
+
+  function nextPlayerIndex(startNumber: number): number {
+    let n: number;
+    startNumber === players.length - 1 ? (n = 0) : (n = startNumber + 1);
+    for (n; n < players.length; n++) {
+      if (
+        !players[n].folded &&
+        players[n].active &&
+        players[n].cash > 0 &&
+        (players[n].currentBet < betLevel || betLevel === 0)
+      ) {
+        return n;
+      }
+    }
+
+    n = 0;
+    for (n; n < startNumber; n++) {
+      if (
+        !players[n].folded &&
+        players[n].active &&
+        players[n].cash > 0 &&
+        (players[n].currentBet < betLevel || betLevel === 0)
+      ) {
+        return n;
+      }
+    }
+    return n;
+  }
+
+  return betLevel;
+}

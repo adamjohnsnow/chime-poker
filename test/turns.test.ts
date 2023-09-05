@@ -1,10 +1,10 @@
 import { describe, expect, test, beforeEach } from "@jest/globals";
-import { nextRoundTurn } from "../src/app/lib/turns";
+import { nextBettingTurn, nextRoundTurn } from "../src/app/lib/turns";
 import { BlindButtons, Player } from "../src/app/lib/player";
 import exp from "constants";
 
-describe("turns", () => {
-  test("Initial state", async () => {
+describe("button turns", () => {
+  test("initial state", async () => {
     const players: Player[] = [
       {
         id: "1",
@@ -19,6 +19,7 @@ describe("turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
+        isBettingTurn: false,
       },
       {
         id: "2",
@@ -33,6 +34,7 @@ describe("turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
+        isBettingTurn: false,
       },
       {
         id: "3",
@@ -47,6 +49,7 @@ describe("turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
+        isBettingTurn: false,
       },
     ];
 
@@ -76,6 +79,7 @@ describe("turns", () => {
         blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
+        isBettingTurn: false,
       },
       {
         id: "2",
@@ -90,6 +94,7 @@ describe("turns", () => {
         blindButton: BlindButtons.LITTLEBLIND,
         gameId: "123",
         sortIndex: 0,
+        isBettingTurn: false,
       },
       {
         id: "3",
@@ -104,6 +109,7 @@ describe("turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
+        isBettingTurn: false,
       },
     ];
 
@@ -140,6 +146,7 @@ describe("turns", () => {
         blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
+        isBettingTurn: false,
       },
       {
         id: "2",
@@ -154,6 +161,7 @@ describe("turns", () => {
         blindButton: BlindButtons.LITTLEBLIND,
         gameId: "123",
         sortIndex: 0,
+        isBettingTurn: false,
       },
     ];
 
@@ -188,6 +196,7 @@ describe("turns", () => {
         blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
+        isBettingTurn: false,
       },
       {
         id: "2",
@@ -202,6 +211,7 @@ describe("turns", () => {
         blindButton: BlindButtons.LITTLEBLIND,
         gameId: "123",
         sortIndex: 0,
+        isBettingTurn: false,
       },
       {
         id: "3",
@@ -216,6 +226,7 @@ describe("turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
+        isBettingTurn: false,
       },
       {
         id: "4",
@@ -230,6 +241,7 @@ describe("turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
+        isBettingTurn: false,
       },
     ];
 
@@ -259,6 +271,7 @@ describe("turns", () => {
         blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
+        isBettingTurn: false,
       },
       {
         id: "2",
@@ -273,6 +286,7 @@ describe("turns", () => {
         blindButton: BlindButtons.LITTLEBLIND,
         gameId: "123",
         sortIndex: 0,
+        isBettingTurn: false,
       },
       {
         id: "3",
@@ -287,6 +301,7 @@ describe("turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
+        isBettingTurn: false,
       },
       {
         id: "4",
@@ -301,6 +316,7 @@ describe("turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
+        isBettingTurn: false,
       },
     ];
 
@@ -314,5 +330,229 @@ describe("turns", () => {
     expect(players[3].blindButton).toBeNull;
     expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
     expect(players[2].blindButton).toBe(BlindButtons.LITTLEBLIND);
+  });
+});
+
+describe("betting turns", () => {
+  test("initial state", async () => {
+    const players: Player[] = [
+      {
+        id: "1",
+        cash: 10,
+        currentBet: 0,
+        cards: [],
+        name: "1",
+        cardsShown: false,
+        active: true,
+        folded: false,
+        isDealer: false,
+        gameId: "123",
+        sortIndex: 0,
+        blindButton: null,
+        isBettingTurn: false,
+      },
+      {
+        id: "2",
+        cash: 10,
+        currentBet: 0,
+        cards: [],
+        name: "2",
+        active: true,
+        cardsShown: false,
+        folded: false,
+        isDealer: false,
+        gameId: "123",
+        sortIndex: 0,
+        blindButton: null,
+        isBettingTurn: false,
+      },
+      {
+        id: "3",
+        cash: 10,
+        currentBet: 0,
+        cards: [],
+        cardsShown: false,
+        name: "3",
+        active: true,
+        folded: false,
+        isDealer: false,
+        gameId: "123",
+        sortIndex: 0,
+        blindButton: null,
+        isBettingTurn: false,
+      },
+    ];
+
+    const bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(0);
+    expect(players[1].isBettingTurn).toBe(true);
+    expect(players[0].isBettingTurn).toBe(false);
+    expect(players[2].isBettingTurn).toBe(false);
+  });
+
+  test("next player, no bets", async () => {
+    const players: Player[] = [
+      {
+        id: "1",
+        cash: 10,
+        currentBet: 0,
+        cards: [],
+        name: "1",
+        cardsShown: false,
+        active: true,
+        folded: false,
+        isDealer: true,
+        gameId: "123",
+        sortIndex: 0,
+        blindButton: null,
+        isBettingTurn: false,
+      },
+      {
+        id: "2",
+        cash: 10,
+        currentBet: 0,
+        cards: [],
+        name: "2",
+        active: true,
+        cardsShown: false,
+        folded: false,
+        isDealer: false,
+        gameId: "123",
+        sortIndex: 0,
+        blindButton: 0,
+        isBettingTurn: true,
+      },
+      {
+        id: "3",
+        cash: 10,
+        currentBet: 0,
+        cards: [],
+        cardsShown: false,
+        name: "3",
+        active: true,
+        folded: false,
+        isDealer: false,
+        gameId: "123",
+        sortIndex: 0,
+        blindButton: 1,
+        isBettingTurn: false,
+      },
+    ];
+
+    let bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(0);
+    expect(players[2].isBettingTurn).toBe(true);
+    expect(players[0].isBettingTurn).toBe(false);
+    expect(players[1].isBettingTurn).toBe(false);
+
+    bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(0);
+    expect(players[0].isBettingTurn).toBe(true);
+    expect(players[1].isBettingTurn).toBe(false);
+    expect(players[2].isBettingTurn).toBe(false);
+
+    bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(0);
+    expect(players[0].isBettingTurn).toBe(false);
+    expect(players[1].isBettingTurn).toBe(false);
+    expect(players[2].isBettingTurn).toBe(false);
+  });
+
+  test("next player, with bets", async () => {
+    const players: Player[] = [
+      {
+        id: "1",
+        cash: 10,
+        currentBet: 0,
+        cards: [],
+        name: "1",
+        cardsShown: false,
+        active: true,
+        folded: false,
+        isDealer: true,
+        gameId: "123",
+        sortIndex: 0,
+        blindButton: null,
+        isBettingTurn: false,
+      },
+      {
+        id: "2",
+        cash: 10,
+        currentBet: 0,
+        cards: [],
+        name: "2",
+        active: true,
+        cardsShown: false,
+        folded: false,
+        isDealer: false,
+        gameId: "123",
+        sortIndex: 0,
+        blindButton: 0,
+        isBettingTurn: true,
+      },
+      {
+        id: "3",
+        cash: 10,
+        currentBet: 0,
+        cards: [],
+        cardsShown: false,
+        name: "3",
+        active: true,
+        folded: false,
+        isDealer: false,
+        gameId: "123",
+        sortIndex: 0,
+        blindButton: 1,
+        isBettingTurn: false,
+      },
+    ];
+
+    let bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(0);
+    expect(players[2].isBettingTurn).toBe(true);
+    expect(players[0].isBettingTurn).toBe(false);
+    expect(players[1].isBettingTurn).toBe(false);
+
+    bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(0);
+    expect(players[0].isBettingTurn).toBe(true);
+    expect(players[1].isBettingTurn).toBe(false);
+    expect(players[2].isBettingTurn).toBe(false);
+
+    players[0].currentBet = 20;
+
+    bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(20);
+
+    expect(players[0].isBettingTurn).toBe(false);
+    expect(players[1].isBettingTurn).toBe(true);
+    expect(players[2].isBettingTurn).toBe(false);
+
+    players[1].folded = true;
+
+    bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(20);
+
+    expect(players[0].isBettingTurn).toBe(false);
+    expect(players[1].isBettingTurn).toBe(false);
+    expect(players[2].isBettingTurn).toBe(true);
+
+    players[2].currentBet = 20;
+
+    bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(20);
+
+    expect(players[0].isBettingTurn).toBe(false);
+    expect(players[1].isBettingTurn).toBe(false);
+    expect(players[2].isBettingTurn).toBe(false);
   });
 });

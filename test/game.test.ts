@@ -39,6 +39,7 @@ describe("reset card states", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
+      currentMinimimBet: 0,
     };
     const players: Player[] = [
       new Player("123", "abc"),
@@ -109,6 +110,7 @@ describe("first deal", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
+      currentMinimimBet: 0,
     };
     const players: Player[] = [
       new Player("123", "abc"),
@@ -131,6 +133,7 @@ describe("goes through phases of the game", () => {
       phase: GamePhase.DEAL,
       prizePot: 0,
       blind: 0,
+      currentMinimimBet: 0,
     };
     await dealNextCards(game, []);
     expect(game.communityCards.length).toBe(3);
