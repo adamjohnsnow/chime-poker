@@ -21,6 +21,7 @@ export class Player {
   public isDealer?: boolean;
   public blindButton: BlindButtons | null;
   public sortIndex: number;
+  public isBettingTurn: boolean;
   constructor(gameId: string, name: string) {
     this.id = uuid.v4();
     this.gameId = gameId;
@@ -33,6 +34,7 @@ export class Player {
     this.folded = false;
     this.blindButton = null;
     this.sortIndex = 0;
+    this.isBettingTurn = false;
   }
 }
 

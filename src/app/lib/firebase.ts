@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getDatabase, ref, set, onValue, child, get } from "firebase/database";
 import { Player } from "./player";
 import { gameState } from "./game";
+import { ChimeConfig } from "./chime";
 
 const firebaseConfig = {
   databaseURL: "https://chime-poker-default-rtdb.firebaseio.com/",
@@ -11,13 +12,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+export function writeChimeData(gameId: string, chimeConfig: ChimeConfig) {
+  set(ref(db, "poker/" + gameId + "/chime"), chimeConfig);
+}
+
 export function writePlayerData(player: Player) {
-  set(ref(db, "games/" + player.gameId + "/players/" + player.id), player);
+  set(ref(db, "poker/" + player.gameId + "/players/" + player.id), player);
 }
 
 export function writeGameData(game: gameState) {
   console.log("writing game");
-  set(ref(db, "games/" + game.id + "/game"), game);
+  set(ref(db, "poker/" + game.id + "/game"), game);
 }
 
 export function getPlayerStream(
@@ -25,7 +30,7 @@ export function getPlayerStream(
   playerId: string,
   callback: any
 ) {
-  const player = ref(db, "games/" + gameId + "/players/" + playerId);
+  const player = ref(db, "poker/" + gameId + "/players/" + playerId);
   onValue(player, (snapshot) => {
     const data = snapshot.val();
     callback(data);
@@ -33,7 +38,7 @@ export function getPlayerStream(
 }
 
 export function getGameStream(gameId: string, callback: any) {
-  const game = ref(db, "games/" + gameId + "/game");
+  const game = ref(db, "poker/" + gameId + "/game");
   onValue(game, (snapshot) => {
     const data = snapshot.val() as gameState;
 
@@ -42,7 +47,7 @@ export function getGameStream(gameId: string, callback: any) {
 }
 
 export function getAllPlayersStream(gameId: string, callback: any) {
-  const player = ref(db, "games/" + gameId + "/players");
+  const player = ref(db, "poker/" + gameId + "/players");
   onValue(player, (snapshot) => {
     const data = convertPlayers(snapshot.val());
 
@@ -56,7 +61,7 @@ export async function getPlayer(
 ): Promise<Player | null> {
   const dbRef = ref(getDatabase());
   const snapshot = await get(
-    child(dbRef, "games/" + gameId + "/players/" + playerId)
+    child(dbRef, "poker/" + gameId + "/players/" + playerId)
   );
   if (snapshot.exists()) {
     const player = snapshot.val();
@@ -70,7 +75,7 @@ export async function getPlayer(
 
 export async function getAllPlayers(gameId: string): Promise<Player[]> {
   const dbRef = ref(getDatabase());
-  const snapshot = await get(child(dbRef, "games/" + gameId + "/players"));
+  const snapshot = await get(child(dbRef, "poker/" + gameId + "/players"));
   console.log(snapshot.exists());
   if (snapshot.exists()) {
     const players = convertPlayers(snapshot.val());
@@ -84,11 +89,26 @@ export async function getAllPlayers(gameId: string): Promise<Player[]> {
 
 export async function getGame(gameId: string): Promise<gameState | null> {
   const dbRef = ref(getDatabase());
-  const snapshot = await get(child(dbRef, `games/${gameId}/game`));
+  const snapshot = await get(child(dbRef, "poker/" + gameId + "/game"));
   if (snapshot.exists()) {
     const game = snapshot.val() as gameState;
     console.log("GOT GAME", game);
     return game;
+  } else {
+    console.log("No data available");
+    return null;
+  }
+}
+
+export async function getChimeConfig(
+  gameId: string
+): Promise<ChimeConfig | null> {
+  const dbRef = ref(getDatabase());
+  const snapshot = await get(child(dbRef, "poker/" + gameId + "/chime"));
+  if (snapshot.exists()) {
+    const chime = snapshot.val() as ChimeConfig;
+    console.log("GOT chime", chime);
+    return chime;
   } else {
     console.log("No data available");
     return null;

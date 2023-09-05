@@ -2,7 +2,12 @@ import { Deck, Card } from "./cards";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
 import { BlindButtons, Player, loadAllPlayers } from "./player";
-import { getGame, writeGameData, writePlayerData } from "./firebase";
+import {
+  getGame,
+  writeChimeData,
+  writeGameData,
+  writePlayerData,
+} from "./firebase";
 import { nextRoundTurn } from "./turns";
 import { findWinner, handResult } from "./findWinner";
 
@@ -33,6 +38,7 @@ export async function startGame(): Promise<gameState> {
   if (!call) {
     return Promise.reject();
   }
+  writeChimeData(id, call);
   const newGame = await getNewGame(id, call);
   writeGameData(newGame);
   return newGame;
