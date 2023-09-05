@@ -10,7 +10,6 @@ export type ChimeConfig = Meeting;
 export type ChimeAttendee = Attendee;
 
 export async function newChime(gameId: string) {
-  // You must use "us-east-1" as the region for Chime API and set the endpoint.
   const chime = new ChimeSDKMeetings({ region: "us-east-1" });
   const result = await chime.createMeeting({
     MediaRegion: "eu-west-2",

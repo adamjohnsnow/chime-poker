@@ -53,7 +53,9 @@ export default function Game({ params }: { params: { id: string } }) {
     if (player) {
       saveLocalPlayer(gameId, player);
     }
-    // initialiseGame();
+    if (!process.env.BLOCK_CHIME) {
+      initialiseGame();
+    }
   }, [player]);
 
   useEffect(() => {
