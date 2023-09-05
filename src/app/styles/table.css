@@ -1,6 +1,6 @@
 .community-cards {
   display: flex;
-  width: 550px;
+  width: 580px;
   height: 160px;
   z-index: 1000;
 }
