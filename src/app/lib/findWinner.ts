@@ -39,25 +39,21 @@ export async function findWinner(game: gameState, players: Player[]) {
 }
 
 export function allotPrizes(hands: handResult[], prizePot: number) {
-  console.log("1,", hands);
   let winners = hands.filter(
     (hand) => hand.result.rank === hands[0].result.rank
   );
-  console.log("2,", winners);
 
   if (winners.length > 1) {
     winners = winners.filter(
       (hand) => hand.result.cardsScore === winners[0].result.cardsScore
     );
   }
-  console.log("3,", winners);
 
   if (winners.length > 1) {
     winners = winners.filter(
       (hand) => hand.result.kickersScore === winners[0].result.kickersScore
     );
   }
-  console.log("4,", winners);
 
   const prizeSplit = Math.floor(prizePot / winners.length);
   const change = prizePot % winners.length;

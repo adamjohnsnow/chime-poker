@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { BlindButtons, Player } from "../lib/player";
+import { Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import { getPlayerStream } from "../lib/firebase";
+import "../styles/player.css";
+import { TurnControl } from "./turnControl";
+import { ButtonsWrapper } from "./buttons";
 
 export function PlayerWrapper({
   gameId,
@@ -24,18 +27,21 @@ export function PlayerWrapper({
   }
 
   return player ? (
-    <div>
+    <div className="flex flex-row w-full m-5">
       <audio id="chime-audio" />
-      <div className="z-10 w-full items-start justify-between  text-sm flex">
+      <div className="z-10 w-full items-start text-sm flex ">
         {player.name}: £{player.cash}
-        <div className="flex">
-          {" "}
-          {player.isDealer ? <div>D</div> : null}
-          {player.blindButton === BlindButtons.BIGBLIND ? <div>BIG</div> : null}
-          {player.blindButton === BlindButtons.LITTLEBLIND ? (
-            <div>LITTLE</div>
-          ) : null}
-          <video className="video-tile m-1" id="local"></video>
+        <div
+          className={
+            player.isBettingTurn
+              ? "flex items-end highlighted"
+              : "flex items-end"
+          }
+        >
+          <video className="video-tile m-1 " id="local"></video>
+          <ButtonsWrapper player={player} />
+        </div>
+        <div className="flex flex-row w-60">
           {player.cards && player.cards.length != 0 ? (
             <>
               <PlayingCard card={player.cards[0]}></PlayingCard>
@@ -43,7 +49,9 @@ export function PlayerWrapper({
             </>
           ) : null}
         </div>
+        <div>{player.currentBet}</div>
       </div>
+      {player.isBettingTurn ? <TurnControl player={player} /> : null}
     </div>
   ) : null;
 }

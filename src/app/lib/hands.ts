@@ -62,7 +62,7 @@ export class HandEvaluator {
       result.rank = Rank.FourOfAKind;
       result.cards = winningCards;
       result.kickers = [
-        cards.filter((card) => card.value != fourOfAKindValue)[0],
+        cards.find((card) => card.value != fourOfAKindValue) as Card,
       ];
       return result;
     }
@@ -94,11 +94,11 @@ export class HandEvaluator {
     if (pairCards.length > 0) {
       if (pairCards.length === 4) {
         const kicker = [
-          cards.filter(
+          cards.find(
             (card) =>
               card.value != pairCards[0].value &&
               card.value != pairCards[3].value
-          )[0],
+          ) as Card,
         ];
         result.rank = Rank.TwoPair;
         result.cards = pairCards;

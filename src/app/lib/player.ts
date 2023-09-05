@@ -5,7 +5,7 @@ import * as uuid from "uuid";
 
 export enum BlindButtons {
   BIGBLIND,
-  LITTLEBLIND,
+  SMALLBLIND,
 }
 
 export class Player {

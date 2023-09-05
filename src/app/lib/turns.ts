@@ -1,4 +1,16 @@
-import { BlindButtons, Player } from "./player";
+import { writeAllPlayers } from "./firebase";
+import { BlindButtons, Player, loadAllPlayers } from "./player";
+
+export async function triggerNextRound(gameId: string) {
+  const players = await loadAllPlayers(gameId);
+  await nextRoundTurn(players);
+}
+
+export async function triggerNextBetting(gameId: string) {
+  const players = await loadAllPlayers(gameId);
+  await nextBettingTurn(players);
+  await writeAllPlayers(players);
+}
 
 export async function nextRoundTurn(players: Player[]) {
   if (players.length < 2) {
@@ -21,10 +33,10 @@ export async function nextRoundTurn(players: Player[]) {
     return n;
   }
 
-  if (players.filter((player) => player.isDealer).length === 0) {
+  if (!players.find((player) => player.isDealer)) {
     players[0].isDealer = true;
     players[1].blindButton = BlindButtons.BIGBLIND;
-    players[nextPlayerIndex(1)].blindButton = BlindButtons.LITTLEBLIND;
+    players[nextPlayerIndex(1)].blindButton = BlindButtons.SMALLBLIND;
     return;
   }
   let dealerMoved = false;
@@ -35,7 +47,7 @@ export async function nextRoundTurn(players: Player[]) {
       players[i].blindButton = null;
       players[nextPlayerIndex(i)].blindButton = BlindButtons.BIGBLIND;
       players[nextPlayerIndex(nextPlayerIndex(i))].blindButton =
-        BlindButtons.LITTLEBLIND;
+        BlindButtons.SMALLBLIND;
       buttonsMoved = true;
     }
     if (!dealerMoved && players[i].isDealer) {
@@ -51,10 +63,17 @@ export async function nextBettingTurn(players: Player[]): Promise<number> {
     .slice()
     .sort((a, b) => b.currentBet - a.currentBet)[0].currentBet;
 
-  const inTurnPlayer = players.filter((player) => player.isBettingTurn)[0];
-
+  const inTurnPlayer = players.find((player) => player.isBettingTurn);
   if (!inTurnPlayer) {
-    players[1].isBettingTurn = true;
+    const small = players.find(
+      (player) => player.blindButton === BlindButtons.SMALLBLIND
+    );
+
+    if (small) {
+      players[nextPlayerIndex(players.indexOf(small))].isBettingTurn = true;
+    } else {
+      players[1].isBettingTurn = true;
+    }
     return betLevel;
   }
   inTurnPlayer.isBettingTurn = false;

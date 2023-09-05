@@ -135,7 +135,16 @@ describe("goes through phases of the game", () => {
       blind: 0,
       currentMinimimBet: 0,
     };
-    await dealNextCards(game, []);
+    const players = [new Player("123", "ABC"), new Player("123", "XYZ")];
+    players[0].cards = [
+      { value: 1, suit: "♥️" },
+      { value: 2, suit: "♥️" },
+    ];
+    players[1].cards = [
+      { value: 3, suit: "♥️" },
+      { value: 4, suit: "♥️" },
+    ];
+    await dealNextCards(game, players);
     expect(game.communityCards.length).toBe(3);
     expect(game.cardDeck.length).toBe(49);
     expect(game.cardDeck).not.toContain(game.communityCards[0]);
@@ -144,7 +153,7 @@ describe("goes through phases of the game", () => {
     expect(game.phase).toBe(GamePhase.TURN);
     expect(game.results.length).toBe(0);
 
-    await dealNextCards(game, []);
+    await dealNextCards(game, players);
     expect(game.communityCards.length).toBe(4);
     expect(game.cardDeck.length).toBe(48);
     expect(game.cardDeck).not.toContain(game.communityCards[0]);
@@ -153,7 +162,7 @@ describe("goes through phases of the game", () => {
     expect(game.cardDeck).not.toContain(game.communityCards[3]);
     expect(game.phase).toBe(GamePhase.FLOP);
 
-    await dealNextCards(game, []);
+    await dealNextCards(game, players);
     expect(game.communityCards.length).toBe(5);
     expect(game.cardDeck.length).toBe(47);
     expect(game.cardDeck).not.toContain(game.communityCards[0]);
@@ -164,11 +173,6 @@ describe("goes through phases of the game", () => {
     expect(game.phase).toBe(GamePhase.RIVER);
     expect(game.results).toBeFalsy;
 
-    const players = [new Player("123", "ABC")];
-    players[0].cards = [
-      { value: 1, suit: "♥️" },
-      { value: 2, suit: "♥️" },
-    ];
     await dealNextCards(game, players);
 
     expect(game.phase).toBe(GamePhase.RESULTS);

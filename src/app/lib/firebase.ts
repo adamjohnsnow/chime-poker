@@ -17,11 +17,15 @@ export function writeChimeData(gameId: string, chimeConfig: ChimeConfig) {
 }
 
 export function writePlayerData(player: Player) {
+  console.log("WRITE", player);
   set(ref(db, "poker/" + player.gameId + "/players/" + player.id), player);
 }
 
+export async function writeAllPlayers(players: Player[]) {
+  players.forEach((player) => writePlayerData(player));
+}
+
 export function writeGameData(game: gameState) {
-  console.log("writing game");
   set(ref(db, "poker/" + game.id + "/game"), game);
 }
 
@@ -65,7 +69,6 @@ export async function getPlayer(
   );
   if (snapshot.exists()) {
     const player = snapshot.val();
-    console.log("GOT PLAYER", player);
     return player;
   } else {
     console.log("No player data available");
@@ -76,10 +79,8 @@ export async function getPlayer(
 export async function getAllPlayers(gameId: string): Promise<Player[]> {
   const dbRef = ref(getDatabase());
   const snapshot = await get(child(dbRef, "poker/" + gameId + "/players"));
-  console.log(snapshot.exists());
   if (snapshot.exists()) {
     const players = convertPlayers(snapshot.val());
-    console.log("GOT ALL PLAYERS", players);
     return players;
   } else {
     console.log("No players data available");
@@ -92,7 +93,6 @@ export async function getGame(gameId: string): Promise<gameState | null> {
   const snapshot = await get(child(dbRef, "poker/" + gameId + "/game"));
   if (snapshot.exists()) {
     const game = snapshot.val() as gameState;
-    console.log("GOT GAME", game);
     return game;
   } else {
     console.log("No data available");
@@ -107,7 +107,6 @@ export async function getChimeConfig(
   const snapshot = await get(child(dbRef, "poker/" + gameId + "/chime"));
   if (snapshot.exists()) {
     const chime = snapshot.val() as ChimeConfig;
-    console.log("GOT chime", chime);
     return chime;
   } else {
     console.log("No data available");

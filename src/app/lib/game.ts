@@ -8,7 +8,7 @@ import {
   writeGameData,
   writePlayerData,
 } from "./firebase";
-import { nextRoundTurn } from "./turns";
+import { nextBettingTurn, nextRoundTurn } from "./turns";
 import { findWinner, handResult } from "./findWinner";
 
 export type gameState = {
@@ -24,6 +24,7 @@ export type gameState = {
 };
 
 export enum GamePhase {
+  NOTSTARTED,
   START,
   DEAL,
   TURN,
@@ -58,7 +59,7 @@ export async function getNewGame(
     communityCards: [],
     results: [],
     prizePot: 0,
-    phase: GamePhase.START,
+    phase: GamePhase.NOTSTARTED,
     blind: 20,
     currentMinimimBet: 0,
   };
@@ -98,6 +99,7 @@ export async function nextPhase(gameId: string) {
 export async function resetCards(gameId: string) {
   const gameData = await loadGameAndPlayers(gameId);
   await processResetCards(gameData.game, gameData.players);
+  await nextRoundTurn(gameData.players);
   await saveGameAndPlayers(gameData.game, gameData.players);
 }
 
@@ -105,10 +107,17 @@ export async function processResetCards(
   game: gameState,
   players: Player[]
 ): Promise<{ game: gameState; players: Player[] }> {
-  await nextRoundTurn(players);
-
   players.forEach((player) => {
     player.cards = [];
+    player.isBettingTurn = false;
+    if (game.results) {
+      const prize = game.results.find(
+        (result) => result.playerId === player.id
+      )?.prize;
+      if (prize) {
+        player.cash += prize;
+      }
+    }
   });
 
   game.cardDeck = new Deck().cards;
@@ -129,6 +138,8 @@ export async function dealNextCards(game: gameState, players: Player[]) {
   switch (game.phase) {
     case GamePhase.START: {
       await dealDeck(game, players);
+      await nextBettingTurn(players);
+
       game.phase = GamePhase.DEAL;
       break;
     }
@@ -137,6 +148,8 @@ export async function dealNextCards(game: gameState, players: Player[]) {
       game.cardDeck = game.cardDeck.slice(0 - game.cardDeck.length + 3);
 
       game.phase = GamePhase.TURN;
+      await nextBettingTurn(players);
+
       break;
     }
     case GamePhase.TURN: {
@@ -145,6 +158,8 @@ export async function dealNextCards(game: gameState, players: Player[]) {
       );
       game.cardDeck = game.cardDeck.slice(1);
       game.phase = GamePhase.FLOP;
+      await nextBettingTurn(players);
+
       break;
     }
     case GamePhase.FLOP: {
@@ -153,6 +168,8 @@ export async function dealNextCards(game: gameState, players: Player[]) {
       );
       game.cardDeck = game.cardDeck.slice(1);
       game.phase = GamePhase.RIVER;
+      await nextBettingTurn(players);
+
       break;
     }
     case GamePhase.RIVER: {
@@ -175,7 +192,7 @@ export async function dealDeck(game: gameState, players: Player[]) {
         player.cash = player.cash - game.blind;
         player.currentBet = game.blind;
       }
-      if (player.blindButton === BlindButtons.LITTLEBLIND) {
+      if (player.blindButton === BlindButtons.SMALLBLIND) {
         player.cash = player.cash - game.blind / 2;
         player.currentBet = game.blind / 2;
       }
@@ -186,6 +203,7 @@ export async function dealDeck(game: gameState, players: Player[]) {
       player.isDealer = false;
     }
   });
+  game.prizePot = game.blind * 1.5;
   game.cardDeck = game.cardDeck.slice(0 - (deckLength - i * 2));
 }
 

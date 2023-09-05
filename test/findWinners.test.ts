@@ -21,6 +21,7 @@ describe("finding winners", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
+      currentMinimimBet: 0,
     };
     const players = [new Player("123", "A"), new Player("123", "B")];
     players[0].cards = [
@@ -56,6 +57,7 @@ describe("finding winners", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
+      currentMinimimBet: 0,
     };
     const players = [new Player("123", "A"), new Player("123", "B")];
     players[0].cards = [
@@ -91,6 +93,7 @@ describe("finding winners", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
+      currentMinimimBet: 0,
     };
     const players = [new Player("123", "A"), new Player("123", "B")];
     players[0].cards = [
@@ -128,6 +131,7 @@ describe("finding winners", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
+      currentMinimimBet: 0,
     };
     const players = [new Player("123", "A"), new Player("123", "B")];
     players[0].cards = [
@@ -173,6 +177,7 @@ describe("finding winners", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
+      currentMinimimBet: 0,
     };
     const players = [new Player("123", "A"), new Player("123", "B")];
     players[0].cards = [

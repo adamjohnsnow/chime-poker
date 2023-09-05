@@ -6,7 +6,7 @@ import { Key, useEffect, useState } from "react";
 // lib
 import { createAttendee } from "@/app/lib/chime";
 import { ChimeProvider } from "@/app/lib/chimeUtils";
-import { gameState, nextPhase, resetCards } from "@/app/lib/game";
+import { GamePhase, gameState, nextPhase, resetCards } from "@/app/lib/game";
 import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
 
@@ -21,6 +21,7 @@ import { ActivityMonitor } from "@/app/components/activityMonitor";
 import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
 import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
+import { triggerNextBetting } from "@/app/lib/turns";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -49,16 +50,14 @@ export default function Game({ params }: { params: { id: string } }) {
   }, [params.id]);
 
   useEffect(() => {
-    console.log("PLAYER UPDATED:", player);
     if (player) {
       saveLocalPlayer(gameId, player);
     }
-    initialiseGame();
+    // initialiseGame();
   }, [player]);
 
   useEffect(() => {
     if (game && game.results) {
-      console.log("RESULTS IN!", game.results);
       highlightWinningCards();
     }
     if (!game?.results || game.results.length === 0) {
@@ -66,11 +65,12 @@ export default function Game({ params }: { params: { id: string } }) {
     }
   }, [game]);
 
+  useEffect(() => {}, [players]);
+
   function gameEventHandler(gameData: gameState): void {
     if (!gameData.communityCards) {
       gameData.communityCards = [];
     }
-    console.log("GAMEDATA UPDATE:", gameData);
 
     setGame(gameData);
   }
@@ -97,6 +97,7 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   async function initialiseGame() {
+    console.log("INIT GAME");
     if (!game || !player) {
       return;
     }
@@ -121,17 +122,16 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   async function nextAction() {
-    if (!game) {
+    if (!gameId) {
       return;
     }
-    nextPhase(gameId);
+    await nextPhase(gameId);
   }
 
   async function nextRound() {
     if (!gameId) {
       return;
     }
-
     await resetCards(gameId);
   }
 
@@ -171,30 +171,33 @@ export default function Game({ params }: { params: { id: string } }) {
         {player ? (
           <>
             <PlayerWrapper playerId={player.id} gameId={gameId} />
-            <form action={nextAction}>
-              <button>Deal</button>
-            </form>
-            <form action={nextRound}>
-              <button>Reset</button>
-            </form>
-            {/* <TurnControl player={player}></TurnControl> */}
+
             <div className="players">
-              {players ? (
-                <>
-                  {players.map(
-                    (playerTile: Player, i: Key | null | undefined) =>
-                      playerTile.active && playerTile.id != player?.id ? (
-                        <PlayerTile key={i} player={playerTile}></PlayerTile>
-                      ) : null
-                  )}
-                </>
-              ) : null}
+              {players.map((playerTile: Player, i: Key | null | undefined) =>
+                playerTile.active && playerTile.id != player?.id ? (
+                  <PlayerTile key={i} player={playerTile}></PlayerTile>
+                ) : null
+              )}
             </div>
-            <div>{game?.prizePot}</div>
-            <CommunityCards
-              chime={chime as ChimeProvider}
-              cards={game ? game.communityCards : []}
-            />
+            {game && game.phase === GamePhase.NOTSTARTED ? (
+              <form action={nextRound}>
+                <button>Start the game</button>
+              </form>
+            ) : (
+              <>
+                <div>{game?.prizePot}</div>
+                <CommunityCards
+                  chime={chime as ChimeProvider}
+                  cards={game ? game.communityCards : []}
+                />
+                <form action={nextAction}>
+                  <button>next</button>
+                </form>
+                <form action={nextRound}>
+                  <button>reset</button>
+                </form>
+              </>
+            )}
           </>
         ) : (
           <>

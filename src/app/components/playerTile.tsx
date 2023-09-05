@@ -2,6 +2,12 @@ import { BlindButtons, Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import "../styles/player.css";
 import { useEffect } from "react";
+import {
+  BigBlindButton,
+  ButtonsWrapper,
+  DealerButton,
+  SmallBlindButton,
+} from "./buttons";
 
 export function PlayerTile({ player }: { player: Player }) {
   // const [player, setPlayer] = useState<Player>();
@@ -24,7 +30,14 @@ export function PlayerTile({ player }: { player: Player }) {
             <strong>{player.name}</strong>
           </div>
           <div>£{player.cash}</div>
-          <div className="video-tile">
+          <div
+            className={
+              player.isBettingTurn
+                ? "video-tile highlighted flex items-end"
+                : "video-tile  flex items-end"
+            }
+          >
+            <ButtonsWrapper player={player} />
             <video
               className={player.folded ? "video-tile folded" : "video-tile"}
               id={player.id}
@@ -38,11 +51,6 @@ export function PlayerTile({ player }: { player: Player }) {
               </div>
             ) : null}
           </div>
-          {player.isDealer ? <div>D</div> : null}
-          {player.blindButton === BlindButtons.BIGBLIND ? <div>BIG</div> : null}
-          {player.blindButton === BlindButtons.LITTLEBLIND ? (
-            <div>LITTLE</div>
-          ) : null}
         </div>
       ) : null}
     </>
