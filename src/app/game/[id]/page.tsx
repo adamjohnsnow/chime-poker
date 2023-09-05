@@ -68,7 +68,7 @@ export default function Game({ params }: { params: { id: string } }) {
   useEffect(() => {}, [players]);
 
   function gameEventHandler(gameData: gameState): void {
-    if (!gameData.communityCards) {
+    if (gameData && !gameData.communityCards) {
       gameData.communityCards = [];
     }
 
@@ -201,7 +201,7 @@ export default function Game({ params }: { params: { id: string } }) {
           </>
         ) : (
           <>
-            {showNameInput ? (
+            {showNameInput && game?.phase === GamePhase.NOTSTARTED ? (
               <>
                 <div>New Player</div>
                 <form action={playerJoin}>
