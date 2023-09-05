@@ -53,7 +53,7 @@ export default function Game({ params }: { params: { id: string } }) {
     if (player) {
       saveLocalPlayer(gameId, player);
     }
-    // initialiseGame();
+    initialiseGame();
   }, [player]);
 
   useEffect(() => {
