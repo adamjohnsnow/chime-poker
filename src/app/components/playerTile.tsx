@@ -1,4 +1,4 @@
-import { BlindButtons, Player } from "../lib/player";
+import { BettingStatus, BlindButtons, Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import "../styles/player.css";
 import { useEffect } from "react";
@@ -32,7 +32,7 @@ export function PlayerTile({ player }: { player: Player }) {
           <div>£{player.cash}</div>
           <div
             className={
-              player.isBettingTurn
+              player.bettingStatus === BettingStatus.BETTING
                 ? "video-tile highlighted flex items-end"
                 : "video-tile  flex items-end"
             }

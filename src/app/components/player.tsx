@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Player } from "../lib/player";
+import { BettingStatus, Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import { getPlayerStream } from "../lib/firebase";
 import "../styles/player.css";
@@ -33,7 +33,7 @@ export function PlayerWrapper({
         {player.name}: £{player.cash}
         <div
           className={
-            player.isBettingTurn
+            player.bettingStatus === BettingStatus.BETTING
               ? "flex items-end highlighted"
               : "flex items-end"
           }
@@ -51,7 +51,9 @@ export function PlayerWrapper({
         </div>
         <div>{player.currentBet}</div>
       </div>
-      {player.isBettingTurn ? <TurnControl player={player} /> : null}
+      {player.bettingStatus === BettingStatus.BETTING ? (
+        <TurnControl player={player} />
+      ) : null}
     </div>
   ) : null;
 }
