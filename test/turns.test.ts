@@ -367,7 +367,7 @@ describe("betting turns", () => {
     expect(players[3].bettingStatus).toBe(1);
   });
 
-  test("next player, no bets", async () => {
+  test("next player, 4 player", async () => {
     const players = getPlayers();
     players[1].blindButton = BlindButtons.BIGBLIND;
     players[2].blindButton = BlindButtons.SMALLBLIND;
@@ -388,6 +388,24 @@ describe("betting turns", () => {
     expect(players[1].bettingStatus).toBe(2);
     expect(players[2].bettingStatus).toBe(1);
     expect(players[3].bettingStatus).toBe(3);
+  });
+
+  test("next player, 2 player", async () => {
+    const players = getPlayers().splice(0, 2);
+    players[0].blindButton = BlindButtons.BIGBLIND;
+    players[1].blindButton = BlindButtons.SMALLBLIND;
+
+    let bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(0);
+    expect(players[0].bettingStatus).toBe(2);
+    expect(players[1].bettingStatus).toBe(1);
+
+    bet = await nextBettingTurn(players);
+
+    expect(bet).toBe(0);
+    expect(players[0].bettingStatus).toBe(3);
+    expect(players[1].bettingStatus).toBe(2);
   });
 });
 

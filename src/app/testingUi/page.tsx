@@ -24,7 +24,7 @@ export default function Test() {
     gameId: "123",
     sortIndex: 0,
     blindButton: null,
-    isBettingTurn: false,
+    bettingStatus: 0,
   });
 
   getPlayerStream("123", "123", (data: any) => console.log(data));
