@@ -1,7 +1,26 @@
-import { describe, expect, test, beforeEach } from "@jest/globals";
-import { nextBettingTurn, nextRoundTurn } from "../src/app/lib/turns";
-import { BlindButtons, Player } from "../src/app/lib/player";
-import exp from "constants";
+import { describe, expect, test } from "@jest/globals";
+import {
+  findNextBettingPlayerIndex,
+  getEligiblePlayers,
+  isEligibleForBetting,
+  nextBettingTurn,
+  nextRoundTurn,
+} from "../src/app/lib/turns";
+import { BettingStatus, BlindButtons, Player } from "../src/app/lib/player";
+
+function getPlayers() {
+  const players = [
+    new Player("123", "abc"),
+    new Player("123", "def"),
+    new Player("123", "ghi"),
+    new Player("123", "jlk"),
+  ];
+  players[0].bettingStatus = 1;
+  players[1].bettingStatus = 1;
+  players[2].bettingStatus = 1;
+  players[3].bettingStatus = 1;
+  return players;
+}
 
 describe("button turns", () => {
   test("initial state", async () => {
@@ -19,7 +38,7 @@ describe("button turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "2",
@@ -34,7 +53,7 @@ describe("button turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "3",
@@ -49,7 +68,7 @@ describe("button turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
     ];
 
@@ -79,7 +98,7 @@ describe("button turns", () => {
         blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "2",
@@ -94,7 +113,7 @@ describe("button turns", () => {
         blindButton: BlindButtons.SMALLBLIND,
         gameId: "123",
         sortIndex: 0,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "3",
@@ -109,7 +128,7 @@ describe("button turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
     ];
 
@@ -146,7 +165,7 @@ describe("button turns", () => {
         blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "2",
@@ -161,7 +180,7 @@ describe("button turns", () => {
         blindButton: BlindButtons.SMALLBLIND,
         gameId: "123",
         sortIndex: 0,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
     ];
 
@@ -196,7 +215,7 @@ describe("button turns", () => {
         blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "2",
@@ -211,7 +230,7 @@ describe("button turns", () => {
         blindButton: BlindButtons.SMALLBLIND,
         gameId: "123",
         sortIndex: 0,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "3",
@@ -226,7 +245,7 @@ describe("button turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "4",
@@ -241,7 +260,7 @@ describe("button turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
     ];
 
@@ -271,7 +290,7 @@ describe("button turns", () => {
         blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "2",
@@ -286,7 +305,7 @@ describe("button turns", () => {
         blindButton: BlindButtons.SMALLBLIND,
         gameId: "123",
         sortIndex: 0,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "3",
@@ -301,7 +320,7 @@ describe("button turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
       {
         id: "4",
@@ -316,7 +335,7 @@ describe("button turns", () => {
         gameId: "123",
         sortIndex: 0,
         blindButton: null,
-        isBettingTurn: false,
+        bettingStatus: BettingStatus.MUSTBET,
       },
     ];
 
@@ -335,224 +354,96 @@ describe("button turns", () => {
 
 describe("betting turns", () => {
   test("initial state", async () => {
-    const players: Player[] = [
-      {
-        id: "1",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "1",
-        cardsShown: false,
-        active: true,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: 0,
-        isBettingTurn: false,
-      },
-      {
-        id: "2",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "2",
-        active: true,
-        cardsShown: false,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 1,
-        blindButton: 1,
-        isBettingTurn: false,
-      },
-      {
-        id: "3",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        cardsShown: false,
-        name: "3",
-        active: true,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 2,
-        blindButton: null,
-        isBettingTurn: false,
-      },
-    ];
+    const players = getPlayers();
+    players[0].blindButton = BlindButtons.BIGBLIND;
+    players[1].blindButton = BlindButtons.SMALLBLIND;
 
     const bet = await nextBettingTurn(players);
 
     expect(bet).toBe(0);
-    expect(players[2].isBettingTurn).toBe(true);
-    expect(players[0].isBettingTurn).toBe(false);
-    expect(players[1].isBettingTurn).toBe(false);
+    expect(players[2].bettingStatus).toBe(2);
+    expect(players[0].bettingStatus).toBe(1);
+    expect(players[1].bettingStatus).toBe(1);
+    expect(players[3].bettingStatus).toBe(1);
   });
 
   test("next player, no bets", async () => {
-    const players: Player[] = [
-      {
-        id: "1",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "1",
-        cardsShown: false,
-        active: true,
-        folded: false,
-        isDealer: true,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        isBettingTurn: false,
-      },
-      {
-        id: "2",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "2",
-        active: true,
-        cardsShown: false,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: 0,
-        isBettingTurn: true,
-      },
-      {
-        id: "3",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        cardsShown: false,
-        name: "3",
-        active: true,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: 1,
-        isBettingTurn: false,
-      },
-    ];
+    const players = getPlayers();
+    players[1].blindButton = BlindButtons.BIGBLIND;
+    players[2].blindButton = BlindButtons.SMALLBLIND;
+    players[3].bettingStatus = BettingStatus.BETTING;
 
     let bet = await nextBettingTurn(players);
 
     expect(bet).toBe(0);
-    expect(players[2].isBettingTurn).toBe(true);
-    expect(players[0].isBettingTurn).toBe(false);
-    expect(players[1].isBettingTurn).toBe(false);
+    expect(players[0].bettingStatus).toBe(2);
+    expect(players[1].bettingStatus).toBe(1);
+    expect(players[2].bettingStatus).toBe(1);
+    expect(players[3].bettingStatus).toBe(3);
 
     bet = await nextBettingTurn(players);
 
     expect(bet).toBe(0);
-    expect(players[0].isBettingTurn).toBe(true);
-    expect(players[1].isBettingTurn).toBe(false);
-    expect(players[2].isBettingTurn).toBe(false);
+    expect(players[0].bettingStatus).toBe(3);
+    expect(players[1].bettingStatus).toBe(2);
+    expect(players[2].bettingStatus).toBe(1);
+    expect(players[3].bettingStatus).toBe(3);
+  });
+});
 
-    bet = await nextBettingTurn(players);
+describe("helper functions", () => {
+  test("isEligibleForBetting", () => {
+    const player = new Player("123", "acb");
+    expect(isEligibleForBetting(player)).toBe(false);
 
-    expect(bet).toBe(0);
-    expect(players[0].isBettingTurn).toBe(false);
-    expect(players[1].isBettingTurn).toBe(false);
-    expect(players[2].isBettingTurn).toBe(false);
+    player.bettingStatus = 1;
+    expect(isEligibleForBetting(player)).toBe(true);
+
+    player.bettingStatus = 2;
+    expect(isEligibleForBetting(player)).toBe(false);
+
+    player.cash = 0;
+    player.bettingStatus = 1;
+    expect(isEligibleForBetting(player)).toBe(false);
+
+    player.cash = 10;
+    player.active = false;
+    expect(isEligibleForBetting(player)).toBe(false);
+
+    player.active = true;
+    player.folded = true;
+    expect(isEligibleForBetting(player)).toBe(false);
   });
 
-  test("next player, with bets", async () => {
-    const players: Player[] = [
-      {
-        id: "1",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "1",
-        cardsShown: false,
-        active: true,
-        folded: false,
-        isDealer: true,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        isBettingTurn: false,
-      },
-      {
-        id: "2",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "2",
-        active: true,
-        cardsShown: false,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: 0,
-        isBettingTurn: true,
-      },
-      {
-        id: "3",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        cardsShown: false,
-        name: "3",
-        active: true,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: 1,
-        isBettingTurn: false,
-      },
-    ];
-
-    let bet = await nextBettingTurn(players);
-
-    expect(bet).toBe(0);
-    expect(players[2].isBettingTurn).toBe(true);
-    expect(players[0].isBettingTurn).toBe(false);
-    expect(players[1].isBettingTurn).toBe(false);
-
-    bet = await nextBettingTurn(players);
-
-    expect(bet).toBe(0);
-    expect(players[0].isBettingTurn).toBe(true);
-    expect(players[1].isBettingTurn).toBe(false);
-    expect(players[2].isBettingTurn).toBe(false);
-
-    players[0].currentBet = 20;
-
-    bet = await nextBettingTurn(players);
-
-    expect(bet).toBe(20);
-
-    expect(players[0].isBettingTurn).toBe(false);
-    expect(players[1].isBettingTurn).toBe(true);
-    expect(players[2].isBettingTurn).toBe(false);
-
+  test("getActiveNonFoldedPlayers", () => {
+    const players = getPlayers();
+    players[0].bettingStatus = 1;
     players[1].folded = true;
+    players[2].cash = 0;
+    players[3].active = false;
 
-    bet = await nextBettingTurn(players);
+    const filter = getEligiblePlayers(players);
 
-    expect(bet).toBe(20);
+    expect(filter.length).toBe(1);
+    expect(filter[0].name).toBe("abc");
+  });
 
-    expect(players[0].isBettingTurn).toBe(false);
-    expect(players[1].isBettingTurn).toBe(false);
-    expect(players[2].isBettingTurn).toBe(true);
+  test("findNextBettingPlayer", () => {
+    const players = getPlayers();
+    players[0].bettingStatus = 1;
+    players[1].bettingStatus = 1;
+    players[2].bettingStatus = 1;
+    players[3].bettingStatus = 1;
 
-    players[2].currentBet = 20;
+    let i = findNextBettingPlayerIndex(players, 1);
+    expect(i).toBe(2);
 
-    bet = await nextBettingTurn(players);
+    players[2].folded = true;
+    i = findNextBettingPlayerIndex(players, 1);
+    expect(i).toBe(3);
 
-    expect(bet).toBe(20);
-
-    expect(players[0].isBettingTurn).toBe(false);
-    expect(players[1].isBettingTurn).toBe(false);
-    expect(players[2].isBettingTurn).toBe(false);
+    players[3].cash = 0;
+    i = findNextBettingPlayerIndex(players, 1);
+    expect(i).toBe(0);
   });
 });

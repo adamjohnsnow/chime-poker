@@ -1,7 +1,7 @@
 import { Deck, Card } from "./cards";
 import { ChimeConfig, newChime } from "./chime";
 import * as uuid from "uuid";
-import { BlindButtons, Player, loadAllPlayers } from "./player";
+import { BettingStatus, BlindButtons, Player, loadAllPlayers } from "./player";
 import {
   getGame,
   writeChimeData,
@@ -11,7 +11,7 @@ import {
 import { nextBettingTurn, nextRoundTurn } from "./turns";
 import { findWinner, handResult } from "./findWinner";
 
-export type gameState = {
+export type GameState = {
   id: string;
   chimeConfig: ChimeConfig;
   cardDeck: Card[];
@@ -33,7 +33,7 @@ export enum GamePhase {
   RESULTS,
 }
 
-export async function startGame(): Promise<gameState> {
+export async function startGame(): Promise<GameState> {
   const id = uuid.v4();
 
   const call = await newChime(id);
@@ -49,10 +49,10 @@ export async function startGame(): Promise<gameState> {
 export async function getNewGame(
   id: string,
   chimeConfig: ChimeConfig
-): Promise<gameState> {
+): Promise<GameState> {
   const deck = new Deck();
 
-  const state: gameState = {
+  const state: GameState = {
     id: id,
     chimeConfig: chimeConfig,
     cardDeck: deck.cards,
@@ -69,7 +69,7 @@ export async function getNewGame(
 
 export async function loadGameAndPlayers(
   gameId: string
-): Promise<{ game: gameState; players: Player[] }> {
+): Promise<{ game: GameState; players: Player[] }> {
   const game = await getGame(gameId);
   const players = await loadAllPlayers(gameId);
 
@@ -79,7 +79,7 @@ export async function loadGameAndPlayers(
   return { game, players };
 }
 
-export async function saveGameAndPlayers(game: gameState, players: Player[]) {
+export async function saveGameAndPlayers(game: GameState, players: Player[]) {
   writeGameData(game);
   players.forEach((player) => {
     if (player.currentBet > 0) {
@@ -104,12 +104,12 @@ export async function resetCards(gameId: string) {
 }
 
 export async function processResetCards(
-  game: gameState,
+  game: GameState,
   players: Player[]
-): Promise<{ game: gameState; players: Player[] }> {
+): Promise<{ game: GameState; players: Player[] }> {
   players.forEach((player) => {
     player.cards = [];
-    player.isBettingTurn = false;
+    player.bettingStatus = BettingStatus.MUSTBET;
     if (game.results) {
       const prize = game.results.find(
         (result) => result.playerId === player.id
@@ -128,13 +128,18 @@ export async function processResetCards(
   return { game, players };
 }
 
-export async function dealNextCards(game: gameState, players: Player[]) {
+export async function dealNextCards(game: GameState, players: Player[]) {
   if (!game || game.phase === GamePhase.RESULTS) {
     return;
   }
   if (!game.communityCards) {
     game.communityCards = [];
   }
+
+  players.forEach((player) => {
+    game.prizePot += player.currentBet;
+  });
+
   switch (game.phase) {
     case GamePhase.START: {
       await dealDeck(game, players);
@@ -180,7 +185,7 @@ export async function dealNextCards(game: gameState, players: Player[]) {
   }
 }
 
-export async function dealDeck(game: gameState, players: Player[]) {
+export async function dealDeck(game: GameState, players: Player[]) {
   const deckLength = game.cardDeck.length;
   const playerCount = countActivePlayers(players);
   let i = 0;
@@ -215,4 +220,12 @@ export function countActivePlayers(players: Player[]): number {
     }
   });
   return i;
+}
+
+export async function getBets(gameId: string) {
+  const game = (await getGame(gameId)) as GameState;
+  if (game?.currentMinimimBet) {
+    return { bet: game.currentMinimimBet, blind: game.blind };
+  }
+  return { bet: 0, blind: game.blind };
 }

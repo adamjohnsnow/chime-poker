@@ -6,7 +6,7 @@ import { Key, useEffect, useState } from "react";
 // lib
 import { createAttendee } from "@/app/lib/chime";
 import { ChimeProvider } from "@/app/lib/chimeUtils";
-import { GamePhase, gameState, nextPhase, resetCards } from "@/app/lib/game";
+import { GamePhase, GameState, nextPhase, resetCards } from "@/app/lib/game";
 import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
 
@@ -25,7 +25,7 @@ import { triggerNextBetting } from "@/app/lib/turns";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
-  const [game, setGame] = useState<gameState>();
+  const [game, setGame] = useState<GameState>();
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
   const [players, setPlayers] = useState<Player[]>([]);
@@ -53,7 +53,7 @@ export default function Game({ params }: { params: { id: string } }) {
     if (player) {
       saveLocalPlayer(gameId, player);
     }
-    if (!process.env.BLOCK_CHIME) {
+    if (!process.env.NEXT_PUBLIC_BLOCK_CHIME) {
       initialiseGame();
     }
   }, [player]);
@@ -69,7 +69,7 @@ export default function Game({ params }: { params: { id: string } }) {
 
   useEffect(() => {}, [players]);
 
-  function gameEventHandler(gameData: gameState): void {
+  function gameEventHandler(gameData: GameState): void {
     if (gameData && !gameData.communityCards) {
       gameData.communityCards = [];
     }
@@ -169,11 +169,10 @@ export default function Game({ params }: { params: { id: string } }) {
     <>
       {chime ? <ActivityMonitor chime={chime} /> : null}
 
-      <main className="flex min-h-screen flex-col items-center justify-between p-10 font-mono">
+      <main className="flex min-h-screen flex-col items-center justify-start p-10 font-mono">
         {player ? (
           <>
             <PlayerWrapper playerId={player.id} gameId={gameId} />
-
             <div className="players">
               {players.map((playerTile: Player, i: Key | null | undefined) =>
                 playerTile.active && playerTile.id != player?.id ? (
@@ -199,7 +198,8 @@ export default function Game({ params }: { params: { id: string } }) {
                   <button>reset</button>
                 </form>
               </>
-            )}
+            )}{" "}
+            <p className="">You are in game: {gameId}</p>
           </>
         ) : (
           <>
@@ -220,7 +220,6 @@ export default function Game({ params }: { params: { id: string } }) {
             )}
           </>
         )}
-        <p className="">You are in game: {gameId}</p>
       </main>
     </>
   );

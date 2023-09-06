@@ -1,12 +1,35 @@
 import { Rank } from "../src/app/lib/hands";
 import { allotPrizes, findWinner, handResult } from "../src/app/lib/findWinner";
-import { gameState, GamePhase } from "../src/app/lib/game";
-import { Player } from "../src/app/lib/player";
 import { describe, expect, test } from "@jest/globals";
+import { Player } from "../src/app/lib/player";
+
+type GameState = {
+  id: string;
+  chimeConfig: {};
+  cardDeck: Card[];
+  communityCards: Card[];
+  results: handResult[];
+  prizePot: number;
+  phase: GamePhase;
+  blind: number;
+  currentMinimimBet: number;
+};
+
+type Card = { value: number; suit: string };
+
+export enum GamePhase {
+  NOTSTARTED,
+  START,
+  DEAL,
+  TURN,
+  FLOP,
+  RIVER,
+  RESULTS,
+}
 
 describe("finding winners", () => {
   test("find winner, flush vs 1 pair", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: [],
@@ -42,7 +65,7 @@ describe("finding winners", () => {
   });
 
   test("find winner, 7 pair vs 4 pair", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: [],
@@ -78,7 +101,7 @@ describe("finding winners", () => {
   });
 
   test("find winner, two-pair", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: [],
@@ -116,7 +139,7 @@ describe("finding winners", () => {
   });
 
   test("find winner, two-pair tie-break", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: [],
@@ -162,7 +185,7 @@ describe("finding winners", () => {
   });
 
   test("find winner, flush tie-break", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: [],

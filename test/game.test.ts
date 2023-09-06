@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@jest/globals";
 import {
   getNewGame,
-  gameState,
+  GameState,
   GamePhase,
   dealNextCards,
   processResetCards,
@@ -24,7 +24,7 @@ describe("new game", () => {
 
 describe("reset card states", () => {
   test("resets cards", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: [
@@ -98,7 +98,7 @@ describe("count active players", () => {
 
 describe("first deal", () => {
   test("deal deck", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: new Deck().cards,
@@ -124,7 +124,7 @@ describe("first deal", () => {
 });
 describe("goes through phases of the game", () => {
   test("deals the cards", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: new Deck().cards,

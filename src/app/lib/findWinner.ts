@@ -1,5 +1,5 @@
 import { Card } from "./cards";
-import { gameState } from "./game";
+import { GameState } from "./game";
 import { HandEvaluator, Rank, Result } from "./hands";
 import { Player } from "./player";
 
@@ -11,7 +11,7 @@ export type handResult = {
 
 const evaluator = new HandEvaluator();
 
-export async function findWinner(game: gameState, players: Player[]) {
+export async function findWinner(game: GameState, players: Player[]) {
   const results: handResult[] = [];
 
   if (!players) {

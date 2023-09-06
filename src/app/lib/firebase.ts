@@ -1,16 +1,32 @@
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, onValue, child, get } from "firebase/database";
+import { FirebaseApp, initializeApp } from "firebase/app";
+import {
+  getDatabase,
+  ref,
+  set,
+  onValue,
+  child,
+  get,
+  Database,
+} from "firebase/database";
 import { Player } from "./player";
-import { gameState } from "./game";
+import { GameState } from "./game";
 import { ChimeConfig } from "./chime";
 
-const firebaseConfig = {
-  databaseURL: "https://chime-poker-default-rtdb.firebaseio.com/",
-  projectId: "chime-poker",
-};
+let app: FirebaseApp;
+let db: Database;
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+if (
+  process.env.NEXT_PUBLIC_FIREBASE_URL &&
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECTID
+) {
+  const firebaseConfig = {
+    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_URL,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECTID,
+  };
+
+  app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+}
 
 export function writeChimeData(gameId: string, chimeConfig: ChimeConfig) {
   set(ref(db, "poker/" + gameId + "/chime"), chimeConfig);
@@ -25,7 +41,7 @@ export async function writeAllPlayers(players: Player[]) {
   players.forEach((player) => writePlayerData(player));
 }
 
-export function writeGameData(game: gameState) {
+export function writeGameData(game: GameState) {
   set(ref(db, "poker/" + game.id + "/game"), game);
 }
 
@@ -44,7 +60,7 @@ export function getPlayerStream(
 export function getGameStream(gameId: string, callback: any) {
   const game = ref(db, "poker/" + gameId + "/game");
   onValue(game, (snapshot) => {
-    const data = snapshot.val() as gameState;
+    const data = snapshot.val() as GameState;
 
     callback(data);
   });
@@ -88,11 +104,11 @@ export async function getAllPlayers(gameId: string): Promise<Player[]> {
   }
 }
 
-export async function getGame(gameId: string): Promise<gameState | null> {
+export async function getGame(gameId: string): Promise<GameState | null> {
   const dbRef = ref(getDatabase());
   const snapshot = await get(child(dbRef, "poker/" + gameId + "/game"));
   if (snapshot.exists()) {
-    const game = snapshot.val() as gameState;
+    const game = snapshot.val() as GameState;
     return game;
   } else {
     console.log("No data available");
