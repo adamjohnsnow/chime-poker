@@ -25,7 +25,7 @@ export class Player {
   public cardsShown: boolean;
   public folded: boolean;
   public active: boolean;
-  public isDealer?: boolean;
+  public isDealer: boolean;
   public blindButton: BlindButtons | null;
   public sortIndex: number;
   public bettingStatus: BettingStatus;
@@ -39,9 +39,23 @@ export class Player {
     this.cardsShown = false;
     this.active = true;
     this.folded = false;
+    this.isDealer = false;
     this.blindButton = null;
     this.sortIndex = 0;
     this.bettingStatus = BettingStatus.NONE;
+  }
+
+  public isEligibleForBetting(): boolean {
+    return (
+      !this.folded &&
+      this.active &&
+      this.cash > 0 &&
+      this.bettingStatus === BettingStatus.MUSTBET
+    );
+  }
+
+  public canPlay(): boolean {
+    return this.active && this.cash > 0;
   }
 }
 

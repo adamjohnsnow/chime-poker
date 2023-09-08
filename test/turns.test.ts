@@ -2,11 +2,11 @@ import { describe, expect, test } from "@jest/globals";
 import {
   findNextBettingPlayerIndex,
   getEligiblePlayers,
-  isEligibleForBetting,
   nextBettingTurn,
   nextRoundTurn,
 } from "../src/app/lib/turns";
 import { BettingStatus, BlindButtons, Player } from "../src/app/lib/player";
+import { getPlayer } from "@/app/lib/firebase";
 
 function getPlayers() {
   const players = [
@@ -24,331 +24,95 @@ function getPlayers() {
 
 describe("button turns", () => {
   test("initial state", async () => {
-    const players: Player[] = [
-      {
-        id: "1",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "1",
-        cardsShown: false,
-        active: true,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "2",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "2",
-        active: true,
-        cardsShown: false,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "3",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        cardsShown: false,
-        name: "3",
-        active: true,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-    ];
+    const players = getPlayers();
 
     nextRoundTurn(players);
 
-    expect(players[0].isDealer).toBeTruthy;
-    expect(players[1].isDealer).toBeFalsy;
-    expect(players[2].isDealer).toBeFalsy;
+    expect(players[0].isDealer).toBe(true);
+    expect(players[1].isDealer).toBe(false);
+    expect(players[2].isDealer).toBe(false);
 
-    expect(players[0].blindButton).toBeNull;
+    expect(players[0].blindButton).toBe(null);
     expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
     expect(players[2].blindButton).toBe(BlindButtons.SMALLBLIND);
   });
 
   test("round turn", async () => {
-    const players: Player[] = [
-      {
-        id: "1",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "1",
-        cardsShown: false,
-        active: true,
-        folded: false,
-        isDealer: false,
-        blindButton: BlindButtons.BIGBLIND,
-        gameId: "123",
-        sortIndex: 0,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "2",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "2",
-        active: true,
-        cardsShown: false,
-        folded: false,
-        isDealer: false,
-        blindButton: BlindButtons.SMALLBLIND,
-        gameId: "123",
-        sortIndex: 0,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "3",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        cardsShown: false,
-        name: "3",
-        active: true,
-        folded: false,
-        isDealer: true,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-    ];
+    const players = getPlayers().slice(0, 3);
 
     nextRoundTurn(players);
-    expect(players[0].isDealer).toBeTruthy;
-    expect(players[1].isDealer).toBeFalsy;
-    expect(players[2].isDealer).toBeFalsy;
+    expect(players[0].isDealer).toBe(true);
+    expect(players[1].isDealer).toBe(false);
+    expect(players[2].isDealer).toBe(false);
 
-    expect(players[0].blindButton).toBeNull;
+    expect(players[0].blindButton).toBe(null);
     expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
     expect(players[2].blindButton).toBe(BlindButtons.SMALLBLIND);
 
     nextRoundTurn(players);
-    expect(players[1].isDealer).toBeTruthy;
-    expect(players[0].isDealer).toBeFalsy;
-    expect(players[2].isDealer).toBeFalsy;
+    expect(players[1].isDealer).toBe(true);
+    expect(players[0].isDealer).toBe(false);
+    expect(players[2].isDealer).toBe(false);
 
-    expect(players[1].blindButton).toBeNull;
+    expect(players[1].blindButton).toBe(null);
     expect(players[2].blindButton).toBe(BlindButtons.BIGBLIND);
     expect(players[0].blindButton).toBe(BlindButtons.SMALLBLIND);
   });
   test("2 players round turn", async () => {
-    const players: Player[] = [
-      {
-        id: "1",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "1",
-        cardsShown: false,
-        active: true,
-        folded: false,
-        isDealer: false,
-        blindButton: BlindButtons.BIGBLIND,
-        gameId: "123",
-        sortIndex: 0,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "2",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "2",
-        active: true,
-        cardsShown: false,
-        folded: false,
-        isDealer: true,
-        blindButton: BlindButtons.SMALLBLIND,
-        gameId: "123",
-        sortIndex: 0,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-    ];
+    const players = getPlayers().slice(0, 2);
 
     nextRoundTurn(players);
 
-    expect(players[0].isDealer).toBeTruthy;
-    expect(players[1].isDealer).toBeFalsy;
+    expect(players[0].isDealer).toBe(true);
+    expect(players[1].isDealer).toBe(false);
 
     expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
     expect(players[0].blindButton).toBe(BlindButtons.SMALLBLIND);
 
     nextRoundTurn(players);
-    expect(players[1].isDealer).toBeTruthy;
-    expect(players[0].isDealer).toBeFalsy;
+    expect(players[1].isDealer).toBe(true);
+    expect(players[0].isDealer).toBe(false);
 
     expect(players[0].blindButton).toBe(BlindButtons.BIGBLIND);
     expect(players[1].blindButton).toBe(BlindButtons.SMALLBLIND);
   });
 
-  test("dont give to busted or inactive", async () => {
-    const players: Player[] = [
-      {
-        id: "1",
-        cash: 0,
-        currentBet: 0,
-        cards: [],
-        name: "1",
-        cardsShown: false,
-        active: true,
-        folded: false,
-        isDealer: false,
-        blindButton: BlindButtons.BIGBLIND,
-        gameId: "123",
-        sortIndex: 0,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "2",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "2",
-        active: false,
-        cardsShown: false,
-        folded: false,
-        isDealer: false,
-        blindButton: BlindButtons.SMALLBLIND,
-        gameId: "123",
-        sortIndex: 0,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "3",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        cardsShown: false,
-        name: "3",
-        active: true,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "4",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        cardsShown: false,
-        name: "3",
-        active: true,
-        folded: false,
-        isDealer: true,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-    ];
-
+  test("dont give to inactive", async () => {
+    const players = getPlayers();
+    players[0].active = false;
+    players[0].isDealer = true;
+    players[1].active = false;
+    players[1].blindButton = 1;
     nextRoundTurn(players);
-    expect(players[0].isDealer).toBeFalsy;
-    expect(players[1].isDealer).toBeFalsy;
-    expect(players[2].isDealer).toBeTruthy;
-    expect(players[3].isDealer).toBeFalsy;
 
-    expect(players[0].blindButton).toBeNull;
-    expect(players[1].blindButton).toBeNull;
+    expect(players[0].isDealer).toBe(false);
+    expect(players[1].isDealer).toBe(false);
+    expect(players[2].isDealer).toBe(true);
+    expect(players[3].isDealer).toBe(false);
+
+    expect(players[0].blindButton).toBe(null);
+    expect(players[1].blindButton).toBe(null);
     expect(players[2].blindButton).toBe(BlindButtons.BIGBLIND);
     expect(players[3].blindButton).toBe(BlindButtons.SMALLBLIND);
   });
-  test("dont give to busted or inactive 2", async () => {
-    const players: Player[] = [
-      {
-        id: "1",
-        cash: 0,
-        currentBet: 0,
-        cards: [],
-        name: "1",
-        cardsShown: false,
-        active: true,
-        folded: false,
-        isDealer: false,
-        blindButton: BlindButtons.BIGBLIND,
-        gameId: "123",
-        sortIndex: 0,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "2",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        name: "2",
-        active: true,
-        cardsShown: false,
-        folded: false,
-        isDealer: false,
-        blindButton: BlindButtons.SMALLBLIND,
-        gameId: "123",
-        sortIndex: 0,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "3",
-        cash: 10,
-        currentBet: 0,
-        cards: [],
-        cardsShown: false,
-        name: "3",
-        active: true,
-        folded: false,
-        isDealer: true,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-      {
-        id: "4",
-        cash: 0,
-        currentBet: 0,
-        cards: [],
-        cardsShown: false,
-        name: "3",
-        active: true,
-        folded: false,
-        isDealer: false,
-        gameId: "123",
-        sortIndex: 0,
-        blindButton: null,
-        bettingStatus: BettingStatus.MUSTBET,
-      },
-    ];
 
+  test("dont give to busted players", async () => {
+    const players = getPlayers();
+    players[1].cash = 0;
+    players[2].cash = 0;
+    players[0].isDealer = true;
+    players[1].blindButton = 1;
     nextRoundTurn(players);
-    expect(players[0].isDealer).toBeFalsy;
-    expect(players[1].isDealer).toBeTruthy;
-    expect(players[2].isDealer).toBeFalsy;
-    expect(players[3].isDealer).toBeFalsy;
 
-    expect(players[0].blindButton).toBeNull;
-    expect(players[3].blindButton).toBeNull;
-    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
-    expect(players[2].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[0].isDealer).toBe(false);
+    expect(players[1].isDealer).toBe(false);
+    expect(players[2].isDealer).toBe(false);
+    expect(players[3].isDealer).toBe(true);
+
+    expect(players[0].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[1].blindButton).toBe(null);
+    expect(players[2].blindButton).toBe(null);
+    expect(players[3].blindButton).toBe(BlindButtons.BIGBLIND);
   });
 });
 
@@ -410,29 +174,6 @@ describe("betting turns", () => {
 });
 
 describe("helper functions", () => {
-  test("isEligibleForBetting", () => {
-    const player = new Player("123", "acb");
-    expect(isEligibleForBetting(player)).toBe(false);
-
-    player.bettingStatus = 1;
-    expect(isEligibleForBetting(player)).toBe(true);
-
-    player.bettingStatus = 2;
-    expect(isEligibleForBetting(player)).toBe(false);
-
-    player.cash = 0;
-    player.bettingStatus = 1;
-    expect(isEligibleForBetting(player)).toBe(false);
-
-    player.cash = 10;
-    player.active = false;
-    expect(isEligibleForBetting(player)).toBe(false);
-
-    player.active = true;
-    player.folded = true;
-    expect(isEligibleForBetting(player)).toBe(false);
-  });
-
   test("getActiveNonFoldedPlayers", () => {
     const players = getPlayers();
     players[0].bettingStatus = 1;

@@ -17,27 +17,12 @@ export async function nextRoundTurn(players: Player[]) {
   if (players.length < 2) {
     return;
   }
-  function nextPlayerIndex(startNumber: number): number {
-    let n: number;
-    startNumber === players.length - 1 ? (n = 0) : (n = startNumber + 1);
-    for (n; n < players.length; n++) {
-      if (players[n].active && players[n].cash > 0) {
-        return n;
-      }
-    }
-    n = 0;
-    for (n; n < startNumber; n++) {
-      if (players[n].active && players[n].cash > 0) {
-        return n;
-      }
-    }
-    return n;
-  }
 
   if (!players.find((player) => player.isDealer)) {
     players[0].isDealer = true;
     players[1].blindButton = BlindButtons.BIGBLIND;
-    players[nextPlayerIndex(1)].blindButton = BlindButtons.SMALLBLIND;
+    players[findNextTurnPlayerIndex(players, 1)].blindButton =
+      BlindButtons.SMALLBLIND;
     return;
   }
   let dealerMoved = false;
@@ -46,13 +31,15 @@ export async function nextRoundTurn(players: Player[]) {
   for (let i = 0; i < players.length; i++) {
     if (!buttonsMoved && players[i].blindButton === BlindButtons.BIGBLIND) {
       players[i].blindButton = null;
-      players[nextPlayerIndex(i)].blindButton = BlindButtons.BIGBLIND;
-      players[nextPlayerIndex(nextPlayerIndex(i))].blindButton =
-        BlindButtons.SMALLBLIND;
+      players[findNextTurnPlayerIndex(players, i)].blindButton =
+        BlindButtons.BIGBLIND;
+      players[
+        findNextTurnPlayerIndex(players, findNextTurnPlayerIndex(players, i))
+      ].blindButton = BlindButtons.SMALLBLIND;
       buttonsMoved = true;
     }
     if (!dealerMoved && players[i].isDealer) {
-      players[nextPlayerIndex(i)].isDealer = true;
+      players[findNextTurnPlayerIndex(players, i)].isDealer = true;
       players[i].isDealer = false;
       dealerMoved = true;
     }
@@ -100,18 +87,18 @@ export function setNextBettingTurn(
   players[nextIndex].bettingStatus = BettingStatus.BETTING;
 }
 
-export function findNextBettingPlayerIndex(
+function findNextTurnPlayerIndex(
   players: Player[],
   startIndex: number
 ): number {
   for (let i = startIndex + 1; i < players.length; i++) {
-    if (isEligibleForBetting(players[i])) {
+    if (players[i].canPlay()) {
       return i;
     }
   }
 
   for (let i = 0; i < startIndex; i++) {
-    if (isEligibleForBetting(players[i])) {
+    if (players[i].canPlay()) {
       return i;
     }
   }
@@ -119,15 +106,25 @@ export function findNextBettingPlayerIndex(
   return startIndex;
 }
 
-export function isEligibleForBetting(player: Player): boolean {
-  return (
-    !player.folded &&
-    player.active &&
-    player.cash > 0 &&
-    player.bettingStatus === BettingStatus.MUSTBET
-  );
+export function findNextBettingPlayerIndex(
+  players: Player[],
+  startIndex: number
+): number {
+  for (let i = startIndex + 1; i < players.length; i++) {
+    if (players[i].isEligibleForBetting()) {
+      return i;
+    }
+  }
+
+  for (let i = 0; i < startIndex; i++) {
+    if (players[i].isEligibleForBetting()) {
+      return i;
+    }
+  }
+
+  return startIndex;
 }
 
 export function getEligiblePlayers(players: Player[]): Player[] {
-  return players.filter((player) => isEligibleForBetting(player));
+  return players.filter((player) => player.isEligibleForBetting());
 }
