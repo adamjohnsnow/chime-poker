@@ -6,21 +6,7 @@ import {
   nextRoundTurn,
 } from "../src/app/lib/turns";
 import { BettingStatus, BlindButtons, Player } from "../src/app/lib/player";
-import { getPlayer } from "@/app/lib/firebase";
-
-function getPlayers() {
-  const players = [
-    new Player("123", "abc"),
-    new Player("123", "def"),
-    new Player("123", "ghi"),
-    new Player("123", "jlk"),
-  ];
-  players[0].bettingStatus = 1;
-  players[1].bettingStatus = 1;
-  players[2].bettingStatus = 1;
-  players[3].bettingStatus = 1;
-  return players;
-}
+import { getPlayers } from "./helpers";
 
 describe("button turns", () => {
   test("initial state", async () => {

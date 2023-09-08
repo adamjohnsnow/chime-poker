@@ -7,9 +7,11 @@ import {
   processResetCards,
   dealDeck,
   countActivePlayers,
+  processNewBet,
 } from "../src/app/lib/game";
-import { Player } from "../src/app/lib/player";
+import { BettingStatus, Player } from "../src/app/lib/player";
 import { Deck } from "../src/app/lib/cards";
+import { getPlayers } from "./helpers";
 
 describe("new game", () => {
   test("generates a new game", async () => {
@@ -39,7 +41,7 @@ describe("reset card states", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
-      currentMinimimBet: 0,
+      currentMinimumBet: 0,
     };
     const players: Player[] = [
       new Player("123", "abc"),
@@ -96,6 +98,21 @@ describe("count active players", () => {
   });
 });
 
+describe("new bet raised", () => {
+  test("new bet resets must bets", async () => {
+    const game = await getNewGame("abc", {});
+    const players = getPlayers();
+    players[0].bettingStatus = 3;
+    players[2].bettingStatus = 3;
+    players[2].folded = true;
+    await processNewBet(game, players, 20);
+
+    expect(game.currentMinimumBet).toBe(20);
+    expect(players[0].bettingStatus).toBe(BettingStatus.MUSTBET);
+    expect(players[2].bettingStatus).not.toBe(BettingStatus.MUSTBET);
+  });
+});
+
 describe("first deal", () => {
   test("deal deck", async () => {
     const game: GameState = {
@@ -110,7 +127,7 @@ describe("first deal", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
-      currentMinimimBet: 0,
+      currentMinimumBet: 0,
     };
     const players: Player[] = [
       new Player("123", "abc"),
@@ -133,7 +150,7 @@ describe("goes through phases of the game", () => {
       phase: GamePhase.DEAL,
       prizePot: 0,
       blind: 0,
-      currentMinimimBet: 0,
+      currentMinimumBet: 0,
     };
     const players = [new Player("123", "ABC"), new Player("123", "XYZ")];
     players[0].cards = [

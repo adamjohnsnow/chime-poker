@@ -1,4 +1,3 @@
-import { Card } from "./cards";
 import { GameState } from "./game";
 import { HandEvaluator, Rank, Result } from "./hands";
 import { Player } from "./player";

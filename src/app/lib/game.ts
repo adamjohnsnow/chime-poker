@@ -17,10 +17,10 @@ export type GameState = {
   cardDeck: Card[];
   communityCards: Card[];
   results: handResult[];
-  prizePot: number;
   phase: GamePhase;
+  prizePot: number;
   blind: number;
-  currentMinimimBet: number;
+  currentMinimumBet: number;
 };
 
 export enum GamePhase {
@@ -61,7 +61,7 @@ export async function getNewGame(
     prizePot: 0,
     phase: GamePhase.NOTSTARTED,
     blind: 20,
-    currentMinimimBet: 0,
+    currentMinimumBet: 0,
   };
 
   return state;
@@ -125,6 +125,7 @@ export async function processResetCards(
   game.results = [];
   game.phase = GamePhase.START;
   game.prizePot = 0;
+  game.currentMinimumBet = 0;
   return { game, players };
 }
 
@@ -135,6 +136,7 @@ export async function dealNextCards(game: GameState, players: Player[]) {
   if (!game.communityCards) {
     game.communityCards = [];
   }
+  game.currentMinimumBet = 0;
 
   players.forEach((player) => {
     game.prizePot += player.currentBet;
@@ -224,8 +226,24 @@ export function countActivePlayers(players: Player[]): number {
 
 export async function getBets(gameId: string) {
   const game = (await getGame(gameId)) as GameState;
-  if (game?.currentMinimimBet) {
-    return { bet: game.currentMinimimBet, blind: game.blind };
-  }
-  return { bet: 0, blind: game.blind };
+  return { bet: game.currentMinimumBet, blind: game.blind };
+}
+
+export async function newBet(gameId: string, value: number) {
+  const gameData = await loadGameAndPlayers(gameId);
+  await processNewBet(gameData.game, gameData.players, value);
+  saveGameAndPlayers(gameData.game, gameData.players);
+}
+
+export async function processNewBet(
+  game: GameState,
+  players: Player[],
+  betValue: number
+) {
+  game.currentMinimumBet = betValue;
+  players.forEach((player) => {
+    if (player.canPlay() && !player.folded) {
+      player.bettingStatus = BettingStatus.MUSTBET;
+    }
+  });
 }
