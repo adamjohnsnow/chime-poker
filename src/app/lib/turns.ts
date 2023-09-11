@@ -98,6 +98,7 @@ function findNextTurnPlayerIndex(
   }
 
   for (let i = 0; i < startIndex; i++) {
+    console.log(players[i].canPlay());
     if (players[i].canPlay()) {
       return i;
     }

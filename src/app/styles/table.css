@@ -46,3 +46,17 @@
 .folded {
   filter: grayscale();
 }
+
+.start-button {
+  width: 100px;
+  height: 150px;
+  border-radius: 7px;
+  margin: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.start-card {
+  margin: 4px 8px;
+}

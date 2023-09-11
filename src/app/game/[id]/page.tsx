@@ -22,6 +22,7 @@ import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
 import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
 import { triggerNextBetting } from "@/app/lib/turns";
+import { LoadingSpinner } from "@/app/components/loadingSpinner";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -216,7 +217,10 @@ export default function Game({ params }: { params: { id: string } }) {
                 </form>
               </>
             ) : (
-              <div>LOADING</div>
+              <div>
+                <div>LOADING</div>
+                <LoadingSpinner show={true} />
+              </div>
             )}
           </>
         )}
