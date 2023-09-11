@@ -44,19 +44,6 @@ export class Player {
     this.sortIndex = 0;
     this.bettingStatus = BettingStatus.NONE;
   }
-
-  public isEligibleForBetting(): boolean {
-    return (
-      !this.folded &&
-      this.active &&
-      this.cash > 0 &&
-      this.bettingStatus === BettingStatus.MUSTBET
-    );
-  }
-
-  public canPlay(): boolean {
-    return this.active && this.cash > 0;
-  }
 }
 
 export async function loadPlayer(gameId: string, playerId: string) {
