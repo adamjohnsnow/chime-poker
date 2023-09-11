@@ -3,7 +3,6 @@ import { BettingStatus, Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import { getPlayerStream } from "../lib/firebase";
 import "../styles/player.css";
-import { TurnControl } from "./turnControl";
 import { ButtonsWrapper } from "./buttons";
 
 export function PlayerWrapper({
@@ -51,9 +50,6 @@ export function PlayerWrapper({
         </div>
         <div>{player.currentBet}</div>
       </div>
-      {player.bettingStatus === BettingStatus.BETTING ? (
-        <TurnControl player={player} />
-      ) : null}
     </div>
   ) : null;
 }

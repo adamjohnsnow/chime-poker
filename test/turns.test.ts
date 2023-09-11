@@ -66,8 +66,8 @@ describe("button turns", () => {
     expect(players[2].isDealer).toBeFalsy;
 
     expect(players[0].blindButton).toBeNull;
-    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
-    expect(players[2].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[1].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[2].blindButton).toBe(BlindButtons.BIGBLIND);
   });
 
   test("round turn", async () => {
@@ -82,7 +82,7 @@ describe("button turns", () => {
         active: true,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons.BIGBLIND,
+        blindButton: BlindButtons.SMALLBLIND,
         gameId: "123",
         sortIndex: 0,
         bettingStatus: BettingStatus.MUSTBET,
@@ -97,7 +97,7 @@ describe("button turns", () => {
         cardsShown: false,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons.SMALLBLIND,
+        blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
         bettingStatus: BettingStatus.MUSTBET,
@@ -125,8 +125,8 @@ describe("button turns", () => {
     expect(players[2].isDealer).toBeFalsy;
 
     expect(players[0].blindButton).toBeNull;
-    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
-    expect(players[2].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[1].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[2].blindButton).toBe(BlindButtons.BIGBLIND);
 
     nextRoundTurn(players);
     expect(players[1].isDealer).toBeTruthy;
@@ -134,8 +134,8 @@ describe("button turns", () => {
     expect(players[2].isDealer).toBeFalsy;
 
     expect(players[1].blindButton).toBeNull;
-    expect(players[2].blindButton).toBe(BlindButtons.BIGBLIND);
-    expect(players[0].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[2].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[0].blindButton).toBe(BlindButtons.BIGBLIND);
   });
   test("2 players round turn", async () => {
     const players: Player[] = [
@@ -149,7 +149,7 @@ describe("button turns", () => {
         active: true,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons.BIGBLIND,
+        blindButton: BlindButtons.SMALLBLIND,
         gameId: "123",
         sortIndex: 0,
         bettingStatus: BettingStatus.MUSTBET,
@@ -164,7 +164,7 @@ describe("button turns", () => {
         cardsShown: false,
         folded: false,
         isDealer: true,
-        blindButton: BlindButtons.SMALLBLIND,
+        blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
         bettingStatus: BettingStatus.MUSTBET,
@@ -176,15 +176,15 @@ describe("button turns", () => {
     expect(players[0].isDealer).toBeTruthy;
     expect(players[1].isDealer).toBeFalsy;
 
-    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
-    expect(players[0].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[1].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[0].blindButton).toBe(BlindButtons.BIGBLIND);
 
     nextRoundTurn(players);
     expect(players[1].isDealer).toBeTruthy;
     expect(players[0].isDealer).toBeFalsy;
 
-    expect(players[0].blindButton).toBe(BlindButtons.BIGBLIND);
-    expect(players[1].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[0].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
   });
 
   test("dont give to busted or inactive", async () => {
@@ -199,7 +199,7 @@ describe("button turns", () => {
         active: true,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons.BIGBLIND,
+        blindButton: BlindButtons.SMALLBLIND,
         gameId: "123",
         sortIndex: 0,
         bettingStatus: BettingStatus.MUSTBET,
@@ -214,7 +214,7 @@ describe("button turns", () => {
         cardsShown: false,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons.SMALLBLIND,
+        blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
         bettingStatus: BettingStatus.MUSTBET,
@@ -259,8 +259,8 @@ describe("button turns", () => {
 
     expect(players[0].blindButton).toBeNull;
     expect(players[1].blindButton).toBeNull;
-    expect(players[2].blindButton).toBe(BlindButtons.BIGBLIND);
-    expect(players[3].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[2].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[3].blindButton).toBe(BlindButtons.BIGBLIND);
   });
   test("dont give to busted or inactive 2", async () => {
     const players: Player[] = [
@@ -274,7 +274,7 @@ describe("button turns", () => {
         active: true,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons.BIGBLIND,
+        blindButton: BlindButtons.SMALLBLIND,
         gameId: "123",
         sortIndex: 0,
         bettingStatus: BettingStatus.MUSTBET,
@@ -289,7 +289,7 @@ describe("button turns", () => {
         cardsShown: false,
         folded: false,
         isDealer: false,
-        blindButton: BlindButtons.SMALLBLIND,
+        blindButton: BlindButtons.BIGBLIND,
         gameId: "123",
         sortIndex: 0,
         bettingStatus: BettingStatus.MUSTBET,
@@ -334,16 +334,16 @@ describe("button turns", () => {
 
     expect(players[0].blindButton).toBeNull;
     expect(players[3].blindButton).toBeNull;
-    expect(players[1].blindButton).toBe(BlindButtons.BIGBLIND);
-    expect(players[2].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[1].blindButton).toBe(BlindButtons.SMALLBLIND);
+    expect(players[2].blindButton).toBe(BlindButtons.BIGBLIND);
   });
 });
 
 describe("betting turns", () => {
   test("initial state", async () => {
     const players = getPlayers();
-    players[0].blindButton = BlindButtons.BIGBLIND;
-    players[1].blindButton = BlindButtons.SMALLBLIND;
+    players[0].blindButton = BlindButtons.SMALLBLIND;
+    players[1].blindButton = BlindButtons.BIGBLIND;
 
     const bet = await nextBettingTurn(players);
 
@@ -356,8 +356,8 @@ describe("betting turns", () => {
 
   test("next player, 4 player", async () => {
     const players = getPlayers();
-    players[1].blindButton = BlindButtons.BIGBLIND;
-    players[2].blindButton = BlindButtons.SMALLBLIND;
+    players[1].blindButton = BlindButtons.SMALLBLIND;
+    players[2].blindButton = BlindButtons.BIGBLIND;
     players[3].bettingStatus = BettingStatus.BETTING;
 
     let bet = await nextBettingTurn(players);
@@ -379,8 +379,8 @@ describe("betting turns", () => {
 
   test("next player, 2 player", async () => {
     const players = getPlayers().splice(0, 2);
-    players[0].blindButton = BlindButtons.BIGBLIND;
-    players[1].blindButton = BlindButtons.SMALLBLIND;
+    players[0].blindButton = BlindButtons.SMALLBLIND;
+    players[1].blindButton = BlindButtons.BIGBLIND;
 
     let bet = await nextBettingTurn(players);
 

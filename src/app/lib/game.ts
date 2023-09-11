@@ -242,7 +242,7 @@ export async function processNewBet(
 ) {
   game.currentMinimumBet = betValue;
   players.forEach((player) => {
-    if (player.canPlay() && !player.folded) {
+    if (player.active && player.cash > 0 && !player.folded) {
       player.bettingStatus = BettingStatus.MUSTBET;
     }
   });

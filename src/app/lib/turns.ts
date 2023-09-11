@@ -36,19 +36,19 @@ export async function nextRoundTurn(players: Player[]) {
 
   if (!players.find((player) => player.isDealer)) {
     players[0].isDealer = true;
-    players[1].blindButton = BlindButtons.BIGBLIND;
-    players[nextPlayerIndex(1)].blindButton = BlindButtons.SMALLBLIND;
+    players[1].blindButton = BlindButtons.SMALLBLIND;
+    players[nextPlayerIndex(1)].blindButton = BlindButtons.BIGBLIND;
     return;
   }
   let dealerMoved = false;
   let buttonsMoved = false;
 
   for (let i = 0; i < players.length; i++) {
-    if (!buttonsMoved && players[i].blindButton === BlindButtons.BIGBLIND) {
+    if (!buttonsMoved && players[i].blindButton === BlindButtons.SMALLBLIND) {
       players[i].blindButton = null;
-      players[nextPlayerIndex(i)].blindButton = BlindButtons.BIGBLIND;
+      players[nextPlayerIndex(i)].blindButton = BlindButtons.SMALLBLIND;
       players[nextPlayerIndex(nextPlayerIndex(i))].blindButton =
-        BlindButtons.SMALLBLIND;
+        BlindButtons.BIGBLIND;
       buttonsMoved = true;
     }
     if (!dealerMoved && players[i].isDealer) {
@@ -64,11 +64,11 @@ export async function nextBettingTurn(players: Player[]): Promise<number> {
   const inTurnPlayer = getInTurnPlayer(players);
 
   if (!inTurnPlayer) {
-    const smallBlind = players.find(
-      (player) => player.blindButton === BlindButtons.SMALLBLIND
+    const bigBlind = players.find(
+      (player) => player.blindButton === BlindButtons.BIGBLIND
     );
-    if (smallBlind) {
-      setNextBettingTurn(players, players.indexOf(smallBlind as Player));
+    if (bigBlind) {
+      setNextBettingTurn(players, players.indexOf(bigBlind as Player));
     }
     return betLevel;
   }
