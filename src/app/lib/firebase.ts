@@ -9,7 +9,7 @@ import {
   Database,
 } from "firebase/database";
 import { Player } from "./player";
-import { GameState } from "./game";
+import { GamePhase, GameState } from "./game";
 import { ChimeConfig } from "./chime";
 
 let app: FirebaseApp;
@@ -65,7 +65,14 @@ export function getGameStream(gameId: string, callback: any) {
     callback(data);
   });
 }
+export function getGamePhaseStream(gameId: string, callback: any) {
+  const game = ref(db, "poker/" + gameId + "/game/phase");
+  onValue(game, (snapshot) => {
+    const data = snapshot.val() as GamePhase;
 
+    callback(data);
+  });
+}
 export function getAllPlayersStream(gameId: string, callback: any) {
   const player = ref(db, "poker/" + gameId + "/players");
   onValue(player, (snapshot) => {

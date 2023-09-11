@@ -16,7 +16,6 @@ import { PlayerTile } from "@/app/components/playerTile";
 // styles
 import "@/app/styles/table.css";
 import "@/app/styles/playingCard.css";
-import { TurnControl } from "@/app/components/turnControl";
 import { ActivityMonitor } from "@/app/components/activityMonitor";
 import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
