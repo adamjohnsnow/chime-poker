@@ -29,7 +29,6 @@ export default function Game({ params }: { params: { id: string } }) {
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
   const [players, setPlayers] = useState<Player[]>([]);
-  const [playerTurn, setPlayerTurn] = useState<string>();
   const [showNameInput, setShowNameInput] = useState<boolean>(false);
 
   useEffect(() => {

@@ -18,14 +18,16 @@ export async function findWinner(game: GameState, players: Player[]) {
   }
 
   await players.forEach((player) => {
-    const cards = [...game.communityCards, ...player.cards];
-    const evaluatedHand = evaluator.evaluate(cards);
-    results.push({
-      playerId: player.id,
-      result: evaluatedHand,
-      prize: 0,
-    });
-    player.cardsShown = true;
+    if (!player.folded) {
+      const cards = [...game.communityCards, ...player.cards];
+      const evaluatedHand = evaluator.evaluate(cards);
+      results.push({
+        playerId: player.id,
+        result: evaluatedHand,
+        prize: 0,
+      });
+      player.cardsShown = true;
+    }
   });
 
   results.sort(

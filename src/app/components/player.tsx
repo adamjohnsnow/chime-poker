@@ -10,6 +10,7 @@ import {
   getBets,
   newBet,
   nextPhase,
+  resetCards,
   triggerNextBetting,
 } from "../lib/game";
 
@@ -58,7 +59,7 @@ export function PlayerWrapper({
     if (!player) {
       return;
     }
-    player.cash -= bet - (player.currentBet || 0);
+    player.cash -= bet - player.currentBet;
     player.currentBet = bet;
     await updatePlayer(player);
     if (bet > minBet) {
@@ -81,14 +82,21 @@ export function PlayerWrapper({
     }
   }
 
+  async function nextRound() {
+    if (!gameId) {
+      return;
+    }
+    await resetCards(gameId);
+  }
+
   function showBetAction() {
     return player?.bettingStatus === BettingStatus.BETTING;
   }
+
   return player ? (
     <div className="flex flex-row w-full m-5">
       <audio id="chime-audio" />
       <div className="z-10 w-full items-start text-sm flex ">
-        {player.name}: £{player.cash}
         <div
           className={
             player.bettingStatus === BettingStatus.BETTING
@@ -99,53 +107,73 @@ export function PlayerWrapper({
           <video className="video-tile m-1 " id="local"></video>
           <ButtonsWrapper player={player} />
         </div>
-        <div className="flex flex-row w-60">
-          {player.cards && player.cards.length != 0 ? (
-            <>
-              <PlayingCard card={player.cards[0]}></PlayingCard>
-              <PlayingCard card={player.cards[1]}></PlayingCard>
-            </>
-          ) : null}
-        </div>
-        <div>Bet: £{player.currentBet}</div>
-      </div>
-      {player?.isDealer && gamePhase === GamePhase.START ? (
-        <>
-          <div>You are now the dealer</div>{" "}
-          <form action={nextAction}>
-            <button>Deal</button>
-          </form>
-        </>
-      ) : null}
-      {showBetAction() ? (
-        <div className="flex flex-col w-48">
-          <div>YOUR TURN</div>
-          <form className="flex w-full text-red-700" action={fold}>
-            <button className="w-full">FOLD</button>
-          </form>
-          <form className="flex w-full" action={betCall}>
-            {minBet - player.currentBet === 0 &&
-            bet - player.currentBet === 0 ? (
-              <button className="w-full">Check</button>
-            ) : (
-              <button className="w-full">
-                {bet > minBet ? "RAISE" : "CALL"} +£{bet - player.currentBet}
-              </button>
-            )}
-          </form>
-          <div className="text-xs flex flex-row">
-            <form action={decreaseBet}>
-              <button disabled={bet < betIncrement || bet <= minBet}>
-                -£{betIncrement}
-              </button>
-            </form>
-
-            <form action={increaseBet}>
-              <button>+£{betIncrement}</button>
-            </form>
+        <div className="flex flex-col m-2">
+          <div>
+            {player.name}: £{player.cash}
           </div>
+          <div>Bet: £{player.currentBet}</div>
         </div>
-      ) : null}
+      </div>
+
+      <div>
+        {player?.isDealer && gamePhase === GamePhase.START ? (
+          <>
+            <div>You are now the dealer</div>{" "}
+            <form action={nextAction}>
+              <button>Deal</button>
+            </form>
+          </>
+        ) : null}
+
+        {player?.isDealer && gamePhase === GamePhase.RESULTS ? (
+          <>
+            <div>The round is over</div>{" "}
+            <form action={nextRound}>
+              <button>Next round</button>
+            </form>
+          </>
+        ) : null}
+
+        {showBetAction() ? (
+          <div className="flex flex-col w-36 mx-2">
+            <form className="flex w-full text-red-700" action={fold}>
+              <button className="w-full">Fold</button>
+            </form>
+            <form className="flex w-full" action={betCall}>
+              {minBet - player.currentBet === 0 &&
+              bet - player.currentBet === 0 ? (
+                <button className="w-full">Check</button>
+              ) : (
+                <button className="w-full">
+                  {bet > minBet ? "RAISE" : "CALL"} +£{bet - player.currentBet}
+                </button>
+              )}
+            </form>
+            <div className="text-xs flex w-full flex-row justify-between">
+              <form action={decreaseBet}>
+                <button
+                  className="w-14"
+                  disabled={bet < betIncrement || bet <= minBet}
+                >
+                  -£{betIncrement}
+                </button>
+              </form>
+
+              <form action={increaseBet}>
+                <button className="w-14">+£{betIncrement}</button>
+              </form>
+            </div>
+          </div>
+        ) : null}
+      </div>
+      <div className="flex flex-row w-60">
+        {player.cards && player.cards.length != 0 ? (
+          <>
+            <PlayingCard card={player.cards[0]}></PlayingCard>
+            <PlayingCard card={player.cards[1]}></PlayingCard>
+          </>
+        ) : null}
+      </div>
     </div>
   ) : null;
 }
