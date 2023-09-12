@@ -2,12 +2,7 @@ import { BettingStatus, BlindButtons, Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import "../styles/player.css";
 import { useEffect } from "react";
-import {
-  BigBlindButton,
-  ButtonsWrapper,
-  DealerButton,
-  SmallBlindButton,
-} from "./buttons";
+import { ButtonsWrapper } from "./buttons";
 
 export function PlayerTile({ player }: { player: Player }) {
   // const [player, setPlayer] = useState<Player>();
@@ -33,15 +28,22 @@ export function PlayerTile({ player }: { player: Player }) {
           <div
             className={
               player.bettingStatus === BettingStatus.BETTING
-                ? "video-tile highlighted flex items-end"
-                : "video-tile  flex items-end"
+                ? "video-tile flex justify-center highlighted"
+                : "video-tile flex justify-center"
             }
           >
-            <ButtonsWrapper player={player} />
             <video
-              className={player.folded ? "video-tile folded" : "video-tile"}
+              className={
+                player.folded ? "video absolute folded" : "video absolute"
+              }
               id={player.id}
             ></video>
+            <div className="flex flex-col justify-between items-center text-white">
+              <div className="flex m-1" id={"result-" + player.id}></div>
+              <div className="flex m-1" id={"prize-" + player.id}></div>
+
+              <ButtonsWrapper player={player} />
+            </div>
           </div>
           <div>
             {player.cards?.length === 2 && player.cardsShown ? (

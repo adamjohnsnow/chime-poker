@@ -3,7 +3,7 @@ import "../styles/buttons.css";
 
 export function ButtonsWrapper({ player }: { player: Player }) {
   return (
-    <div className="flex absolute m-1">
+    <div className="flex m-1">
       {player.cardsShown ? null : (
         <>
           {player.isDealer ? <DealerButton /> : null}

@@ -21,8 +21,8 @@ import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
 import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
 import { LoadingSpinner } from "@/app/components/loadingSpinner";
-import { TitleCard } from "@/app/components/titleCard";
 import { SmallTitle } from "@/app/components/titleCards";
+import { Rank } from "@/app/lib/hands";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -138,6 +138,22 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   function highlightWinningCards() {
+    game?.results.forEach((result) => {
+      const resultElement = document.getElementById(
+        "result-" + result.playerId
+      );
+      if (resultElement) {
+        resultElement.innerHTML = Rank[result.result.rank];
+      }
+      if (result.prize > 0) {
+        const prizeElement = document.getElementById(
+          "prize-" + result.playerId
+        );
+        if (prizeElement) {
+          prizeElement.innerHTML = "+£" + result.prize;
+        }
+      }
+    });
     const winningHand = game?.results[0].result.cards;
     winningHand?.forEach((card) => {
       const cardElement = document.getElementById(
@@ -163,6 +179,15 @@ export default function Game({ params }: { params: { id: string } }) {
     for (let i = 0; i < highlightedCards.length; i++) {
       highlightedCards[i].classList.remove("highlighted");
     }
+    const results = document.querySelectorAll('div[id^="result-"]');
+    results.forEach((element) => {
+      element.innerHTML = "";
+    });
+    const prizes = document.querySelectorAll('div[id^="prize-"]');
+    prizes.forEach((element) => {
+      element.innerHTML = "";
+    });
+    console.log(results);
   }
 
   return (

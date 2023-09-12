@@ -97,15 +97,15 @@ export function PlayerWrapper({
   return player ? (
     <div className="flex flex-row w-full m-5">
       <audio id="chime-audio" />
-      <div className="z-10 w-full items-start text-sm flex ">
+      <div className="w-full items-start text-sm flex ">
         <div
           className={
             player.bettingStatus === BettingStatus.BETTING
-              ? "flex items-end highlighted"
-              : "flex items-end"
+              ? "video-tile flex items-end highlighted"
+              : "video-tile flex items-end"
           }
         >
-          <video className="video-tile m-1 " id="local"></video>
+          <video className="video absolute" id="local"></video>
           <ButtonsWrapper player={player} />
         </div>
         <div className="flex flex-col m-2">
@@ -113,6 +113,8 @@ export function PlayerWrapper({
             {player.name}: £{player.cash}
           </div>
           <div>Bet: £{player.currentBet}</div>
+          <div className="flex m-1" id={"result-" + player.id}></div>
+          <div className="flex m-1" id={"prize-" + player.id}></div>
         </div>
       </div>
 
