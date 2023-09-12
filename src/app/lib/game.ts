@@ -108,7 +108,7 @@ export async function triggerNextBetting(gameId: string) {
       {
         playerId: nonFoldedPlayers[0].id,
         result: {
-          rank: Rank.HighCard,
+          rank: Rank.LastStanding,
           cards: [],
           cardsScore: 0,
           kickers: [],

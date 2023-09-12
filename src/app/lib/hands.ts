@@ -11,6 +11,7 @@ export enum Rank {
   FourOfAKind,
   StraightFlush,
   RoyalFlush,
+  LastStanding,
 }
 
 export interface Result {
