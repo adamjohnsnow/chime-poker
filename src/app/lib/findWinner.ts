@@ -1,5 +1,5 @@
 import { GameState } from "./game";
-import { HandEvaluator, Rank, Result } from "./hands";
+import { HandEvaluator, Result } from "./hands";
 import { Player } from "./player";
 
 export type handResult = {

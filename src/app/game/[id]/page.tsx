@@ -22,6 +22,7 @@ import { PlayerWrapper } from "@/app/components/player";
 import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
 import { LoadingSpinner } from "@/app/components/loadingSpinner";
 import { TitleCard } from "@/app/components/titleCard";
+import { SmallTitle } from "@/app/components/titleCards";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -212,23 +213,7 @@ export default function Game({ params }: { params: { id: string } }) {
           <>
             {showNameInput && game?.phase === GamePhase.NOTSTARTED ? (
               <div className="flex flex-col items-center">
-                <div
-                  style={{ width: 400, margin: 40 }}
-                  className="opponent-cards"
-                >
-                  <TitleCard suit={"P"} letter={"P"} red={false} />
-                  <TitleCard suit={"O"} letter={"O"} red={true} />
-                  <TitleCard suit={"K"} letter={"O"} red={false} />
-                  <TitleCard suit={"E"} letter={"O"} red={true} />
-                  <TitleCard suit={"R"} letter={"O"} red={false} />
-                </div>
-
-                <div style={{ width: 400 }} className="opponent-cards">
-                  <TitleCard suit={"F"} letter={"P"} red={false} />
-                  <TitleCard suit={"A"} letter={"O"} red={true} />
-                  <TitleCard suit={"C"} letter={"O"} red={false} />
-                  <TitleCard suit={"E"} letter={"O"} red={true} />
-                </div>
+                <SmallTitle />
                 <div className="flex flex-col items-center">
                   <div>New Player</div>
 

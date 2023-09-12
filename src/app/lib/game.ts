@@ -4,13 +4,13 @@ import * as uuid from "uuid";
 import { BettingStatus, BlindButtons, Player, loadAllPlayers } from "./player";
 import {
   getGame,
-  writeAllPlayers,
   writeChimeData,
   writeGameData,
   writePlayerData,
 } from "./firebase";
 import { nextBettingTurn, nextRoundTurn } from "./turns";
 import { findWinner, handResult } from "./findWinner";
+import { Rank } from "./hands";
 
 export type GameState = {
   id: string;
@@ -96,6 +96,29 @@ export async function triggerNextBetting(gameId: string) {
   const players = await loadAllPlayers(gameId);
   const game = await getGame(gameId);
   if (!game) {
+    return;
+  }
+
+  const nonFoldedPlayers = players.filter(
+    (player) => !player.folded && player.active
+  );
+
+  if (nonFoldedPlayers.length < 2) {
+    game.results = [
+      {
+        playerId: nonFoldedPlayers[0].id,
+        result: {
+          rank: Rank.HighCard,
+          cards: [],
+          cardsScore: 0,
+          kickers: [],
+          kickersScore: 0,
+        },
+        prize: game.prizePot,
+      },
+    ];
+    game.phase = GamePhase.RESULTS;
+    await writeGameData(game);
     return;
   }
 
@@ -266,6 +289,7 @@ export async function processNewBet(
   players: Player[],
   betValue: number
 ) {
+  console.log(betValue);
   game.currentMinimumBet = betValue;
   players.forEach((player) => {
     if (
@@ -277,4 +301,18 @@ export async function processNewBet(
       player.bettingStatus = BettingStatus.MUSTBET;
     }
   });
+}
+
+export async function foldPlayer(player: Player) {
+  const game = await getGame(player.gameId);
+  if (!game) {
+    return;
+  }
+  game.prizePot += player.currentBet;
+  player.folded = true;
+  player.currentBet = 0;
+  player.bettingStatus = BettingStatus.HASBET;
+  await writeGameData(game);
+  await writePlayerData(player);
+  triggerNextBetting(game.id);
 }
