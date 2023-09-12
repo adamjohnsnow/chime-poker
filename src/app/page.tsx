@@ -4,7 +4,7 @@
 import { useRouter } from "next/navigation";
 import { startGame } from "./lib/game";
 import "./styles/table.css";
-import { TitleCard } from "./components/titleCard";
+import { TitleCard } from "./components/titleCards";
 import { LoadingSpinner } from "./components/loadingSpinner";
 import { useEffect, useState } from "react";
 

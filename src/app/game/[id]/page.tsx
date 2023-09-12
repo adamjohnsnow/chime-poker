@@ -187,7 +187,6 @@ export default function Game({ params }: { params: { id: string } }) {
     prizes.forEach((element) => {
       element.innerHTML = "";
     });
-    console.log(results);
   }
 
   return (
@@ -198,6 +197,8 @@ export default function Game({ params }: { params: { id: string } }) {
         {player ? (
           <>
             <PlayerWrapper playerId={player.id} gameId={gameId} />
+            <div>POT: £{game?.prizePot}</div>
+
             <div className="players">
               {players.map((playerTile: Player, i: Key | null | undefined) =>
                 playerTile.active && playerTile.id != player?.id ? (
@@ -220,17 +221,16 @@ export default function Game({ params }: { params: { id: string } }) {
               </div>
             ) : (
               <>
-                <div>{game?.prizePot}</div>
                 <CommunityCards
                   chime={chime as ChimeProvider}
                   cards={game ? game.communityCards : []}
                 />
-                <form action={nextAction}>
+                {/* <form action={nextAction}>
                   <button>next</button>
                 </form>
                 <form action={nextRound}>
                   <button>reset</button>
-                </form>
+                </form> */}
               </>
             )}
           </>

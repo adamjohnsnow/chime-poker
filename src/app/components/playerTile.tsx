@@ -1,22 +1,9 @@
-import { BettingStatus, BlindButtons, Player } from "../lib/player";
+import { BettingStatus, Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import "../styles/player.css";
-import { useEffect } from "react";
 import { ButtonsWrapper } from "./buttons";
 
 export function PlayerTile({ player }: { player: Player }) {
-  // const [player, setPlayer] = useState<Player>();
-  useEffect(() => {
-    // getPlayerStream(player.gameId, player.id, playerEventHandler);
-  }, [player]);
-
-  // function playerEventHandler(data: any): void {
-  //   console.log("PLAYER MESSAGE:", data);
-  //   if(data.cards == player.cards){
-  //   player.cards = []
-  //   }
-  // }
-
   return (
     <>
       {player ? (
@@ -38,9 +25,9 @@ export function PlayerTile({ player }: { player: Player }) {
               }
               id={player.id}
             ></video>
-            <div className="flex flex-col justify-between items-center text-white">
-              <div className="flex m-1" id={"result-" + player.id}></div>
-              <div className="flex m-1" id={"prize-" + player.id}></div>
+            <div className="flex flex-col justify-between items-center text-white glow-text">
+              <div className="flex m-1 z-50" id={"result-" + player.id}></div>
+              <div className="flex m-1 z-50" id={"prize-" + player.id}></div>
 
               <ButtonsWrapper player={player} />
             </div>
@@ -52,6 +39,7 @@ export function PlayerTile({ player }: { player: Player }) {
                 <PlayingCard card={player.cards[1]}></PlayingCard>
               </div>
             ) : null}
+            {player.currentBet > 0 ? "£" + player.currentBet : null}
           </div>
         </div>
       ) : null}
