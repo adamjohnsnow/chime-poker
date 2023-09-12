@@ -113,31 +113,32 @@ export function PlayerWrapper({
         </>
       ) : null}
       {showBetAction() ? (
-        <>
+        <div className="flex flex-col w-48">
           <div>YOUR TURN</div>
-          <form action={fold}>
-            <button>FOLD</button>
+          <form className="flex w-full text-red-700" action={fold}>
+            <button className="w-full">FOLD</button>
           </form>
-          <form action={betCall}>
+          <form className="flex w-full" action={betCall}>
             {minBet - player.currentBet === 0 && bet === 0 ? (
-              <button>Check</button>
+              <button className="w-full">Check</button>
             ) : (
-              <button>
+              <button className="w-full">
                 {bet > minBet ? "RAISE" : "CALL"} +£{bet}
               </button>
             )}
           </form>
-          <form action={decreaseBet}>
-            <button disabled={bet < betIncrement || bet <= minBet}>
-              -£{betIncrement}
-            </button>
-          </form>
+          <div className="text-xs flex flex-row">
+            <form action={decreaseBet}>
+              <button disabled={bet < betIncrement || bet <= minBet}>
+                -£{betIncrement}
+              </button>
+            </form>
 
-          <form action={increaseBet}>
-            <button>+£{betIncrement}</button>
-          </form>
-          <div>This bet: £{bet}</div>
-        </>
+            <form action={increaseBet}>
+              <button>+£{betIncrement}</button>
+            </form>
+          </div>
+        </div>
       ) : null}
     </div>
   ) : null;

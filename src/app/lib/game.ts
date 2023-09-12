@@ -134,7 +134,9 @@ export async function processResetCards(
     player.cards = [];
     player.folded = false;
     player.currentBet = 0;
+    player.cardsShown = false;
     player.bettingStatus = BettingStatus.MUSTBET;
+
     if (game.results) {
       const prize = game.results.find(
         (result) => result.playerId === player.id

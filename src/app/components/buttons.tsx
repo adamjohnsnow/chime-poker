@@ -4,11 +4,17 @@ import "../styles/buttons.css";
 export function ButtonsWrapper({ player }: { player: Player }) {
   return (
     <div className="flex absolute m-1">
-      {player.isDealer ? <DealerButton /> : null}
-      {player.blindButton === BlindButtons.BIGBLIND ? <BigBlindButton /> : null}
-      {player.blindButton === BlindButtons.SMALLBLIND ? (
-        <SmallBlindButton />
-      ) : null}
+      {player.cardsShown ? null : (
+        <>
+          {player.isDealer ? <DealerButton /> : null}
+          {player.blindButton === BlindButtons.BIGBLIND ? (
+            <BigBlindButton />
+          ) : null}
+          {player.blindButton === BlindButtons.SMALLBLIND ? (
+            <SmallBlindButton />
+          ) : null}
+        </>
+      )}
     </div>
   );
 }
