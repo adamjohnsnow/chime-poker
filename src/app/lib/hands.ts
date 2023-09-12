@@ -161,12 +161,16 @@ export class HandEvaluator {
 
   private hasStraight(cards: Card[]): Result {
     const result = this.blankResult();
+    if (cards[0].value === 13) {
+      cards.push({ value: 0, suit: cards[0].suit });
+    }
     let newCards: Card[] = [cards[0]];
     for (let i = 1; i < cards.length; i++) {
       if (cards[i].value === newCards[newCards.length - 1].value) continue;
 
       if (cards[i].value === newCards[newCards.length - 1].value - 1) {
         newCards.push(cards[i]);
+
         if (newCards.length > 4) {
           if (newCards[0].value === 13) {
             result.rank = Rank.RoyalFlush;

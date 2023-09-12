@@ -152,6 +152,7 @@ export async function processResetCards(
   game.results = [];
   game.phase = GamePhase.START;
   game.prizePot = 0;
+  game.currentMinimumBet = 0;
   return { game, players };
 }
 
@@ -219,7 +220,6 @@ export async function dealDeck(game: GameState, players: Player[]) {
   const deckLength = game.cardDeck.length;
   const playerCount = countActivePlayers(players);
   let i = 0;
-  console.log("a", players);
 
   players.forEach((player) => {
     player.cardsShown = false;
@@ -236,7 +236,7 @@ export async function dealDeck(game: GameState, players: Player[]) {
       i++;
     }
   });
-  console.log("a", players);
+
   game.cardDeck = game.cardDeck.slice(0 - (deckLength - i * 2));
 }
 
@@ -268,7 +268,12 @@ export async function processNewBet(
 ) {
   game.currentMinimumBet = betValue;
   players.forEach((player) => {
-    if (player.active && player.cash > 0 && !player.folded) {
+    if (
+      player.active &&
+      player.cash > 0 &&
+      !player.folded &&
+      player.currentBet < betValue
+    ) {
       player.bettingStatus = BettingStatus.MUSTBET;
     }
   });

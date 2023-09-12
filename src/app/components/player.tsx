@@ -5,7 +5,13 @@ import { PlayingCard } from "./playingCard";
 import { getGamePhaseStream, getPlayerStream } from "../lib/firebase";
 import "../styles/player.css";
 import { ButtonsWrapper } from "./buttons";
-import { GamePhase, getBets, nextPhase, triggerNextBetting } from "../lib/game";
+import {
+  GamePhase,
+  getBets,
+  newBet,
+  nextPhase,
+  triggerNextBetting,
+} from "../lib/game";
 
 export function PlayerWrapper({
   gameId,
@@ -48,8 +54,17 @@ export function PlayerWrapper({
   function decreaseBet() {
     setBet(bet - betIncrement);
   }
-  function betCall() {
-    placeBet();
+  async function betCall() {
+    if (!player) {
+      return;
+    }
+    player.cash -= bet - (player.currentBet || 0);
+    player.currentBet = bet;
+    await updatePlayer(player);
+    if (bet > minBet) {
+      await newBet(player.gameId, player.currentBet);
+    }
+    await triggerNextBetting(player.gameId);
   }
 
   async function fold() {
@@ -58,16 +73,6 @@ export function PlayerWrapper({
       updatePlayer(player);
       triggerNextBetting(player.gameId);
     }
-  }
-
-  async function placeBet() {
-    if (!player) {
-      return;
-    }
-    player.currentBet += bet;
-    player.cash -= bet;
-    await updatePlayer(player);
-    await triggerNextBetting(player.gameId);
   }
 
   async function nextAction() {
@@ -119,11 +124,12 @@ export function PlayerWrapper({
             <button className="w-full">FOLD</button>
           </form>
           <form className="flex w-full" action={betCall}>
-            {minBet - player.currentBet === 0 && bet === 0 ? (
+            {minBet - player.currentBet === 0 &&
+            bet - player.currentBet === 0 ? (
               <button className="w-full">Check</button>
             ) : (
               <button className="w-full">
-                {bet > minBet ? "RAISE" : "CALL"} +£{bet}
+                {bet > minBet ? "RAISE" : "CALL"} +£{bet - player.currentBet}
               </button>
             )}
           </form>
