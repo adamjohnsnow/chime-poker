@@ -1,17 +1,4 @@
-import { act } from "react-dom/test-utils";
-import { writeAllPlayers } from "./firebase";
-import { BettingStatus, BlindButtons, Player, loadAllPlayers } from "./player";
-
-export async function triggerNextRound(gameId: string) {
-  const players = await loadAllPlayers(gameId);
-  await nextRoundTurn(players);
-}
-
-export async function triggerNextBetting(gameId: string) {
-  const players = await loadAllPlayers(gameId);
-  await nextBettingTurn(players);
-  await writeAllPlayers(players);
-}
+import { BettingStatus, BlindButtons, Player } from "./player";
 
 export async function nextRoundTurn(players: Player[]) {
   if (players.length < 2) {

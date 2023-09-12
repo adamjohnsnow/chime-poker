@@ -33,7 +33,6 @@ export function writeChimeData(gameId: string, chimeConfig: ChimeConfig) {
 }
 
 export function writePlayerData(player: Player) {
-  console.log("WRITE", player);
   set(ref(db, "poker/" + player.gameId + "/players/" + player.id), player);
 }
 

@@ -4,6 +4,7 @@ import * as uuid from "uuid";
 import { BettingStatus, BlindButtons, Player, loadAllPlayers } from "./player";
 import {
   getGame,
+  writeAllPlayers,
   writeChimeData,
   writeGameData,
   writePlayerData,
@@ -82,12 +83,34 @@ export async function loadGameAndPlayers(
 export async function saveGameAndPlayers(game: GameState, players: Player[]) {
   writeGameData(game);
   players.forEach((player) => {
-    if (player.currentBet > 0) {
-      game.prizePot = game.prizePot + player.currentBet;
-      player.currentBet = 0;
-    }
     writePlayerData(player);
   });
+}
+
+export async function triggerNextRound(gameId: string) {
+  const players = await loadAllPlayers(gameId);
+  await nextRoundTurn(players);
+}
+
+export async function triggerNextBetting(gameId: string) {
+  const players = await loadAllPlayers(gameId);
+  const game = await getGame(gameId);
+  if (!game) {
+    return;
+  }
+
+  game.currentMinimumBet = await nextBettingTurn(players);
+
+  const playersYetToBet = players.filter(
+    (player) =>
+      player.bettingStatus === BettingStatus.MUSTBET ||
+      player.bettingStatus === BettingStatus.BETTING
+  );
+
+  if (playersYetToBet.length === 0) {
+    await dealNextCards(game, players);
+  }
+  await saveGameAndPlayers(game, players);
 }
 
 export async function nextPhase(gameId: string) {
@@ -109,6 +132,8 @@ export async function processResetCards(
 ): Promise<{ game: GameState; players: Player[] }> {
   players.forEach((player) => {
     player.cards = [];
+    player.folded = false;
+    player.currentBet = 0;
     player.bettingStatus = BettingStatus.MUSTBET;
     if (game.results) {
       const prize = game.results.find(
@@ -125,7 +150,6 @@ export async function processResetCards(
   game.results = [];
   game.phase = GamePhase.START;
   game.prizePot = 0;
-  game.currentMinimumBet = 0;
   return { game, players };
 }
 
@@ -140,13 +164,15 @@ export async function dealNextCards(game: GameState, players: Player[]) {
 
   players.forEach((player) => {
     game.prizePot += player.currentBet;
+    player.currentBet = 0;
+    player.bettingStatus = BettingStatus.MUSTBET;
   });
 
   switch (game.phase) {
     case GamePhase.START: {
       await dealDeck(game, players);
       await nextBettingTurn(players);
-
+      game.currentMinimumBet = game.blind;
       game.phase = GamePhase.DEAL;
       break;
     }
@@ -191,6 +217,8 @@ export async function dealDeck(game: GameState, players: Player[]) {
   const deckLength = game.cardDeck.length;
   const playerCount = countActivePlayers(players);
   let i = 0;
+  console.log("a", players);
+
   players.forEach((player) => {
     player.cardsShown = false;
     if (player.cash > 0 && player.active) {
@@ -205,12 +233,8 @@ export async function dealDeck(game: GameState, players: Player[]) {
       }
       i++;
     }
-    if (player.cash <= 0) {
-      player.blindButton = null;
-      player.isDealer = false;
-    }
   });
-  game.prizePot = game.blind * 1.5;
+  console.log("a", players);
   game.cardDeck = game.cardDeck.slice(0 - (deckLength - i * 2));
 }
 

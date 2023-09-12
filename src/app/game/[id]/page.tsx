@@ -20,8 +20,8 @@ import { ActivityMonitor } from "@/app/components/activityMonitor";
 import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
 import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
-import { triggerNextBetting } from "@/app/lib/turns";
 import { LoadingSpinner } from "@/app/components/loadingSpinner";
+import { TitleCard } from "@/app/components/titleCard";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -180,10 +180,19 @@ export default function Game({ params }: { params: { id: string } }) {
                 ) : null
               )}
             </div>
+
             {game && game.phase === GamePhase.NOTSTARTED ? (
-              <form action={nextRound}>
-                <button>Start the game</button>
-              </form>
+              <div className="p-8">
+                {players.length < 2 ? (
+                  <div>Waiting for another player...</div>
+                ) : (
+                  <form action={nextRound}>
+                    <button>
+                      Start the game with {players.length} players
+                    </button>
+                  </form>
+                )}
+              </div>
             ) : (
               <>
                 <div>{game?.prizePot}</div>
@@ -198,23 +207,45 @@ export default function Game({ params }: { params: { id: string } }) {
                   <button>reset</button>
                 </form>
               </>
-            )}{" "}
-            <p className="">You are in game: {gameId}</p>
+            )}
           </>
         ) : (
           <>
             {showNameInput && game?.phase === GamePhase.NOTSTARTED ? (
-              <>
-                <div>New Player</div>
-                <form action={playerJoin}>
-                  <input
-                    type="text"
-                    id="new-player-name"
-                    placeholder="Enter your name"
-                  />
-                  <button>Take a seat</button>
-                </form>
-              </>
+              <div className="flex flex-col items-center">
+                <div
+                  style={{ width: 400, margin: 40 }}
+                  className="opponent-cards"
+                >
+                  <TitleCard suit={"P"} letter={"P"} red={false} />
+                  <TitleCard suit={"O"} letter={"O"} red={true} />
+                  <TitleCard suit={"K"} letter={"O"} red={false} />
+                  <TitleCard suit={"E"} letter={"O"} red={true} />
+                  <TitleCard suit={"R"} letter={"O"} red={false} />
+                </div>
+
+                <div style={{ width: 400 }} className="opponent-cards">
+                  <TitleCard suit={"F"} letter={"P"} red={false} />
+                  <TitleCard suit={"A"} letter={"O"} red={true} />
+                  <TitleCard suit={"C"} letter={"O"} red={false} />
+                  <TitleCard suit={"E"} letter={"O"} red={true} />
+                </div>
+                <div className="flex flex-col items-center">
+                  <div>New Player</div>
+
+                  <form
+                    className="flex flex-col items-center"
+                    action={playerJoin}
+                  >
+                    <input
+                      type="text"
+                      id="new-player-name"
+                      placeholder="Enter your name"
+                    />
+                    <button>Take a seat</button>
+                  </form>
+                </div>
+              </div>
             ) : (
               <div>
                 <div>LOADING</div>

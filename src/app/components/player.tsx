@@ -5,8 +5,7 @@ import { PlayingCard } from "./playingCard";
 import { getGamePhaseStream, getPlayerStream } from "../lib/firebase";
 import "../styles/player.css";
 import { ButtonsWrapper } from "./buttons";
-import { GamePhase, getBets, nextPhase } from "../lib/game";
-import { triggerNextBetting } from "../lib/turns";
+import { GamePhase, getBets, nextPhase, triggerNextBetting } from "../lib/game";
 
 export function PlayerWrapper({
   gameId,
@@ -17,14 +16,9 @@ export function PlayerWrapper({
 }) {
   const [player, setPlayer] = useState<Player>();
   const [minBet, setMinBet] = useState<number>(0);
+  const [betIncrement, setBetIncrement] = useState<number>(0);
   const [gamePhase, setGamePhase] = useState<GamePhase>(0);
   const [bet, setBet] = useState<number>(0);
-
-  useEffect(() => {
-    getBets(gameId).then((result: { bet: number; blind: number }) => {
-      setMinBet(result.bet === 0 ? result.blind : result.bet);
-    });
-  }, []);
 
   useEffect(() => {
     getPlayerStream(gameId, playerId, playerEventHandler);
@@ -32,10 +26,15 @@ export function PlayerWrapper({
   }, [gameId, playerId]);
 
   function playerEventHandler(data: any): void {
-    console.log("THIS PLAYER MESSAGE:", data);
     if (!data) {
       return;
     }
+    getBets(gameId).then((result: { bet: number; blind: number }) => {
+      setMinBet(result.bet);
+      setBet(result.bet);
+      setBetIncrement(result.blind);
+    });
+
     setPlayer(data);
   }
 
@@ -44,13 +43,12 @@ export function PlayerWrapper({
   }
 
   function increaseBet() {
-    setBet(bet + minBet);
+    setBet(bet + betIncrement);
   }
   function decreaseBet() {
-    setBet(bet - minBet);
+    setBet(bet - betIncrement);
   }
   function betCall() {
-    setBet(minBet);
     placeBet();
   }
 
@@ -68,8 +66,8 @@ export function PlayerWrapper({
     }
     player.currentBet += bet;
     player.cash -= bet;
-    updatePlayer(player);
-    triggerNextBetting(player.gameId);
+    await updatePlayer(player);
+    await triggerNextBetting(player.gameId);
   }
 
   async function nextAction() {
@@ -78,7 +76,7 @@ export function PlayerWrapper({
     }
   }
 
-  function showDealAction() {
+  function showBetAction() {
     return player?.bettingStatus === BettingStatus.BETTING;
   }
   return player ? (
@@ -114,21 +112,29 @@ export function PlayerWrapper({
           </form>
         </>
       ) : null}
-      {showDealAction() ? (
+      {showBetAction() ? (
         <>
           <div>YOUR TURN</div>
           <form action={fold}>
             <button>FOLD</button>
           </form>
           <form action={betCall}>
-            <button>{minBet === 0 ? "CHECK" : "CALL £" + minBet}</button>
+            {minBet - player.currentBet === 0 && bet === 0 ? (
+              <button>Check</button>
+            ) : (
+              <button>
+                {bet > minBet ? "RAISE" : "CALL"} +£{bet}
+              </button>
+            )}
           </form>
           <form action={decreaseBet}>
-            <button>-£{minBet}</button>
+            <button disabled={bet < betIncrement || bet <= minBet}>
+              -£{betIncrement}
+            </button>
           </form>
 
           <form action={increaseBet}>
-            <button>+£{minBet}</button>
+            <button>+£{betIncrement}</button>
           </form>
           <div>This bet: £{bet}</div>
         </>
