@@ -1,6 +1,5 @@
-import { Card } from "./cards";
-import { gameState } from "./game";
-import { HandEvaluator, Rank, Result } from "./hands";
+import { GameState } from "./game";
+import { HandEvaluator, Result } from "./hands";
 import { Player } from "./player";
 
 export type handResult = {
@@ -11,7 +10,7 @@ export type handResult = {
 
 const evaluator = new HandEvaluator();
 
-export async function findWinner(game: gameState, players: Player[]) {
+export async function findWinner(game: GameState, players: Player[]) {
   const results: handResult[] = [];
 
   if (!players) {
@@ -19,14 +18,16 @@ export async function findWinner(game: gameState, players: Player[]) {
   }
 
   await players.forEach((player) => {
-    const cards = [...game.communityCards, ...player.cards];
-    const evaluatedHand = evaluator.evaluate(cards);
-    results.push({
-      playerId: player.id,
-      result: evaluatedHand,
-      prize: 0,
-    });
-    player.cardsShown = true;
+    if (!player.folded) {
+      const cards = [...game.communityCards, ...player.cards];
+      const evaluatedHand = evaluator.evaluate(cards);
+      results.push({
+        playerId: player.id,
+        result: evaluatedHand,
+        prize: 0,
+      });
+      player.cardsShown = true;
+    }
   });
 
   results.sort(
@@ -39,25 +40,21 @@ export async function findWinner(game: gameState, players: Player[]) {
 }
 
 export function allotPrizes(hands: handResult[], prizePot: number) {
-  console.log("1,", hands);
   let winners = hands.filter(
     (hand) => hand.result.rank === hands[0].result.rank
   );
-  console.log("2,", winners);
 
   if (winners.length > 1) {
     winners = winners.filter(
       (hand) => hand.result.cardsScore === winners[0].result.cardsScore
     );
   }
-  console.log("3,", winners);
 
   if (winners.length > 1) {
     winners = winners.filter(
       (hand) => hand.result.kickersScore === winners[0].result.kickersScore
     );
   }
-  console.log("4,", winners);
 
   const prizeSplit = Math.floor(prizePot / winners.length);
   const change = prizePot % winners.length;

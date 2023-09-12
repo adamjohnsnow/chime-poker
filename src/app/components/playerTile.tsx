@@ -1,21 +1,9 @@
-import { BlindButtons, Player } from "../lib/player";
+import { BettingStatus, Player } from "../lib/player";
 import { PlayingCard } from "./playingCard";
 import "../styles/player.css";
-import { useEffect } from "react";
+import { ButtonsWrapper } from "./buttons";
 
 export function PlayerTile({ player }: { player: Player }) {
-  // const [player, setPlayer] = useState<Player>();
-  useEffect(() => {
-    // getPlayerStream(player.gameId, player.id, playerEventHandler);
-  }, [player]);
-
-  // function playerEventHandler(data: any): void {
-  //   console.log("PLAYER MESSAGE:", data);
-  //   if(data.cards == player.cards){
-  //   player.cards = []
-  //   }
-  // }
-
   return (
     <>
       {player ? (
@@ -24,11 +12,31 @@ export function PlayerTile({ player }: { player: Player }) {
             <strong>{player.name}</strong>
           </div>
           <div>£{player.cash}</div>
-          <div className="video-tile">
+          <div
+            className={
+              player.bettingStatus === BettingStatus.BETTING
+                ? "video-tile flex justify-center highlighted"
+                : "video-tile flex justify-center"
+            }
+          >
             <video
-              className={player.folded ? "video-tile folded" : "video-tile"}
+              className={
+                player.folded ? "video absolute folded" : "video absolute"
+              }
               id={player.id}
             ></video>
+            <div className="flex flex-col justify-between items-center text-white">
+              <div
+                className="flex m-1 z-50 glow-text"
+                id={"result-" + player.id}
+              ></div>
+              <div
+                className="flex m-1 z-50 glow-text"
+                id={"prize-" + player.id}
+              ></div>
+
+              <ButtonsWrapper player={player} />
+            </div>
           </div>
           <div>
             {player.cards?.length === 2 && player.cardsShown ? (
@@ -37,12 +45,8 @@ export function PlayerTile({ player }: { player: Player }) {
                 <PlayingCard card={player.cards[1]}></PlayingCard>
               </div>
             ) : null}
+            {player.currentBet > 0 ? "£" + player.currentBet : null}
           </div>
-          {player.isDealer ? <div>D</div> : null}
-          {player.blindButton === BlindButtons.BIGBLIND ? <div>BIG</div> : null}
-          {player.blindButton === BlindButtons.LITTLEBLIND ? (
-            <div>LITTLE</div>
-          ) : null}
         </div>
       ) : null}
     </>

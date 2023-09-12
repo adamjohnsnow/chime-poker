@@ -1,15 +1,17 @@
 import { describe, expect, test } from "@jest/globals";
 import {
   getNewGame,
-  gameState,
+  GameState,
   GamePhase,
   dealNextCards,
   processResetCards,
   dealDeck,
   countActivePlayers,
+  processNewBet,
 } from "../src/app/lib/game";
-import { Player } from "../src/app/lib/player";
+import { BettingStatus, Player } from "../src/app/lib/player";
 import { Deck } from "../src/app/lib/cards";
+import { getPlayers } from "./helpers";
 
 describe("new game", () => {
   test("generates a new game", async () => {
@@ -24,7 +26,7 @@ describe("new game", () => {
 
 describe("reset card states", () => {
   test("resets cards", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: [
@@ -39,7 +41,7 @@ describe("reset card states", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
-      currentMinimimBet: 0,
+      currentMinimumBet: 0,
     };
     const players: Player[] = [
       new Player("123", "abc"),
@@ -96,9 +98,24 @@ describe("count active players", () => {
   });
 });
 
+describe("new bet raised", () => {
+  test("new bet resets must bets", async () => {
+    const game = await getNewGame("abc", {});
+    const players = getPlayers();
+    players[0].bettingStatus = 3;
+    players[2].bettingStatus = 3;
+    players[2].folded = true;
+    await processNewBet(game, players, 20);
+
+    expect(game.currentMinimumBet).toBe(20);
+    expect(players[0].bettingStatus).toBe(BettingStatus.MUSTBET);
+    expect(players[2].bettingStatus).not.toBe(BettingStatus.MUSTBET);
+  });
+});
+
 describe("first deal", () => {
   test("deal deck", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: new Deck().cards,
@@ -110,7 +127,7 @@ describe("first deal", () => {
       prizePot: 1000,
       phase: GamePhase.START,
       blind: 0,
-      currentMinimimBet: 0,
+      currentMinimumBet: 0,
     };
     const players: Player[] = [
       new Player("123", "abc"),
@@ -124,7 +141,7 @@ describe("first deal", () => {
 });
 describe("goes through phases of the game", () => {
   test("deals the cards", async () => {
-    const game: gameState = {
+    const game: GameState = {
       id: "123",
       chimeConfig: {},
       cardDeck: new Deck().cards,
@@ -133,9 +150,18 @@ describe("goes through phases of the game", () => {
       phase: GamePhase.DEAL,
       prizePot: 0,
       blind: 0,
-      currentMinimimBet: 0,
+      currentMinimumBet: 0,
     };
-    await dealNextCards(game, []);
+    const players = [new Player("123", "ABC"), new Player("123", "XYZ")];
+    players[0].cards = [
+      { value: 1, suit: "♥️" },
+      { value: 2, suit: "♥️" },
+    ];
+    players[1].cards = [
+      { value: 3, suit: "♥️" },
+      { value: 4, suit: "♥️" },
+    ];
+    await dealNextCards(game, players);
     expect(game.communityCards.length).toBe(3);
     expect(game.cardDeck.length).toBe(49);
     expect(game.cardDeck).not.toContain(game.communityCards[0]);
@@ -144,7 +170,7 @@ describe("goes through phases of the game", () => {
     expect(game.phase).toBe(GamePhase.TURN);
     expect(game.results.length).toBe(0);
 
-    await dealNextCards(game, []);
+    await dealNextCards(game, players);
     expect(game.communityCards.length).toBe(4);
     expect(game.cardDeck.length).toBe(48);
     expect(game.cardDeck).not.toContain(game.communityCards[0]);
@@ -153,7 +179,7 @@ describe("goes through phases of the game", () => {
     expect(game.cardDeck).not.toContain(game.communityCards[3]);
     expect(game.phase).toBe(GamePhase.FLOP);
 
-    await dealNextCards(game, []);
+    await dealNextCards(game, players);
     expect(game.communityCards.length).toBe(5);
     expect(game.cardDeck.length).toBe(47);
     expect(game.cardDeck).not.toContain(game.communityCards[0]);
@@ -164,11 +190,6 @@ describe("goes through phases of the game", () => {
     expect(game.phase).toBe(GamePhase.RIVER);
     expect(game.results).toBeFalsy;
 
-    const players = [new Player("123", "ABC")];
-    players[0].cards = [
-      { value: 1, suit: "♥️" },
-      { value: 2, suit: "♥️" },
-    ];
     await dealNextCards(game, players);
 
     expect(game.phase).toBe(GamePhase.RESULTS);

@@ -253,4 +253,33 @@ describe("hand evaluator", () => {
     expect(hand.cards.length).toBe(4);
     expect(hand.cards[0].value).not.toBe(7);
   });
+
+  test("Ace low straight", () => {
+    const cards: Card[] = [
+      { suit: "♦️", value: 13 },
+      { suit: "♠️", value: 1 },
+      { suit: "♠️", value: 3 },
+      { suit: "♣️", value: 8 },
+      { suit: "♣️", value: 2 },
+      { suit: "♠️", value: 4 },
+    ];
+
+    const hand = evaluator.evaluate(cards);
+    expect(hand.rank).toBe(Rank.Straight);
+  });
+
+  test("Ace low straight flush", () => {
+    const cards: Card[] = [
+      { suit: "♦️", value: 13 },
+      { suit: "♠️", value: 13 },
+      { suit: "♠️", value: 1 },
+      { suit: "♠️", value: 3 },
+      { suit: "♣️", value: 8 },
+      { suit: "♠️", value: 2 },
+      { suit: "♠️", value: 4 },
+    ];
+
+    const hand = evaluator.evaluate(cards);
+    expect(hand.rank).toBe(Rank.StraightFlush);
+  });
 });

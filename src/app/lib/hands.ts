@@ -11,6 +11,7 @@ export enum Rank {
   FourOfAKind,
   StraightFlush,
   RoyalFlush,
+  LastStanding,
 }
 
 export interface Result {
@@ -62,7 +63,7 @@ export class HandEvaluator {
       result.rank = Rank.FourOfAKind;
       result.cards = winningCards;
       result.kickers = [
-        cards.filter((card) => card.value != fourOfAKindValue)[0],
+        cards.find((card) => card.value != fourOfAKindValue) as Card,
       ];
       return result;
     }
@@ -94,11 +95,11 @@ export class HandEvaluator {
     if (pairCards.length > 0) {
       if (pairCards.length === 4) {
         const kicker = [
-          cards.filter(
+          cards.find(
             (card) =>
               card.value != pairCards[0].value &&
               card.value != pairCards[3].value
-          )[0],
+          ) as Card,
         ];
         result.rank = Rank.TwoPair;
         result.cards = pairCards;
@@ -161,12 +162,16 @@ export class HandEvaluator {
 
   private hasStraight(cards: Card[]): Result {
     const result = this.blankResult();
+    if (cards[0].value === 13) {
+      cards.push({ value: 0, suit: cards[0].suit });
+    }
     let newCards: Card[] = [cards[0]];
     for (let i = 1; i < cards.length; i++) {
       if (cards[i].value === newCards[newCards.length - 1].value) continue;
 
       if (cards[i].value === newCards[newCards.length - 1].value - 1) {
         newCards.push(cards[i]);
+
         if (newCards.length > 4) {
           if (newCards[0].value === 13) {
             result.rank = Rank.RoyalFlush;

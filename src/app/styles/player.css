@@ -1,3 +1,7 @@
 .opponent-cards {
   @apply flex flex-row justify-center w-40;
 }
+
+.highlighted video {
+  box-shadow: 0px 0px 7px 0px rgba(245, 189, 46, 1);
+}

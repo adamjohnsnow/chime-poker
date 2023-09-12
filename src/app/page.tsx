@@ -1,12 +1,29 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import { useRouter } from "next/navigation";
 import { startGame } from "./lib/game";
+import "./styles/table.css";
+import { TitleCard } from "./components/titleCards";
+import { LoadingSpinner } from "./components/loadingSpinner";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [showSpinner, setShowSpinner] = useState<Boolean>(false);
   const router = useRouter();
 
+  useEffect(() => {
+    if (showSpinner) {
+      startNewGame();
+    }
+  }, [showSpinner]);
+
+  function triggerNewGame() {
+    setShowSpinner(true);
+  }
+
   async function startNewGame() {
+    console.log(showSpinner);
     const game = await startGame();
     if (!game) {
       return;
@@ -23,46 +40,36 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <audio id="chime-audio" />
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          POKER FACE
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By Adam Snow
-          </a>
+    <main className="flex min-h-screen flex-col items-center justify-between p-32">
+      <div>
+        <div className="community-cards">
+          <TitleCard suit="♥️" letter="P" red={true}></TitleCard>
+          <TitleCard suit="♠️" letter="O" red={false}></TitleCard>
+          <TitleCard suit="♦️" letter="K" red={true}></TitleCard>
+          <TitleCard suit="♣️" letter="E" red={false}></TitleCard>
+          <TitleCard suit="♥️" letter="R" red={true}></TitleCard>
+        </div>
+        <div className="community-cards">
+          <TitleCard suit="♥️" letter="F" red={true}></TitleCard>
+          <TitleCard suit="♠️" letter="A" red={false}></TitleCard>
+          <TitleCard suit="♦️" letter="C" red={true}></TitleCard>
+          <TitleCard suit="♣️" letter="E" red={false}></TitleCard>
+          <div className="start-card">
+            {showSpinner ? (
+              <LoadingSpinner show={true} />
+            ) : (
+              <form action={triggerNewGame}>
+                <button className="start-button">START NEW GAME</button>{" "}
+              </form>
+            )}
+          </div>
         </div>
       </div>
-      <>
-        <div>
-          <form action={startNewGame}>
-            <button>Start new game</button>
-          </form>
-        </div>
-        <div>Or</div>
-        <div>
-          <form action={joinGame}>
-            <input
-              type="text"
-              placeholder="Enter game id"
-              id="game-id-input"
-            ></input>
-            <br />
-            <button>Join game</button>
-          </form>
-        </div>
-      </>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left font-mono">
-        A multi-player, single-page poker game with video chat. Next,js, React,
-        AWS Chime, Firebase Realtime Database
+      <div className="text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left font-mono justify-center">
+        A multi-player, single-page poker game with video chat.
+        <br />
+        Next,js, React, AWS Chime, Firebase Realtime Database
       </div>
     </main>
   );

@@ -1,11 +1,18 @@
 import { Card } from "./cards";
 import { getAllPlayers, getPlayer, writePlayerData } from "./firebase";
-import { getGame, writeGameData } from "./firebase";
 import * as uuid from "uuid";
 
 export enum BlindButtons {
+  NONE,
   BIGBLIND,
-  LITTLEBLIND,
+  SMALLBLIND,
+}
+
+export enum BettingStatus {
+  NONE,
+  MUSTBET,
+  BETTING,
+  HASBET,
 }
 
 export class Player {
@@ -16,12 +23,12 @@ export class Player {
   public cash: number;
   public currentBet: number;
   public cardsShown: boolean;
-  public folded?: boolean;
-  public active?: boolean;
-  public isDealer?: boolean;
+  public folded: boolean;
+  public active: boolean;
+  public isDealer: boolean;
   public blindButton: BlindButtons | null;
   public sortIndex: number;
-  public isBettingTurn: boolean;
+  public bettingStatus: BettingStatus;
   constructor(gameId: string, name: string) {
     this.id = uuid.v4();
     this.gameId = gameId;
@@ -32,9 +39,10 @@ export class Player {
     this.cardsShown = false;
     this.active = true;
     this.folded = false;
+    this.isDealer = false;
     this.blindButton = null;
     this.sortIndex = 0;
-    this.isBettingTurn = false;
+    this.bettingStatus = BettingStatus.NONE;
   }
 }
 

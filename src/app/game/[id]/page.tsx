@@ -6,7 +6,7 @@ import { Key, useEffect, useState } from "react";
 // lib
 import { createAttendee } from "@/app/lib/chime";
 import { ChimeProvider } from "@/app/lib/chimeUtils";
-import { gameState, nextPhase, resetCards } from "@/app/lib/game";
+import { GamePhase, GameState, nextPhase, resetCards } from "@/app/lib/game";
 import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
 
@@ -16,19 +16,20 @@ import { PlayerTile } from "@/app/components/playerTile";
 // styles
 import "@/app/styles/table.css";
 import "@/app/styles/playingCard.css";
-import { TurnControl } from "@/app/components/turnControl";
 import { ActivityMonitor } from "@/app/components/activityMonitor";
 import { CommunityCards } from "@/app/components/communityCards";
 import { PlayerWrapper } from "@/app/components/player";
 import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
+import { LoadingSpinner } from "@/app/components/loadingSpinner";
+import { SmallTitle } from "@/app/components/titleCards";
+import { Rank } from "@/app/lib/hands";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
-  const [game, setGame] = useState<gameState>();
+  const [game, setGame] = useState<GameState>();
   const [chime, setChime] = useState<ChimeProvider>();
   const [player, setPlayer] = useState<Player>();
   const [players, setPlayers] = useState<Player[]>([]);
-  const [playerTurn, setPlayerTurn] = useState<string>();
   const [showNameInput, setShowNameInput] = useState<boolean>(false);
 
   useEffect(() => {
@@ -49,16 +50,16 @@ export default function Game({ params }: { params: { id: string } }) {
   }, [params.id]);
 
   useEffect(() => {
-    console.log("PLAYER UPDATED:", player);
     if (player) {
       saveLocalPlayer(gameId, player);
     }
-    initialiseGame();
+    if (!process.env.NEXT_PUBLIC_BLOCK_CHIME) {
+      initialiseGame();
+    }
   }, [player]);
 
   useEffect(() => {
     if (game && game.results) {
-      console.log("RESULTS IN!", game.results);
       highlightWinningCards();
     }
     if (!game?.results || game.results.length === 0) {
@@ -66,11 +67,12 @@ export default function Game({ params }: { params: { id: string } }) {
     }
   }, [game]);
 
-  function gameEventHandler(gameData: gameState): void {
-    if (!gameData.communityCards) {
+  useEffect(() => {}, [players]);
+
+  function gameEventHandler(gameData: GameState): void {
+    if (gameData && !gameData.communityCards) {
       gameData.communityCards = [];
     }
-    console.log("GAMEDATA UPDATE:", gameData);
 
     setGame(gameData);
   }
@@ -97,6 +99,7 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   async function initialiseGame() {
+    console.log("INIT GAME");
     if (!game || !player) {
       return;
     }
@@ -121,21 +124,36 @@ export default function Game({ params }: { params: { id: string } }) {
   }
 
   async function nextAction() {
-    if (!game) {
+    if (!gameId) {
       return;
     }
-    nextPhase(gameId);
+    await nextPhase(gameId);
   }
 
   async function nextRound() {
     if (!gameId) {
       return;
     }
-
     await resetCards(gameId);
   }
 
   function highlightWinningCards() {
+    game?.results.forEach((result) => {
+      const resultElement = document.getElementById(
+        "result-" + result.playerId
+      );
+      if (resultElement) {
+        resultElement.innerHTML = Rank[result.result.rank];
+      }
+      if (result.prize > 0) {
+        const prizeElement = document.getElementById(
+          "prize-" + result.playerId
+        );
+        if (prizeElement) {
+          prizeElement.innerHTML = "+£" + result.prize;
+        }
+      }
+    });
     const winningHand = game?.results[0].result.cards;
     winningHand?.forEach((card) => {
       const cardElement = document.getElementById(
@@ -161,61 +179,90 @@ export default function Game({ params }: { params: { id: string } }) {
     for (let i = 0; i < highlightedCards.length; i++) {
       highlightedCards[i].classList.remove("highlighted");
     }
+    const results = document.querySelectorAll('div[id^="result-"]');
+    results.forEach((element) => {
+      element.innerHTML = "";
+    });
+    const prizes = document.querySelectorAll('div[id^="prize-"]');
+    prizes.forEach((element) => {
+      element.innerHTML = "";
+    });
   }
 
   return (
     <>
       {chime ? <ActivityMonitor chime={chime} /> : null}
 
-      <main className="flex min-h-screen flex-col items-center justify-between p-10 font-mono">
+      <main className="flex min-h-screen flex-col items-center justify-start p-10 font-mono">
         {player ? (
           <>
             <PlayerWrapper playerId={player.id} gameId={gameId} />
-            <form action={nextAction}>
-              <button>Deal</button>
-            </form>
-            <form action={nextRound}>
-              <button>Reset</button>
-            </form>
-            {/* <TurnControl player={player}></TurnControl> */}
+            <div>POT: £{game?.prizePot}</div>
+
             <div className="players">
-              {players ? (
-                <>
-                  {players.map(
-                    (playerTile: Player, i: Key | null | undefined) =>
-                      playerTile.active && playerTile.id != player?.id ? (
-                        <PlayerTile key={i} player={playerTile}></PlayerTile>
-                      ) : null
-                  )}
-                </>
-              ) : null}
+              {players.map((playerTile: Player, i: Key | null | undefined) =>
+                playerTile.active && playerTile.id != player?.id ? (
+                  <PlayerTile key={i} player={playerTile}></PlayerTile>
+                ) : null
+              )}
             </div>
-            <div>{game?.prizePot}</div>
-            <CommunityCards
-              chime={chime as ChimeProvider}
-              cards={game ? game.communityCards : []}
-            />
+
+            {game && game.phase === GamePhase.NOTSTARTED ? (
+              <div className="p-8">
+                {players.length < 2 ? (
+                  <div>Waiting for another player...</div>
+                ) : (
+                  <form action={nextRound}>
+                    <button>
+                      Start the game with {players.length} players
+                    </button>
+                  </form>
+                )}
+              </div>
+            ) : (
+              <>
+                <CommunityCards
+                  chime={chime as ChimeProvider}
+                  cards={game ? game.communityCards : []}
+                />
+                {/* <form action={nextAction}>
+                  <button>next</button>
+                </form>
+                <form action={nextRound}>
+                  <button>reset</button>
+                </form> */}
+              </>
+            )}
           </>
         ) : (
           <>
-            {showNameInput ? (
-              <>
-                <div>New Player</div>
-                <form action={playerJoin}>
-                  <input
-                    type="text"
-                    id="new-player-name"
-                    placeholder="Enter your name"
-                  />
-                  <button>Take a seat</button>
-                </form>
-              </>
+            {showNameInput && game?.phase === GamePhase.NOTSTARTED ? (
+              <div className="flex flex-col items-center">
+                <SmallTitle />
+                <div className="flex flex-col items-center">
+                  <div>New Player</div>
+
+                  <form
+                    className="flex flex-col items-center"
+                    action={playerJoin}
+                  >
+                    <input
+                      type="text"
+                      id="new-player-name"
+                      placeholder="Enter your name"
+                    />
+                    <button>Take a seat</button>
+                  </form>
+                </div>
+              </div>
             ) : (
-              <div>LOADING</div>
+              <div>
+                <div>LOADING</div>
+                <LoadingSpinner show={true} />
+              </div>
             )}
           </>
         )}
-        <p className="">You are in game: {gameId}</p>
       </main>
     </>
   );
