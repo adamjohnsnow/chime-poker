@@ -14,8 +14,8 @@ import { saveLocalPlayer, loadLocalPlayer } from "../../lib/localCache";
 import { PlayerTile } from "../../components/playerTile";
 
 // styles
-import "@/app/styles/table.css";
-import "@/app/styles/playingCard.css";
+import "../../styles/table.css";
+import "../../styles/playingCard.css";
 import { ActivityMonitor } from "../../components/activityMonitor";
 import { CommunityCards } from "../../components/communityCards";
 import { PlayerWrapper } from "../../components/player";
