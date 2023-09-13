@@ -1,5 +1,6 @@
 .opponent-cards {
-  @apply flex flex-row justify-center w-40;
+  @apply flex flex-row relative justify-center w-40;
+  top: -50px;
 }
 
 .highlighted video {

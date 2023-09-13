@@ -95,7 +95,7 @@ export function PlayerWrapper({
   }
 
   return player ? (
-    <div className="flex flex-row w-full m-5">
+    <div className="flex flex-row w-full max-w-3xl m-5">
       <audio id="chime-audio" />
       <div className="w-full items-start text-sm flex ">
         <div
@@ -110,8 +110,9 @@ export function PlayerWrapper({
         </div>
         <div className="flex flex-col m-2">
           <div>
-            {player.name}: £{player.cash}
+            <strong>{player.name}</strong>
           </div>
+          <div>£{player.cash}</div>
           <div>Bet: £{player.currentBet}</div>
           <div className="flex m-1" id={"result-" + player.id}></div>
           <div className="flex m-1" id={"prize-" + player.id}></div>
@@ -177,7 +178,7 @@ export function PlayerWrapper({
             <PlayingCard card={player.cards[0]}></PlayingCard>
             <PlayingCard card={player.cards[1]}></PlayingCard>
           </>
-        ) : null}
+        ) : null}{" "}
       </div>
     </div>
   ) : null;

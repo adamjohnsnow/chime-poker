@@ -197,7 +197,7 @@ export default function Game({ params }: { params: { id: string } }) {
         {player ? (
           <>
             <PlayerWrapper playerId={player.id} gameId={gameId} />
-            <div>POT: £{game?.prizePot}</div>
+            <div className="prize-pot">POT: £{game?.prizePot}</div>
 
             <div className="players">
               {players.map((playerTile: Player, i: Key | null | undefined) =>
