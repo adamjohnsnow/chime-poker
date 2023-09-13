@@ -23,8 +23,9 @@ export async function nextRoundTurn(players: Player[]) {
 
   if (!players.find((player) => player.isDealer)) {
     players[0].isDealer = true;
-    players[1].blindButton = BlindButtons.SMALLBLIND;
-    players[nextPlayerIndex(1)].blindButton = BlindButtons.BIGBLIND;
+    players[nextPlayerIndex(0)].blindButton = BlindButtons.SMALLBLIND;
+    players[nextPlayerIndex(nextPlayerIndex(0))].blindButton =
+      BlindButtons.BIGBLIND;
     return;
   }
   let dealerMoved = false;

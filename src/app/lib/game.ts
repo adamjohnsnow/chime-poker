@@ -126,8 +126,9 @@ export async function triggerNextBetting(gameId: string) {
 
   const playersYetToBet = players.filter(
     (player) =>
-      player.bettingStatus === BettingStatus.MUSTBET ||
-      player.bettingStatus === BettingStatus.BETTING
+      player.active &&
+      (player.bettingStatus === BettingStatus.MUSTBET ||
+        player.bettingStatus === BettingStatus.BETTING)
   );
 
   if (playersYetToBet.length === 0) {

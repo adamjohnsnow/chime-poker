@@ -98,3 +98,16 @@ export async function newCardsForPlayer(player: Player, cards: Card[]) {
 
   updatePlayer(player);
 }
+
+export async function setPlayerStatus(
+  gameId: string,
+  playerId: string,
+  status: boolean
+) {
+  const player = await loadPlayer(gameId, playerId);
+  if (!player) {
+    return;
+  }
+  player.active = status;
+  writePlayerData(player);
+}
