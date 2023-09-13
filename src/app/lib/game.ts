@@ -104,21 +104,7 @@ export async function triggerNextBetting(gameId: string) {
   );
 
   if (nonFoldedPlayers.length < 2) {
-    game.results = [
-      {
-        playerId: nonFoldedPlayers[0].id,
-        result: {
-          rank: Rank.LastStanding,
-          cards: [],
-          cardsScore: 0,
-          kickers: [],
-          kickersScore: 0,
-        },
-        prize: game.prizePot,
-      },
-    ];
-    game.phase = GamePhase.RESULTS;
-    await writeGameData(game);
+    await awardLastStanding(game, players, nonFoldedPlayers[0].id);
     return;
   }
 
@@ -315,4 +301,31 @@ export async function foldPlayer(player: Player) {
   await writeGameData(game);
   await writePlayerData(player);
   triggerNextBetting(game.id);
+}
+
+async function awardLastStanding(
+  game: GameState,
+  players: Player[],
+  winnerId: string
+) {
+  players.forEach((player) => {
+    game.prizePot += player.currentBet;
+    player.currentBet = 0;
+    writePlayerData(player);
+  });
+  game.results = [
+    {
+      playerId: winnerId,
+      result: {
+        rank: Rank.LastStanding,
+        cards: [],
+        cardsScore: 0,
+        kickers: [],
+        kickersScore: 0,
+      },
+      prize: game.prizePot,
+    },
+  ];
+  game.phase = GamePhase.RESULTS;
+  await writeGameData(game);
 }
