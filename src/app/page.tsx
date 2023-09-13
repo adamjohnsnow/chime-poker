@@ -23,7 +23,6 @@ export default function Home() {
   }
 
   async function startNewGame() {
-    console.log(showSpinner);
     const game = await startGame();
     if (!game) {
       return;

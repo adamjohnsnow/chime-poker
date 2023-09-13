@@ -289,7 +289,6 @@ export async function processNewBet(
   players: Player[],
   betValue: number
 ) {
-  console.log(betValue);
   game.currentMinimumBet = betValue;
   players.forEach((player) => {
     if (
