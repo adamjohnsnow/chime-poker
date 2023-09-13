@@ -25,7 +25,7 @@ export function PlayerTile({ player }: { player: Player }) {
               }
               id={player.id}
             ></video>
-            <div className="flex flex-col justify-between items-center text-white">
+            <div className="flex flex-col justify-between items-center text-white h-40">
               <div
                 className="flex m-1 z-50 glow-text"
                 id={"result-" + player.id}
