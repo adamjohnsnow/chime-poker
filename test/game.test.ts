@@ -8,9 +8,9 @@ import {
   dealDeck,
   countActivePlayers,
   processNewBet,
-} from "../src/lib/game";
-import { BettingStatus, Player } from "../src/lib/player";
-import { Deck } from "../src/lib/cards";
+} from "../app/lib/game";
+import { BettingStatus, Player } from "../app/lib/player";
+import { Deck } from "../app/lib/cards";
 import { getPlayers } from "./helpers";
 
 describe("new game", () => {

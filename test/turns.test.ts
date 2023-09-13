@@ -5,8 +5,8 @@ import {
   isEligibleForBetting,
   nextBettingTurn,
   nextRoundTurn,
-} from "../src/lib/turns";
-import { BettingStatus, BlindButtons, Player } from "../src/lib/player";
+} from "../app/lib/turns";
+import { BettingStatus, BlindButtons, Player } from "../app/lib/player";
 import { getPlayers } from "./helpers";
 
 describe("button turns", () => {

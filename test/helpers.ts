@@ -1,4 +1,4 @@
-import { Player } from "../src/lib/player";
+import { Player } from "../app/lib/player";
 
 export function getPlayers() {
   const players = [
