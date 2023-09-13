@@ -4,25 +4,25 @@
 import { Key, useEffect, useState } from "react";
 
 // lib
-import { createAttendee } from "@/app/lib/chime";
-import { ChimeProvider } from "@/app/lib/chimeUtils";
-import { GamePhase, GameState, nextPhase, resetCards } from "@/app/lib/game";
-import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
-import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
+import { createAttendee } from "../../lib/chime";
+import { ChimeProvider } from "../../lib/chimeUtils";
+import { GamePhase, GameState, nextPhase, resetCards } from "../../lib/game";
+import { Player, addNewPlayer, loadPlayer } from "../../lib/player";
+import { saveLocalPlayer, loadLocalPlayer } from "../../lib/localCache";
 
 // components
-import { PlayerTile } from "@/app/components/playerTile";
+import { PlayerTile } from "../../components/playerTile";
 
 // styles
 import "@/app/styles/table.css";
 import "@/app/styles/playingCard.css";
-import { ActivityMonitor } from "@/app/components/activityMonitor";
-import { CommunityCards } from "@/app/components/communityCards";
-import { PlayerWrapper } from "@/app/components/player";
-import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
-import { LoadingSpinner } from "@/app/components/loadingSpinner";
-import { SmallTitle } from "@/app/components/titleCards";
-import { Rank } from "@/app/lib/hands";
+import { ActivityMonitor } from "../../components/activityMonitor";
+import { CommunityCards } from "../../components/communityCards";
+import { PlayerWrapper } from "../../components/player";
+import { getAllPlayersStream, getGameStream } from "../../lib/firebase";
+import { LoadingSpinner } from "../../components/loadingSpinner";
+import { SmallTitle } from "../../components/titleCards";
+import { Rank } from "../../lib/hands";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);

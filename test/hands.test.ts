@@ -1,5 +1,5 @@
-import { Card } from "../src/app/lib/cards";
-import { Rank, HandEvaluator } from "../src/app/lib/hands";
+import { Card } from "../src/lib/cards";
+import { Rank, HandEvaluator } from "../src/lib/hands";
 import { describe, expect, test } from "@jest/globals";
 
 const evaluator = new HandEvaluator();
