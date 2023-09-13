@@ -31,14 +31,6 @@ export default function Home() {
     router.push("/game/" + game.id);
   }
 
-  function joinGame() {
-    const input = document.getElementById("game-id-input") as HTMLInputElement;
-    if (!input) {
-      return;
-    }
-    router.push("/game/" + input.value);
-  }
-
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-32">
       <div>

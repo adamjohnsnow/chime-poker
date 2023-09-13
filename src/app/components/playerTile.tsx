@@ -7,7 +7,12 @@ export function PlayerTile({ player }: { player: Player }) {
   return (
     <>
       {player ? (
-        <div className="flex flex-col items-center align-middle w-48 h-60">
+        <div
+          className={
+            "flex flex-col items-center align-middle w-48 h-60" +
+            (!player.active ? " opacity-25" : "")
+          }
+        >
           <div>
             <strong>{player.name}</strong>
           </div>

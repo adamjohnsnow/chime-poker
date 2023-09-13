@@ -189,6 +189,11 @@ export default function Game({ params }: { params: { id: string } }) {
     });
   }
 
+  function countActivePlayers(): number {
+    const activePlayers = players.filter((player) => player.active);
+    return activePlayers.length;
+  }
+
   return (
     <>
       {chime ? <ActivityMonitor chime={chime} /> : null}
@@ -201,7 +206,7 @@ export default function Game({ params }: { params: { id: string } }) {
 
             <div className="players">
               {players.map((playerTile: Player, i: Key | null | undefined) =>
-                playerTile.active && playerTile.id != player?.id ? (
+                playerTile.id != player?.id ? (
                   <PlayerTile key={i} player={playerTile}></PlayerTile>
                 ) : null
               )}
@@ -209,12 +214,12 @@ export default function Game({ params }: { params: { id: string } }) {
 
             {game && game.phase === GamePhase.NOTSTARTED ? (
               <div className="p-8">
-                {players.length < 2 ? (
+                {countActivePlayers() < 2 ? (
                   <div>Waiting for another player...</div>
                 ) : (
                   <form action={nextRound}>
                     <button>
-                      Start the game with {players.length} players
+                      Start the game with {countActivePlayers()} players
                     </button>
                   </form>
                 )}
@@ -225,12 +230,12 @@ export default function Game({ params }: { params: { id: string } }) {
                   chime={chime as ChimeProvider}
                   cards={game ? game.communityCards : []}
                 />
-                {/* <form action={nextAction}>
+                <form action={nextAction}>
                   <button>next</button>
                 </form>
                 <form action={nextRound}>
                   <button>reset</button>
-                </form> */}
+                </form>
               </>
             )}
           </>

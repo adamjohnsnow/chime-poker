@@ -8,10 +8,12 @@ import {
   VideoTileState,
 } from "amazon-chime-sdk-js";
 import { ChimeConfig, ChimeAttendee } from "./chime";
+import { setPlayerStatus } from "./player";
 
 export class ChimeProvider {
   private meetingSession: DefaultMeetingSession;
   private meetingId: string;
+  private gameId: string;
   public communityCardsDispatcher!: (arg0: any) => void | undefined;
 
   constructor(config: ChimeConfig, attendee: ChimeAttendee) {
@@ -20,6 +22,7 @@ export class ChimeProvider {
     }
 
     this.meetingId = config.MeetingId;
+    this.gameId = config.ExternalMeetingId as string;
     const logger = new ConsoleLogger("MyLogger", 3);
     const deviceController = new DefaultDeviceController(logger);
     const configuration = new MeetingSessionConfiguration(
@@ -107,15 +110,16 @@ export class ChimeProvider {
   private settUpAttendeeObserver() {
     this.meetingSession.audioVideo.realtimeSubscribeToAttendeeIdPresence(
       (
-        attendeeId: string,
+        _attendeeId: string,
         present: boolean,
         externalUserId?: string,
         dropped?: boolean
       ) => {
-        if (present && !dropped) {
-          // todo
-        } else {
-          // todo
+        if ((!present || dropped) && externalUserId) {
+          setPlayerStatus(this.gameId, externalUserId, false);
+        }
+        if (present && !dropped && externalUserId) {
+          setPlayerStatus(this.gameId, externalUserId, true);
         }
       }
     );
