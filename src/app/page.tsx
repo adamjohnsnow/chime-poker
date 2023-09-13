@@ -7,6 +7,7 @@ import "./styles/table.css";
 import { TitleCard } from "./components/titleCards";
 import { LoadingSpinner } from "./components/loadingSpinner";
 import { useEffect, useState } from "react";
+import React from "react";
 
 export default function Home() {
   const [showSpinner, setShowSpinner] = useState<Boolean>(false);
@@ -65,7 +66,7 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:text-left font-mono justify-center">
+      <div className="text-center lg:max-w-5xl lg:w-full lg:mb-0 font-mono justify-center">
         A multi-player, single-page poker game with video chat.
         <br />
         Next,js, React, AWS Chime, Firebase Realtime Database
