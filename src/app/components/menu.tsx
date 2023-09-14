@@ -31,6 +31,20 @@ export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
     });
   }
 
+  const speakerControl = document.getElementById(
+    "speaker-control"
+  ) as HTMLInputElement;
+  if (speakerControl) {
+    speakerControl.addEventListener("change", (event) => {
+      const check = event.currentTarget as HTMLInputElement;
+      if (check.checked) {
+        controls?.turnOnSpeaker();
+      } else {
+        controls?.turnOffSpeaker();
+      }
+    });
+  }
+
   async function leaveGame() {
     await controls?.leaveCall();
     router.push("/");
@@ -61,9 +75,16 @@ export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
               <span className="slider"></span>
             </label>
           </li>
-          <li>
-            <form action={leaveGame}>
-              <button>Leave game</button>
+          <li className="flex flex-row items-center">
+            <div className="p-4">Speaker</div>
+            <label className="switch">
+              <input id="speaker-control" type="checkbox" defaultChecked />
+              <span className="slider"></span>
+            </label>
+          </li>
+          <li className="flex w-full">
+            <form className="flex w-full" action={leaveGame}>
+              <button className="flex w-full">Leave game</button>
             </form>
           </li>
         </ul>

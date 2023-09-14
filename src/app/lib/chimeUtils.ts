@@ -16,6 +16,8 @@ export class ChimeProvider {
   private gameId: string;
   private selectedMic: MediaDeviceInfo | undefined;
   private selectedCamera: MediaDeviceInfo | undefined;
+  private selectedSpeakerId: string | undefined;
+
   public communityCardsDispatcher!: (arg0: any) => void | undefined;
 
   constructor(config: ChimeConfig, attendee: ChimeAttendee) {
@@ -108,10 +110,23 @@ export class ChimeProvider {
     if (speakers.length === 0) {
       return Promise.resolve();
     }
+    this.selectedSpeakerId = speakers[0].deviceId;
     await this.meetingSession?.audioVideo.chooseAudioOutput(
-      speakers[0].deviceId
+      this.selectedSpeakerId
     );
     return Promise.resolve();
+  }
+
+  public async turnOnSpeaker() {
+    if (this.selectedSpeakerId) {
+      await this.meetingSession.audioVideo.chooseAudioOutput(
+        this.selectedSpeakerId
+      );
+    }
+  }
+
+  public async turnOffSpeaker() {
+    await this.meetingSession.audioVideo.chooseAudioOutput(null);
   }
 
   private async setUpObservers() {

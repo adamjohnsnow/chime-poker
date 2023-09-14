@@ -9,12 +9,12 @@
   background: #ffffff;
 }
 .sidebarMenuInner {
-  @apply flex flex-col items-end z-50 fixed font-mono;
+  @apply flex flex-col items-end z-50 fixed font-mono w-full;
 }
 .sidebarMenuInner li {
   list-style: none;
   color: #000000;
-  padding: 20px;
+  padding: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -125,8 +125,13 @@ input[type="checkbox"]:checked ~ .sidebarIconToggle > .diagonal.part-2 {
   border-radius: 50%;
 }
 
+input:checked + .slider:before {
+  background-color: #0f912b;
+}
+
 input:checked + .slider {
-  background-color: #d34934;
+  background-color: white;
+  box-shadow: inset 0px 0px 7px 0px #ccc;
 }
 
 input:focus + .slider {
