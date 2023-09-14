@@ -4,7 +4,6 @@ import {
   ChimeSDKMeetings,
   Meeting,
 } from "@aws-sdk/client-chime-sdk-meetings";
-import { randomUUID } from "crypto";
 
 export type ChimeConfig = Meeting;
 export type ChimeAttendee = Attendee;

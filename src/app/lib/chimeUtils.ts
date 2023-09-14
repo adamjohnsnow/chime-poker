@@ -14,6 +14,8 @@ export class ChimeProvider {
   private meetingSession: DefaultMeetingSession;
   private meetingId: string;
   private gameId: string;
+  private selectedMic: MediaDeviceInfo | undefined;
+  private selectedCamera: MediaDeviceInfo | undefined;
   public communityCardsDispatcher!: (arg0: any) => void | undefined;
 
   constructor(config: ChimeConfig, attendee: ChimeAttendee) {
@@ -23,7 +25,7 @@ export class ChimeProvider {
 
     this.meetingId = config.MeetingId;
     this.gameId = config.ExternalMeetingId as string;
-    const logger = new ConsoleLogger("MyLogger", 3);
+    const logger = new ConsoleLogger("MyLogger", 2);
     const deviceController = new DefaultDeviceController(logger);
     const configuration = new MeetingSessionConfiguration(
       { Meeting: config },
@@ -57,18 +59,42 @@ export class ChimeProvider {
 
   private async setupMic() {
     const mics = await this.meetingSession?.audioVideo.listAudioInputDevices();
-    await this.meetingSession?.audioVideo.startAudioInput(mics[0]);
-    // console.log("audio in: ", mics[0].deviceId);
+    this.selectedMic = mics[0];
+    await this.unMuteMic();
     return Promise.resolve();
+  }
+
+  public async muteMic() {
+    await this.meetingSession?.audioVideo.stopAudioInput();
+  }
+
+  public async unMuteMic() {
+    if (this.selectedMic) {
+      await this.meetingSession?.audioVideo.startAudioInput(this.selectedMic);
+    }
   }
 
   private async setupCamera() {
     const cameras =
       await this.meetingSession?.audioVideo.listVideoInputDevices();
-    await this.meetingSession?.audioVideo.startVideoInput(cameras[0]);
-    // console.log("camera: ", cameras[0].deviceId);
+    this.selectedCamera = cameras[0];
+    await this.turnOnCamera();
     return Promise.resolve();
   }
+
+  public async turnOnCamera() {
+    if (this.selectedCamera) {
+      await this.meetingSession.audioVideo.startVideoInput(this.selectedCamera);
+      this.meetingSession.audioVideo.startLocalVideoTile();
+    }
+  }
+
+  public async turnOffCamera() {
+    await this.meetingSession?.audioVideo.stopVideoInput();
+    await this.meetingSession.audioVideo.stopLocalVideoTile();
+    this.meetingSession.audioVideo.removeLocalVideoTile();
+  }
+
   private async setupSpeaker() {
     const audioElement = document.getElementById("chime-audio");
     if (!(audioElement instanceof HTMLAudioElement)) {
@@ -100,11 +126,11 @@ export class ChimeProvider {
     this.communityCardsDispatcher = dispatcher;
   }
 
-  public leaveCall() {
+  public async leaveCall() {
     console.log("LEAVING CALL", this.meetingSession);
-    this.meetingSession.audioVideo.stopVideoInput();
-    this.meetingSession.audioVideo.stopAudioInput();
-    this.meetingSession.audioVideo.stop();
+    await this.meetingSession.audioVideo.stopVideoInput();
+    await this.meetingSession.audioVideo.stopAudioInput();
+    await this.meetingSession.audioVideo.stop();
   }
 
   private settUpAttendeeObserver() {

@@ -9,20 +9,22 @@ import { ChimeProvider } from "@/app/lib/chimeUtils";
 import { GamePhase, GameState, nextPhase, resetCards } from "@/app/lib/game";
 import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
+import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
 
 // components
 import { PlayerTile } from "@/app/components/playerTile";
+import { LoadingSpinner } from "@/app/components/loadingSpinner";
+import { SmallTitle } from "@/app/components/titleCards";
+import { ActivityMonitor } from "@/app/components/activityMonitor";
+import { CommunityCards } from "@/app/components/communityCards";
+import { PlayerWrapper } from "@/app/components/player";
 
 // styles
 import "@/app/styles/table.css";
 import "@/app/styles/playingCard.css";
-import { ActivityMonitor } from "@/app/components/activityMonitor";
-import { CommunityCards } from "@/app/components/communityCards";
-import { PlayerWrapper } from "@/app/components/player";
-import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
-import { LoadingSpinner } from "@/app/components/loadingSpinner";
-import { SmallTitle } from "@/app/components/titleCards";
+
 import { Rank } from "@/app/lib/hands";
+import { Menu } from "@/app/components/menu";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
@@ -238,6 +240,7 @@ export default function Game({ params }: { params: { id: string } }) {
                 </form>
               </>
             )}
+            <Menu controls={chime} />
           </>
         ) : (
           <>
