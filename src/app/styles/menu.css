@@ -7,19 +7,47 @@
   transform: translateX(-250px);
   transition: transform 250ms ease-in-out;
   background: #ffffff;
+  border-right: 1px solid #ccc;
 }
+
+#subMenu {
+  display: flex;
+  justify-content: center;
+  height: 100%;
+  position: absolute;
+  left: 250px;
+  top: 0;
+  width: 250px;
+  transition: transform 250ms ease-in-out;
+  background: #ffffff;
+}
+
 .sidebarMenuInner {
-  @apply flex flex-col items-end z-50 fixed font-mono w-full;
+  @apply flex flex-col z-50 fixed font-mono w-full p-2;
 }
+
+.subMenuInner {
+  @apply flex flex-col z-50 font-mono w-full p-2;
+}
+
 .sidebarMenuInner li {
   list-style: none;
   color: #000000;
-  padding: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 5px;
 }
 
-input[type="checkbox"]:checked ~ #sidebarMenu {
+.subMenuInner li {
+  list-style: none;
+  color: #000000;
+  padding: 5px;
+}
+
+input[id="openSidebarMenu"]:checked ~ #sidebarMenu {
   transform: translateX(0);
+}
+
+.hide {
+  transform: translateX(-500px);
 }
 
 input[type="checkbox"] {
@@ -27,6 +55,7 @@ input[type="checkbox"] {
   box-sizing: border-box;
   display: none;
 }
+
 .sidebarIconToggle {
   transition: all 0.3s;
   box-sizing: border-box;
@@ -40,6 +69,17 @@ input[type="checkbox"] {
   height: 22px;
   width: 22px;
 }
+
+.subMenuToggle {
+  transition: all 0.3s;
+  box-sizing: border-box;
+  cursor: pointer;
+  z-index: 99;
+  height: 20px;
+  width: 16px;
+  margin: 5px;
+}
+
 .spinner {
   transition: all 0.3s;
   box-sizing: border-box;
@@ -68,6 +108,33 @@ input[type="checkbox"] {
   float: left;
   margin-top: 3px;
 }
+
+.chevron {
+  transition: all 0.3s;
+  box-sizing: border-box;
+  position: absolute;
+  height: 2px;
+  width: 100%;
+  background-color: #000;
+}
+.diagonal.part-3 {
+  transition: all 0.3s;
+  box-sizing: border-box;
+  position: relative;
+  float: left;
+  margin-top: 4px;
+  transform: rotate(45deg);
+}
+
+.diagonal.part-4 {
+  transition: all 0.3s;
+  box-sizing: border-box;
+  position: relative;
+  float: left;
+  margin-top: 8px;
+  transform: rotate(-45deg);
+}
+
 input[type="checkbox"]:checked ~ .sidebarIconToggle > .horizontal {
   transition: all 0.3s;
   box-sizing: border-box;
@@ -84,6 +151,17 @@ input[type="checkbox"]:checked ~ .sidebarIconToggle > .diagonal.part-2 {
   box-sizing: border-box;
   transform: rotate(-135deg);
   margin-top: -9px;
+}
+
+input[id="openSubMenu"]:checked ~ .subMenuToggle > .diagonal.part-3 {
+  transition: all 0.3s;
+  box-sizing: border-box;
+  margin-top: 9px;
+}
+input[id="openSubMenu"]:checked ~ .subMenuToggle > .diagonal.part-4 {
+  transition: all 0.3s;
+  box-sizing: border-box;
+  margin-top: -2px;
 }
 
 .switch {
@@ -142,4 +220,16 @@ input:checked + .slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
+}
+
+.example-card {
+  width: 35px;
+  height: 50px;
+  margin: 3px;
+  background: #fefcf4;
+  border-radius: 7px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
 }

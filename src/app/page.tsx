@@ -42,10 +42,10 @@ export default function Home() {
           <TitleCard suit="♥️" letter="R" red={true}></TitleCard>
         </div>
         <div className="community-cards">
-          <TitleCard suit="♥️" letter="F" red={true}></TitleCard>
-          <TitleCard suit="♠️" letter="A" red={false}></TitleCard>
-          <TitleCard suit="♦️" letter="C" red={true}></TitleCard>
-          <TitleCard suit="♣️" letter="E" red={false}></TitleCard>
+          <TitleCard suit="♠️" letter="F" red={false}></TitleCard>
+          <TitleCard suit="♦️" letter="A" red={true}></TitleCard>
+          <TitleCard suit="♣️" letter="C" red={false}></TitleCard>
+          <TitleCard suit="♥️" letter="E" red={true}></TitleCard>
           <div className="start-card">
             {showSpinner ? (
               <LoadingSpinner show={true} />
