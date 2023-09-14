@@ -6,7 +6,6 @@ import {
   MeetingSessionConfiguration,
   DefaultMeetingSession,
   VideoTileState,
-  MeetingSessionVideoAvailability,
 } from "amazon-chime-sdk-js";
 import { ChimeConfig, ChimeAttendee } from "./chime";
 import { setPlayerStatus } from "./player";
