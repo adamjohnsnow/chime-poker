@@ -126,11 +126,11 @@ export class ChimeProvider {
     this.communityCardsDispatcher = dispatcher;
   }
 
-  public leaveCall() {
+  public async leaveCall() {
     console.log("LEAVING CALL", this.meetingSession);
-    this.meetingSession.audioVideo.stopVideoInput();
-    this.meetingSession.audioVideo.stopAudioInput();
-    this.meetingSession.audioVideo.stop();
+    await this.meetingSession.audioVideo.stopVideoInput();
+    await this.meetingSession.audioVideo.stopAudioInput();
+    await this.meetingSession.audioVideo.stop();
   }
 
   private settUpAttendeeObserver() {

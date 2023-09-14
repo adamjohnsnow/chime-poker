@@ -31,8 +31,8 @@ export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
     });
   }
 
-  function leaveGame() {
-    controls?.leaveCall();
+  async function leaveGame() {
+    await controls?.leaveCall();
     router.push("/");
   }
 
