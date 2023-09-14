@@ -1,5 +1,5 @@
 .modal-background {
-  @apply h-full w-full flex justify-center items-center bg-gray-600 bg-opacity-50 absolute z-auto;
+  @apply h-full w-full flex justify-center items-center bg-gray-600 bg-opacity-50 absolute z-50;
 }
 
 .hidden {
