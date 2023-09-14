@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { CommunityCards } from "../components/communityCards";
-import { PlayerWrapper } from "../components/player";
-import { Card } from "../lib/cards";
-import { Player } from "../lib/player";
 import "../styles/table.css";
-import { getPlayerStream } from "../lib/firebase";
+
+import { Menu } from "../components/menu";
 
 export default function Test() {
   return (
-    <main className="flex flex-col min-h-screen items-center justify-between p-24 font-mono">
-      <div></div>
+    <main className="flex min-h-screen flex-col items-center justify-start p-10 font-mono">
+      <Menu controls={undefined} />
     </main>
   );
 }
