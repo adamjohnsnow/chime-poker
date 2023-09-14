@@ -6,8 +6,12 @@ import {
   flush,
   fourOfAKind,
   fullHouse,
+  onePair,
   royalFlush,
+  straight,
   straightFlush,
+  threeOfAKind,
+  twoPair,
 } from "./exampleHands";
 import { useEffect } from "react";
 
@@ -30,31 +34,8 @@ export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
         <div className="spinner horizontal"></div>
         <div className="spinner diagonal part-2"></div>
       </label>
-      <div id="subMenu" className="hide">
-        <ul className="subMenuInner items-center">
-          <li>WINNING HANDS</li>
-          <li>1. Royal Flush</li>
-          <li>
-            <ExampleHands cards={royalFlush} />
-          </li>
-          <li>2. Straight Flush</li>
-          <li>
-            <ExampleHands cards={straightFlush} />
-          </li>
-          <li>3. Four of a Kind</li>
-          <li>
-            <ExampleHands cards={fourOfAKind} />
-          </li>
-          <li>4. Full House</li>
-          <li>
-            <ExampleHands cards={fullHouse} />
-          </li>
-          <li>5. Flush</li>
-          <li>
-            <ExampleHands cards={flush} />
-          </li>
-        </ul>
-      </div>
+
+      <HandsSubMenu />
 
       <div id="sidebarMenu">
         <ul className="sidebarMenuInner items-end">
@@ -99,21 +80,73 @@ export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
   );
 }
 
+function HandsSubMenu() {
+  return (
+    <div id="subMenu" className="hide">
+      <ul className="subMenuInner items-center">
+        <li>WINNING HANDS</li>
+        <li>
+          <div className="flex items-center">1. Royal Flush</div>
+          <ExampleHands cards={royalFlush} />
+        </li>
+        <li>
+          <div>2. Straight Flush</div>
+          <ExampleHands cards={straightFlush} />
+        </li>
+        <li>
+          <div>3. Four of a Kind</div>
+          <ExampleHands cards={fourOfAKind} />
+        </li>
+        <li>
+          <div>4. Full House</div>
+          <ExampleHands cards={fullHouse} />
+        </li>
+        <li>
+          <div>5. Flush</div>
+          <ExampleHands cards={flush} />
+        </li>
+        <li>
+          <div>6. Straight</div>
+          <ExampleHands cards={straight} />
+        </li>
+        <li>
+          <div>7. Three of a Kind</div>
+          <ExampleHands cards={threeOfAKind} />
+        </li>
+        <li>
+          <div>8. Two Pair</div>
+          <ExampleHands cards={twoPair} />
+        </li>
+        <li>
+          <div>9. One Pair</div>
+          <ExampleHands cards={onePair} />
+        </li>
+      </ul>
+    </div>
+  );
+}
 function ExampleHands({ cards }: { cards: Card[] }) {
   return (
     <div className="opponent-cards flex flex-row relative">
       {cards?.map((card, i) => (
         <div
+          className={
+            (card.value === 0 ? "bg-slate-300 " : "bg-cream ") +
+            "example-card flex relative items-center justify-center"
+          }
           key={i}
           style={{
-            color: card.suit === "♥️" || card.suit === "♦️" ? "red" : "black",
+            color: card.suit === "♥️" || card.suit === "♦️" ? " red" : " black",
           }}
-          className="example-card flex relative items-center justify-center"
         >
-          <div className="flex flex-col items-center">
-            <div className="flex items-end">{getValue(card)}</div>
-            <div>{card.suit}</div>
-          </div>
+          {card.value > 0 ? (
+            <div className="flex flex-col items-center">
+              <div className="flex items-end">{getValue(card)}</div>
+              <div>{card.suit}</div>
+            </div>
+          ) : (
+            "?"
+          )}
         </div>
       ))}
     </div>
@@ -196,7 +229,5 @@ function setUpSwitches(controls: ChimeProvider | undefined) {
         subMenu.classList.add("hide");
       }
     });
-
-    console.log("SHOW");
   }
 }
