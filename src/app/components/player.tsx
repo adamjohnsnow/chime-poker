@@ -77,6 +77,20 @@ export function PlayerWrapper({
     }
   }
 
+  async function allIn() {
+    if (!player) {
+      return;
+    }
+    const totalBet = player.cash;
+    player.currentBet = totalBet;
+
+    player.cash = 0;
+    await updatePlayer(player);
+
+    await newBet(player.gameId, totalBet);
+    await triggerNextBetting(player.gameId);
+  }
+
   async function nextAction() {
     if (player?.gameId) {
       await nextPhase(player?.gameId);
@@ -168,6 +182,9 @@ export function PlayerWrapper({
                   <button className="w-14">+£{betIncrement}</button>
                 </form>
               </div>
+              <form className="flex w-full" action={allIn}>
+                <button className="w-full">ALL IN!!</button>
+              </form>
             </div>
           ) : null}
         </div>

@@ -198,4 +198,38 @@ describe("goes through phases of the game", () => {
     expect(game.communityCards.length).toBe(5);
     expect(game.cardDeck.length).toBe(47);
   });
+
+  test("odd result", async () => {
+    const p1 = new Player("123", "P1");
+    const p2 = new Player("123", "P2");
+    p2.cards = [
+      { value: 2, suit: "♥️" },
+      { value: 7, suit: "♠️" },
+    ];
+    p1.cards = [
+      { value: 4, suit: "♦️" },
+      { value: 8, suit: "♦️" },
+    ];
+
+    const game: GameState = {
+      id: "123",
+      chimeConfig: {},
+      cardDeck: new Deck().cards,
+      communityCards: [
+        { value: 4, suit: "♠️" },
+        { value: 6, suit: "♠️" },
+        { value: 6, suit: "♥️" },
+        { value: 10, suit: "♦️" },
+        { value: 13, suit: "♠️" },
+      ],
+      results: [],
+      phase: GamePhase.RIVER,
+      prizePot: 1000,
+      blind: 0,
+      currentMinimumBet: 0,
+    };
+
+    await dealNextCards(game, [p1, p2]);
+    console.log(game.results[0].result.cards);
+  });
 });

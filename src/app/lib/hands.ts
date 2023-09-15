@@ -137,13 +137,15 @@ export class HandEvaluator {
 
   private organiseCardSuits(cards: Card[]): { [key: string]: Card[] } {
     const counts: { [key: string]: Card[] } = {};
-    cards.forEach((card) => {
-      if (counts[card.suit]) {
-        counts[card.suit] = counts[card.suit].concat(card);
-      } else {
-        counts[card.suit] = [card];
-      }
-    });
+    cards
+      .filter((card) => card.value > 1)
+      .forEach((card) => {
+        if (counts[card.suit]) {
+          counts[card.suit] = counts[card.suit].concat(card);
+        } else {
+          counts[card.suit] = [card];
+        }
+      });
 
     return counts;
   }
@@ -162,8 +164,8 @@ export class HandEvaluator {
 
   private hasStraight(cards: Card[]): Result {
     const result = this.blankResult();
-    if (cards[0].value === 13) {
-      cards.push({ value: 0, suit: cards[0].suit });
+    if (cards[0].value === 14) {
+      cards.push({ value: 1, suit: cards[0].suit });
     }
     let newCards: Card[] = [cards[0]];
     for (let i = 1; i < cards.length; i++) {
@@ -173,7 +175,7 @@ export class HandEvaluator {
         newCards.push(cards[i]);
 
         if (newCards.length > 4) {
-          if (newCards[0].value === 13) {
+          if (newCards[0].value === 14) {
             result.rank = Rank.RoyalFlush;
             result.cards = newCards;
 

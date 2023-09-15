@@ -144,7 +144,7 @@ describe("hand evaluator", () => {
 
   test("returns flush", () => {
     const cards: Card[] = [
-      { value: 1, suit: "♣️" },
+      { value: 2, suit: "♣️" },
       { value: 7, suit: "♣️" },
       { value: 3, suit: "♣️" },
       { value: 8, suit: "♣️" },
@@ -158,6 +158,22 @@ describe("hand evaluator", () => {
     expect(hand.rank).toBe(Rank.Flush);
     expect(hand.cards[0].value).toBe(8);
     expect(hand.kickers.length).toBe(0);
+  });
+
+  test("returns not a flush", () => {
+    const cards: Card[] = [
+      { value: 1, suit: "♣️" },
+      { value: 7, suit: "♣️" },
+      { value: 3, suit: "♣️" },
+      { value: 14, suit: "♣️" },
+      { value: 8, suit: "♥️" },
+      { value: 14, suit: "♦️" },
+      { value: 6, suit: "♦️" },
+    ];
+
+    const hand = evaluator.evaluate(cards);
+
+    expect(hand.rank).not.toBe(Rank.Flush);
   });
 
   test("finds full house", () => {
@@ -227,7 +243,7 @@ describe("hand evaluator", () => {
       { value: 13, suit: "♣️" },
       { value: 12, suit: "♣️" },
       { value: 10, suit: "♣️" },
-      { value: 9, suit: "♣️" },
+      { value: 14, suit: "♣️" },
       { value: 8, suit: "♥️" },
       { value: 10, suit: "♦️" },
       { value: 11, suit: "♣️" },
@@ -256,11 +272,11 @@ describe("hand evaluator", () => {
 
   test("Ace low straight", () => {
     const cards: Card[] = [
-      { suit: "♦️", value: 13 },
-      { suit: "♠️", value: 1 },
+      { suit: "♦️", value: 14 },
+      { suit: "♠️", value: 2 },
       { suit: "♠️", value: 3 },
       { suit: "♣️", value: 8 },
-      { suit: "♣️", value: 2 },
+      { suit: "♣️", value: 5 },
       { suit: "♠️", value: 4 },
     ];
 
@@ -271,8 +287,8 @@ describe("hand evaluator", () => {
   test("Ace low straight flush", () => {
     const cards: Card[] = [
       { suit: "♦️", value: 13 },
-      { suit: "♠️", value: 13 },
-      { suit: "♠️", value: 1 },
+      { suit: "♠️", value: 14 },
+      { suit: "♠️", value: 5 },
       { suit: "♠️", value: 3 },
       { suit: "♣️", value: 8 },
       { suit: "♠️", value: 2 },
