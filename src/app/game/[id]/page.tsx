@@ -244,7 +244,10 @@ export default function Game({ params }: { params: { id: string } }) {
           </>
         ) : (
           <>
-            {showNameInput && game?.phase === GamePhase.NOTSTARTED ? (
+            {" "}
+            {showNameInput && game?.phase != GamePhase.NOTSTARTED ? (
+              <div>Sorry, this game has already started</div>
+            ) : showNameInput && game?.phase === GamePhase.NOTSTARTED ? (
               <div className="flex flex-col items-center">
                 <SmallTitle />
                 <div className="flex flex-col items-center">

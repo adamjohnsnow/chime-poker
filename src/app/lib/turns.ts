@@ -112,6 +112,7 @@ export function isEligibleForBetting(player: Player): boolean {
     !player.folded &&
     player.active &&
     player.cash > 0 &&
+    player.cards.length === 2 &&
     player.bettingStatus === BettingStatus.MUSTBET
   );
 }

@@ -6,8 +6,9 @@
   background: var(--_g), var(--_g) calc(var(--s) / 2) calc(var(--s) / 2),
     conic-gradient(#0f9177 25%, #fdebad 0 50%, #d34434 0 75%, #b5d999 0);
   background-size: var(--s) var(--s);
-  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(1px);
   border-radius: 7px;
+  z-index: 1;
 }
 
 .card-wrapper {

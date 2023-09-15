@@ -14,6 +14,7 @@ import {
   twoPair,
 } from "./exampleHands";
 import { useEffect } from "react";
+import { SuitIcon } from "./playingCard";
 
 export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
   const router = useRouter();
@@ -127,7 +128,7 @@ function HandsSubMenu() {
 }
 function ExampleHands({ cards }: { cards: Card[] }) {
   return (
-    <div className="opponent-cards flex flex-row relative">
+    <div className="flex flex-row relative">
       {cards?.map((card, i) => (
         <div
           className={
@@ -142,7 +143,7 @@ function ExampleHands({ cards }: { cards: Card[] }) {
           {card.value > 0 ? (
             <div className="flex flex-col items-center">
               <div className="flex items-end">{getValue(card)}</div>
-              <div>{card.suit}</div>
+              <SuitIcon suit={card.suit} size={10} />
             </div>
           ) : (
             "?"

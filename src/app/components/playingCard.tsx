@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Card } from "../lib/cards";
 import "../styles/playingCard.css";
 
@@ -40,10 +41,41 @@ export function PlayingCard({ card }: { card: Card }) {
       <div className="card-face">
         <div className="card-value">
           <div>{getValue()}</div>
-          <div>{card.suit}</div>
+          <SuitIcon suit={card.suit} size={15} />
         </div>
-        <div className="card-suit">{card.suit}</div>
+        <SuitIcon suit={card.suit} size={50} />
       </div>
     </div>
+  );
+}
+
+export function SuitIcon({ suit, size }: { suit: string; size: number }) {
+  let imageRef: string = "";
+  let altText: string = "";
+  switch (suit) {
+    case "♥️": {
+      imageRef = "/heart.svg";
+      altText = "Heart Logo";
+      break;
+    }
+    case "♦️": {
+      imageRef = "/diamond.svg";
+      altText = "Diamond Logo";
+      break;
+    }
+    case "♠️": {
+      imageRef = "/spade.svg";
+      altText = "Spade Logo";
+      break;
+    }
+    case "♣️": {
+      imageRef = "/club.svg";
+      altText = "Club Logo";
+      break;
+    }
+  }
+
+  return (
+    <Image src={imageRef} alt={altText} width={size} height={size} priority />
   );
 }
