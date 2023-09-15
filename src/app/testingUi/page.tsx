@@ -29,7 +29,7 @@ export default function Test() {
       />
       <PlayingCard
         card={{
-          value: 13,
+          value: 10,
           suit: "♣️",
         }}
       />

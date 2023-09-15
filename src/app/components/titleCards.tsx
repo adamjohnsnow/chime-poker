@@ -1,4 +1,5 @@
 import "../styles/playingCard.css";
+import { SuitIcon } from "./playingCard";
 
 export function TitleCard({
   suit,
@@ -22,7 +23,7 @@ export function TitleCard({
       <div className="card-back"></div>
       <div className="card-face">
         <div className="card-value">
-          <div>{suit}</div>
+          <SuitIcon suit={suit} size={30} />
         </div>
         <div className="card-suit">{letter}</div>
       </div>

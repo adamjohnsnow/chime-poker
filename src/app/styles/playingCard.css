@@ -42,7 +42,6 @@
   background: #fefcf4;
   border-radius: 7px;
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
   box-shadow: 1px 2px 2px rgba(0, 0, 0, 0.4);
 }
@@ -53,13 +52,13 @@
 
 .card-value {
   margin: 5px 0 0 10px;
-  font-size: 24px;
+  font-size: 20px;
+  width: 17px;
   line-height: 1;
 }
 
 .opponent-cards .card-value {
   @apply flex flex-col items-center m-0;
-  font-size: 32px;
 }
 
 .card-suit {
@@ -80,11 +79,6 @@
   background: #ffffff;
   box-shadow: 0px 0px 7px 0px rgba(245, 189, 46, 1);
   transform: scale(1.1);
-}
-
-.highlighted .card-back,
-.lowlighted .card-back {
-  display: none;
 }
 
 .highlighted.card-wrapper,

@@ -1,5 +1,5 @@
 import { BettingStatus, Player } from "../lib/player";
-import { PlayingCard } from "./playingCard";
+import { MiniCard, PlayingCard } from "./playingCard";
 import "../styles/player.css";
 import { ButtonsWrapper } from "./buttons";
 
@@ -46,8 +46,8 @@ export function PlayerTile({ player }: { player: Player }) {
           <div>
             {player.cards?.length === 2 && player.cardsShown ? (
               <div className="opponent-cards">
-                <PlayingCard card={player.cards[0]}></PlayingCard>
-                <PlayingCard card={player.cards[1]}></PlayingCard>
+                <MiniCard card={player.cards[0]} />
+                <MiniCard card={player.cards[1]} />
               </div>
             ) : null}
             {player.currentBet > 0 ? "£" + player.currentBet : null}

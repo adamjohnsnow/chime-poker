@@ -220,13 +220,27 @@ function setUpSwitches(controls: ChimeProvider | undefined) {
   ) as HTMLInputElement;
 
   const subMenu = document.getElementById("subMenu") as HTMLElement;
-  console.log(helperControl, subMenu);
   if (helperControl && subMenu) {
     helperControl.addEventListener("change", (event) => {
       const check = event.currentTarget as HTMLInputElement;
       if (check.checked) {
+        console.log("CCC");
         subMenu.classList.remove("hide");
       } else {
+        subMenu.classList.add("hide");
+      }
+    });
+  }
+
+  const menuControl = document.getElementById(
+    "openSidebarMenu"
+  ) as HTMLInputElement;
+
+  if (menuControl && subMenu) {
+    menuControl.addEventListener("change", (event) => {
+      helperControl.checked = false;
+      const check = event.currentTarget as HTMLInputElement;
+      if (!check.checked) {
         subMenu.classList.add("hide");
       }
     });
