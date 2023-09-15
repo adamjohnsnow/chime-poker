@@ -42,4 +42,5 @@ button[disabled] {
 
 input {
   @apply p-4 m-4 rounded-md;
+  color: #000;
 }

@@ -31,33 +31,33 @@ export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
     <div className="font-mono">
       <input type="checkbox" className="openSidebarMenu" id="openSidebarMenu" />
       <label htmlFor="openSidebarMenu" className="sidebarIconToggle">
-        <div className="spinner diagonal part-1"></div>
-        <div className="spinner horizontal"></div>
-        <div className="spinner diagonal part-2"></div>
+        <div className="spinner diagonal part-1  dark:invert"></div>
+        <div className="spinner horizontal  dark:invert"></div>
+        <div className="spinner diagonal part-2  dark:invert"></div>
       </label>
 
       <HandsSubMenu />
 
-      <div id="sidebarMenu">
+      <div id="sidebarMenu" className=" dark:invert">
         <ul className="sidebarMenuInner items-end">
           <li>POKER FACE</li>
           <li className="flex flex-row items-center">
             <div className="p-4">Microphone</div>
-            <label className="switch">
+            <label className="switch dark:invert">
               <input id="mic-control" type="checkbox" defaultChecked />
               <span className="slider"></span>
             </label>
           </li>
           <li className="flex flex-row items-center">
             <div className="p-4">Camera</div>
-            <label className="switch">
+            <label className="switch dark:invert">
               <input id="camera-control" type="checkbox" defaultChecked />
               <span className="slider"></span>
             </label>
           </li>
           <li className="flex flex-row items-center">
             <div className="p-4">Speaker</div>
-            <label className="switch">
+            <label className="switch dark:invert">
               <input id="speaker-control" type="checkbox" defaultChecked />
               <span className="slider"></span>
             </label>
@@ -83,8 +83,8 @@ export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
 
 function HandsSubMenu() {
   return (
-    <div id="subMenu" className="hide">
-      <ul className="subMenuInner items-center">
+    <div id="subMenu" className="hide  dark:invert">
+      <ul className="subMenuInner items-center  dark:invert">
         <li>WINNING HANDS</li>
         <li>
           <div className="flex items-center">1. Royal Flush</div>
