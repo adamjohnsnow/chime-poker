@@ -2,8 +2,8 @@
 
 import "../styles/table.css";
 
-import { Menu } from "../components/menu";
-import { PlayingCard } from "../components/playingCard";
+import { Menu } from "../../components/menu";
+import { PlayingCard } from "../../components/playingCard";
 
 export default function Test() {
   return (

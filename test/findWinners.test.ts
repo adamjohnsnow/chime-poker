@@ -1,7 +1,7 @@
-import { Rank } from "../src/app/lib/hands";
-import { allotPrizes, findWinner, handResult } from "../src/app/lib/findWinner";
+import { Rank } from "../src/lib/hands";
+import { allotPrizes, findWinner, handResult } from "../src/lib/findWinner";
 import { describe, expect, test } from "@jest/globals";
-import { Player } from "../src/app/lib/player";
+import { Player } from "../src/lib/player";
 
 type GameState = {
   id: string;

@@ -4,27 +4,27 @@
 import { Key, useEffect, useState } from "react";
 
 // lib
-import { createAttendee } from "@/app/lib/chime";
-import { ChimeProvider } from "@/app/lib/chimeUtils";
-import { GamePhase, GameState, nextPhase, resetCards } from "@/app/lib/game";
-import { Player, addNewPlayer, loadPlayer } from "@/app/lib/player";
-import { saveLocalPlayer, loadLocalPlayer } from "@/app/lib/localCache";
-import { getAllPlayersStream, getGameStream } from "@/app/lib/firebase";
+import { createAttendee } from "@/lib/chime";
+import { ChimeProvider } from "@/lib/chimeUtils";
+import { GamePhase, GameState, nextPhase, resetCards } from "@/lib/game";
+import { Player, addNewPlayer, loadPlayer } from "@/lib/player";
+import { saveLocalPlayer, loadLocalPlayer } from "@/lib/localCache";
+import { getAllPlayersStream, getGameStream } from "@/lib/firebase";
 
 // components
-import { PlayerTile } from "@/app/components/playerTile";
-import { LoadingSpinner } from "@/app/components/loadingSpinner";
-import { SmallTitle } from "@/app/components/titleCards";
-import { ActivityMonitor } from "@/app/components/activityMonitor";
-import { CommunityCards } from "@/app/components/communityCards";
-import { PlayerWrapper } from "@/app/components/player";
+import { PlayerTile } from "@/components/playerTile";
+import { LoadingSpinner } from "@/components/loadingSpinner";
+import { SmallTitle } from "@/components/titleCards";
+import { ActivityMonitor } from "@/components/activityMonitor";
+import { CommunityCards } from "@/components/communityCards";
+import { PlayerWrapper } from "@/components/player";
 
 // styles
-import "@/app/styles/table.css";
-import "@/app/styles/playingCard.css";
+import "@/styles/table.css";
+import "@/styles/playingCard.css";
 
-import { Rank } from "@/app/lib/hands";
-import { Menu } from "@/app/components/menu";
+import { Rank } from "@/lib/hands";
+import { Menu } from "@/components/menu";
 
 export default function Game({ params }: { params: { id: string } }) {
   const [gameId, setGameId] = useState<string>(params.id);
