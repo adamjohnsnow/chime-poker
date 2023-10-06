@@ -1,6 +1,6 @@
 "use client";
 
-import "../styles/table.css";
+import "../../styles/table.css";
 
 import { Menu } from "../../components/menu";
 import { PlayingCard } from "../../components/playingCard";
