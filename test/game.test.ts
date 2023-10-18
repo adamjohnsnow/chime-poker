@@ -230,6 +230,5 @@ describe("goes through phases of the game", () => {
     };
 
     await dealNextCards(game, [p1, p2]);
-    console.log(game.results[0].result.cards);
   });
 });
