@@ -25,18 +25,20 @@ export function canPlay(targetCard: Card, playerCard: Card) {
 }
 
 export class ShedGame {
+  public id: string;
   public drawPile: Card[];
   public playedPile: Card[];
-  constructor(players: ShedPlayer[]) {
+  constructor(id: string) {
+    this.id = id;
     this.playedPile = [];
     this.drawPile = [];
+  }
 
+  public deal(players: ShedPlayer[]) {
     const deck = new Deck();
-    this.playedPile = deck.cards.slice(
-      players.length * 9,
-      players.length * 9 + 1
-    );
-    this.drawPile = deck.cards.slice(players.length * 9 + 1);
+    const cardCount = players.length * 9;
+    this.playedPile = deck.cards.slice(cardCount, cardCount + 1);
+    this.drawPile = deck.cards.slice(cardCount + 1);
 
     let cardIndex = 0;
 

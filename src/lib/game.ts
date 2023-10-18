@@ -11,6 +11,7 @@ import {
 import { nextBettingTurn, nextRoundTurn } from "./turns";
 import { findWinner, handResult } from "./findWinner";
 import { Rank } from "./hands";
+import { ShedGame } from "./shed";
 
 export type GameState = {
   id: string;
@@ -34,17 +35,29 @@ export enum GamePhase {
   RESULTS,
 }
 
-export async function startGame(): Promise<GameState> {
+export async function startPokerGame(): Promise<GameState> {
   const id = uuid.v4();
 
   const call = await newChime(id);
   if (!call) {
     return Promise.reject();
   }
-  writeChimeData(id, call);
+  writeChimeData("poker", id, call);
   const newGame = await getNewGame(id, call);
   writeGameData(newGame);
   return newGame;
+}
+
+export async function startShedGame(): Promise<ShedGame> {
+  const id = uuid.v4();
+
+  const call = await newChime(id);
+  if (!call) {
+    return Promise.reject();
+  }
+  writeChimeData("shed", id, call);
+  const shedGame = new ShedGame(id);
+  return shedGame;
 }
 
 export async function getNewGame(

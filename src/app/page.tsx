@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { startGame } from "../lib/game";
+import { startPokerGame, startShedGame } from "../lib/game";
 import "../styles/table.css";
 import { TitleCard } from "../components/titleCards";
 import { LoadingSpinner } from "../components/loadingSpinner";
@@ -11,6 +11,7 @@ import React from "react";
 
 export default function Home() {
   const [showSpinner, setShowSpinner] = useState<Boolean>(false);
+  const [pokerGame, setPokerGame] = useState<Boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,12 +24,25 @@ export default function Home() {
     setShowSpinner(true);
   }
 
+  function triggerShedGame() {
+    setPokerGame(false);
+    setShowSpinner(true);
+  }
+
   async function startNewGame() {
-    const game = await startGame();
-    if (!game) {
-      return;
+    if (pokerGame) {
+      const game = await startPokerGame();
+      if (!game) {
+        return;
+      }
+      router.push("/game/" + game.id);
+    } else {
+      const game = await startShedGame();
+      if (!game) {
+        return;
+      }
+      router.push("/shed/" + game.id);
     }
-    router.push("/game/" + game.id);
   }
 
   return (
@@ -62,6 +76,12 @@ export default function Home() {
         A multi-player, single-page poker game with video chat.
         <br />
         Next,js, React, AWS Chime, Firebase Realtime Database
+      </div>
+      <div>
+        {" "}
+        <form action={triggerShedGame}>
+          <button>Or SH`ED maybe?</button>{" "}
+        </form>
       </div>
     </main>
   );
