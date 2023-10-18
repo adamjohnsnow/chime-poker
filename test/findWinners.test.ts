@@ -48,11 +48,11 @@ describe("finding winners", () => {
     };
     const players = [new Player("123", "A"), new Player("123", "B")];
     players[0].cards = [
-      { value: 1, suit: "♣️" },
+      { value: 8, suit: "♣️" },
       { value: 3, suit: "♣️" },
     ];
     players[1].cards = [
-      { value: 1, suit: "♥️" },
+      { value: 11, suit: "♥️" },
       { value: 6, suit: "♥️" },
     ];
 
@@ -208,7 +208,7 @@ describe("finding winners", () => {
       { value: 3, suit: "♣️" },
     ];
     players[1].cards = [
-      { value: 1, suit: "♣️" },
+      { value: 7, suit: "♣️" },
       { value: 14, suit: "♣️" },
     ];
 

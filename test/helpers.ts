@@ -11,5 +11,22 @@ export function getPlayers() {
   players[1].bettingStatus = 1;
   players[2].bettingStatus = 1;
   players[3].bettingStatus = 1;
+  players[0].cards = [
+    { value: 4, suit: "club" },
+    { value: 4, suit: "club" },
+  ];
+  players[1].cards = [
+    { value: 4, suit: "club" },
+    { value: 4, suit: "club" },
+  ];
+  players[2].cards = [
+    { value: 4, suit: "club" },
+    { value: 4, suit: "club" },
+  ];
+  players[3].cards = [
+    { value: 4, suit: "club" },
+    { value: 4, suit: "club" },
+  ];
+
   return players;
 }

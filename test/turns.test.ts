@@ -399,6 +399,10 @@ describe("betting turns", () => {
 describe("helper functions", () => {
   test("isEligibleForBetting", () => {
     const player = new Player("123", "acb");
+    player.cards = [
+      { value: 4, suit: "club" },
+      { value: 4, suit: "club" },
+    ];
     expect(isEligibleForBetting(player)).toBe(false);
 
     player.bettingStatus = 1;
