@@ -1,5 +1,5 @@
 import { useRouter } from "next/navigation";
-import { ChimeProvider } from "../lib/chimeUtils";
+import { ChimeProvider } from "../lib/chimeProvider";
 import "../styles/menu.css";
 import { Card } from "../lib/cards";
 import {

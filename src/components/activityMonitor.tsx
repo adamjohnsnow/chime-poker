@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import "../styles/modal.css";
-import { ChimeProvider } from "../lib/chimeUtils";
+import { ChimeProvider } from "../lib/chimeProvider";
 import { useRouter } from "next/navigation";
 
 let activityTimer: NodeJS.Timeout;

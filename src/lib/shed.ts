@@ -1,13 +1,16 @@
 import { Card, Deck } from "./cards";
+import * as uuid from "uuid";
 
 const SPECIAL_CARDS = [2, 10];
 
 export class ShedPlayer {
+  public id: string;
   public handCards: Card[];
   public upCards: Card[];
   public downCards: Card[];
 
   constructor() {
+    this.id = uuid.v4();
     this.handCards = [];
     this.downCards = [];
     this.upCards = [];

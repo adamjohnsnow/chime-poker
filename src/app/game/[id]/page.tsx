@@ -5,7 +5,7 @@ import { Key, useEffect, useState } from "react";
 
 // lib
 import { createAttendee } from "@/lib/chime";
-import { ChimeProvider } from "@/lib/chimeUtils";
+import { ChimeProvider } from "@/lib/chimeProvider";
 import { GamePhase, GameState, nextPhase, resetCards } from "@/lib/game";
 import { Player, addNewPlayer, loadPlayer } from "@/lib/player";
 import { saveLocalPlayer, loadLocalPlayer } from "@/lib/localCache";

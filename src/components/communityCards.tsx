@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Card } from "../lib/cards";
-import { ChimeProvider } from "../lib/chimeUtils";
+import { ChimeProvider } from "../lib/chimeProvider";
 import { PlayingCard } from "./playingCard";
 
 export function CommunityCards({
