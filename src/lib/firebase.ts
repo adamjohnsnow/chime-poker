@@ -129,9 +129,10 @@ export async function getGame(gameId: string): Promise<GameState | null> {
 }
 
 export async function getChimeConfig(
-  gameId: string
+  gameId: string,
+  type: string
 ): Promise<ChimeConfig | null> {
-  const snapshot = await get(child(dbRef, "poker/" + gameId + "/chime"));
+  const snapshot = await get(child(dbRef, type + "/" + gameId + "/chime"));
   if (snapshot.exists()) {
     const chime = snapshot.val() as ChimeConfig;
     return chime;

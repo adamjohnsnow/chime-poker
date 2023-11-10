@@ -41,15 +41,15 @@ export class ChimeProvider {
     );
 
     Promise.all([
-      this.setupMic(),
-      this.setupCamera(),
-      this.setupSpeaker(),
+      // this.setupMic(),
+      // this.setupCamera(),
+      // this.setupSpeaker(),
       this.setUpObservers(),
       this.setUpVideoObserver(),
     ])
       .then(() => {
-        this.meetingSession?.audioVideo.start();
-        this.meetingSession.audioVideo.startLocalVideoTile();
+        // this.meetingSession?.audioVideo.start();
+        // this.meetingSession.audioVideo.startLocalVideoTile();
       })
       .catch((error) => {
         console.error("ERROR", error);

@@ -16,7 +16,13 @@ import {
 import { useEffect } from "react";
 import { SuitIcon } from "./playingCard";
 
-export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
+export function Menu({
+  controls,
+  type,
+}: {
+  controls: ChimeProvider | undefined;
+  type?: string;
+}) {
   const router = useRouter();
   useEffect(() => {
     setUpSwitches(controls);
@@ -62,14 +68,16 @@ export function Menu({ controls }: { controls: ChimeProvider | undefined }) {
               <span className="slider"></span>
             </label>
           </li>
-          <li className="flex flex-row items-center">
-            <div>Hand Helper</div>
-            <input type="checkbox" id="openSubMenu" />
-            <label htmlFor="openSubMenu" className="subMenuToggle">
-              <div className="chevron diagonal part-3"></div>
-              <div className="chevron diagonal part-4"></div>
-            </label>
-          </li>
+          {type === "poker" && (
+            <li className="flex flex-row items-center">
+              <div>Hand Helper</div>
+              <input type="checkbox" id="openSubMenu" />
+              <label htmlFor="openSubMenu" className="subMenuToggle">
+                <div className="chevron diagonal part-3"></div>
+                <div className="chevron diagonal part-4"></div>
+              </label>
+            </li>
+          )}
           <li className="flex w-full">
             <form className="flex w-full" action={leaveGame}>
               <button className="flex w-full">Leave game</button>

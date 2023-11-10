@@ -5,6 +5,7 @@ import { ChimeProvider } from "@/lib/chimeProvider";
 import { useEffect, useState } from "react";
 import { getChimeConfig } from "@/lib/firebase";
 import { createAttendee } from "@/lib/chime";
+import { Menu } from "@/components/menu";
 
 export default function ShedPage({ params }: { params: { id: string } }) {
   const [thisPlayer, setThisPlayer] = useState<ShedPlayer>();
@@ -12,17 +13,23 @@ export default function ShedPage({ params }: { params: { id: string } }) {
   const [chimeProvider, setChimeProvider] = useState<ChimeProvider>();
 
   useEffect(() => {
-    setThisPlayer(new ShedPlayer());
-
     setUpChimeCall();
   }, []);
 
+  useEffect(() => {
+    console.log("save player");
+  }, [thisPlayer]);
+
   async function setUpChimeCall() {
-    const chimeConfig = await getChimeConfig(params.id);
-    if (!chimeConfig || !thisPlayer) {
+    const newPlayer = new ShedPlayer();
+    await setThisPlayer(newPlayer);
+
+    const chimeConfig = await getChimeConfig(params.id, "shed");
+    if (!chimeConfig) {
       return;
     }
-    const attendee = await createAttendee(chimeConfig, thisPlayer.id as string);
+
+    const attendee = await createAttendee(chimeConfig, newPlayer.id as string);
 
     if (!attendee) {
       return;
@@ -41,6 +48,7 @@ export default function ShedPage({ params }: { params: { id: string } }) {
       <form action={startGame}>
         <button>Start</button>
       </form>
+      <Menu controls={chimeProvider} />
     </main>
   );
 }

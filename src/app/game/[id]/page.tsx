@@ -240,7 +240,7 @@ export default function Game({ params }: { params: { id: string } }) {
                 </form>
               </>
             )}
-            <Menu controls={chime} />
+            <Menu controls={chime} type={"poker"} />
           </>
         ) : (
           <>
